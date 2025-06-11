@@ -41,7 +41,7 @@ class MkDocsExamPlugin(BasePlugin):
         # Regex from exam_tag
         EXAM_START_TAG = "<exam>"
         EXAM_END_TAG = "</exam>"
-        REGEX = r'<exam>(.*?)</exam>'
+        REGEX = f"{re.escape(EXAM_START_TAG)}(.*?){re.escape(EXAM_END_TAG)}"
         matches = re.findall(REGEX, markdown, re.DOTALL)
         exam_id = 0
         for match in matches:
