@@ -3,7 +3,6 @@ from mkdocs.plugins import BasePlugin
 from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
 from importlib import resources as impresources
-import re
 from . import css, js
 import re
 inp_file = (impresources.files(css) / 'exam.css')
