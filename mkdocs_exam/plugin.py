@@ -86,13 +86,10 @@ class MkDocsExamPlugin(BasePlugin):
             # Get the content of the exam
             content = exam_lines[exam_lines.index("content:") + 1:]
             exam_html = (
-                '<div class="exam"><h3>{}</h3><form><fieldset>{}'
-                '</fieldset><button type="submit" class="exam-button">Submit</button>'
-                '</form><section class="content hidden">{}</section></div>'.format(
-                    question,
-                    "".join(full_answers),
-                    "\n".join(content),
-                )
+                f'<div class="exam"><h3>{question}</h3><form><fieldset>'
+                f'{"".join(full_answers)}</fieldset>'
+                '<button type="submit" class="exam-button">Submit</button>'
+                f'</form><section class="content hidden">{"\n".join(content)}</section></div>'
             )
             # old_exam = "exam-start" + match + "exam-end"
             old_exam = EXAM_START_TAG + match + EXAM_END_TAG
