@@ -3,31 +3,30 @@ from mkdocs.plugins import BasePlugin
 from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
 from importlib import resources as impresources
-import re
 from . import css, js
 import re
-inp_file = (impresources.files(css) / 'quiz.css')
+inp_file = (impresources.files(css) / 'exam.css')
 with inp_file.open("rt") as f:
     style = f.read()
 
 style = '<style type="text/css">{}</style>'.format(style)
 
-js_file = (impresources.files(js) / 'quiz.js')
+js_file = (impresources.files(js) / 'exam.js')
 with js_file.open("rt") as f:
     js = f.read()
 
 js = '<script type="text/javascript" defer>{}</script>'.format(js)
 
-# <?quiz?>
+# <?exam?>
 # question: Are you ready?
 # answer-correct: Yes!
 # answer: No!
 # answer: Maybe!
 # content:
 # <h2>Provide some additional content</h2>
-# <?/quiz?>
+# <?/exam?>
 
-class MkDocsQuizPlugin(BasePlugin):
+class MkDocsExamPlugin(BasePlugin):
     def __init__(self):
         self.enabled = True
         self.dirty = False
@@ -37,26 +36,26 @@ class MkDocsQuizPlugin(BasePlugin):
         self.dirty = dirty
 
     def on_page_markdown(self, markdown, page, config, **kwargs):
-        if "quiz" in page.meta and page.meta["quiz"] == "disable":
+        if "exam" in page.meta and page.meta["exam"] == "disable":
             return markdown
-        # Regex from quiz_tag
-        QUIZ_START_TAG = "<?quiz?>"
-        QUIZ_END_TAG = "<?/quiz?>"
-        REGEX = r'<\?quiz\?>(.*?)<\?/quiz\?>'
+        # Regex from exam_tag
+        EXAM_START_TAG = "<?exam?>"
+        EXAM_END_TAG = "<?/exam?>"
+        REGEX = r'<\?exam\?>(.*?)<\?/exam\?>'
         matches = re.findall(REGEX, markdown, re.DOTALL)
-        quiz_id = 0
+        exam_id = 0
         for match in matches:
-            quiz_lines = match.splitlines()
+            exam_lines = match.splitlines()
             # Remove 0 and -1 if empty
-            while quiz_lines[0] == "":
-                quiz_lines = quiz_lines[1:]
-            while quiz_lines[-1] == "":
-                quiz_lines = quiz_lines[:-1]
-            question = quiz_lines[0].split("question: ")[1]
+            while exam_lines[0] == "":
+                exam_lines = exam_lines[1:]
+            while exam_lines[-1] == "":
+                exam_lines = exam_lines[:-1]
+            question = exam_lines[0].split("question: ")[1]
 
-            answers = quiz_lines[1: quiz_lines.index("content:")]
+            answers = exam_lines[1: exam_lines.index("content:")]
             # correct_answer = list(filter(lambda x: x.startswith(
-            #     "quiz-answer-correct: "), answers))[0].split("quiz-answer-correct: ")[1]
+            #     "exam-answer-correct: "), answers))[0].split("exam-answer-correct: ")[1]
             multiple_correct = list(
                 filter(lambda x: x.startswith("answer-correct: "), answers))
             multiple_correct = list(
@@ -68,19 +67,19 @@ class MkDocsQuizPlugin(BasePlugin):
             full_answers = []
             for i in range(len(answers)):
                 is_correct = answers[i] in multiple_correct
-                input_id = "quiz-{}-{}".format(quiz_id, i)
+                input_id = "exam-{}-{}".format(exam_id, i)
                 input_type = as_checkboxes and "checkbox" or "radio"
                 correct = is_correct and "correct" or ""
                 full_answers.append('<div><input type="{}" name="answer" value="{}" id="{}" {}><label for="{}">{}</label></div>'.format(
                     input_type, i, input_id, correct, input_id, answers[i]))
-            # Get the content of the quiz
-            content = quiz_lines[quiz_lines.index("content:") + 1:]
-            quiz = '<div class="quiz"><h3>{}</h3><form><fieldset>{}</fieldset><button type="submit" class="quiz-button">Submit</button></form><section class="content hidden">{}</section></div>'.format(
+            # Get the content of the exam
+            content = exam_lines[exam_lines.index("content:") + 1:]
+            exam_html = '<div class="exam"><h3>{}</h3><form><fieldset>{}</fieldset><button type="submit" class="exam-button">Submit</button></form><section class="content hidden">{}</section></div>'.format(
                 question, "".join(full_answers), "\n".join(content))
-            # old_quiz = "quiz-start" + match + "quiz-end"
-            old_quiz = QUIZ_START_TAG + match + QUIZ_END_TAG
-            markdown = markdown.replace(old_quiz, quiz)
-            quiz_id += 1
+            # old_exam = "exam-start" + match + "exam-end"
+            old_exam = EXAM_START_TAG + match + EXAM_END_TAG
+            markdown = markdown.replace(old_exam, exam_html)
+            exam_id += 1
         return markdown
 
     def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:
