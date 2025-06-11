@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/kjanat/mkdocs-exam"
+homepage = "https://github.com/kjanat/mkdocs-exam"
 
 [project.entry-points."mkdocs.plugins"]
 "mkdocs-exam" = "mkdocs_exam.plugin:MkDocsExamPlugin"
