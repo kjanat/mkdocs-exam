@@ -21,7 +21,7 @@ plugins:
 
 Now you can create your first exam directly in markdown:
 
-```bash
+```markdown
 <?exam?>
 question: Are you ready?
 answer-correct: Yes!
@@ -32,15 +32,17 @@ content:
 <?/exam?>
 ```
 
-> **Info** The answers can get styled with HTML (like `<code>Yes!</code>`)
+> [!NOTE]
+> The answers can get styled with HTML (like `<code>Yes!</code>`)
 
-> **Warning** The exam content needs to be valid **_HTML_**
+> [!IMPORTANT]
+> The exam content needs to be valid **_HTML_**
 
 ### Multiple choice
 
 You can also create a multiple choice exam, by providing multiple answers as correct.
 
-```bash
+```markdown
 <?exam?>
 question: Are you ready?
 answer-correct: Yes!
