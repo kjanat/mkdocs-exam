@@ -7,7 +7,7 @@ exam: disable
 All exams are disabled for this page, so you will just see the markdown code.
 
 ```markdown
-<?exam?>
+<exam>
 
 question: Are you ready?
 answer-correct: Yes!
@@ -16,5 +16,5 @@ answer-correct: Maybe!
 content:
 
 <h2>Provide some additional content</h2>
-<?/exam?>
+</exam>
 ```

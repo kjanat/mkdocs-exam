@@ -17,14 +17,14 @@ with js_file.open("rt") as f:
 
 js = '<script type="text/javascript" defer>{}</script>'.format(js)
 
-# <?exam?>
+# <exam>
 # question: Are you ready?
 # answer-correct: Yes!
 # answer: No!
 # answer: Maybe!
 # content:
 # <h2>Provide some additional content</h2>
-# <?/exam?>
+# </exam>
 
 class MkDocsExamPlugin(BasePlugin):
     def __init__(self):
@@ -39,9 +39,9 @@ class MkDocsExamPlugin(BasePlugin):
         if "exam" in page.meta and page.meta["exam"] == "disable":
             return markdown
         # Regex from exam_tag
-        EXAM_START_TAG = "<?exam?>"
-        EXAM_END_TAG = "<?/exam?>"
-        REGEX = r'<\?exam\?>(.*?)<\?/exam\?>'
+        EXAM_START_TAG = "<exam>"
+        EXAM_END_TAG = "</exam>"
+        REGEX = r'<exam>(.*?)</exam>'
         matches = re.findall(REGEX, markdown, re.DOTALL)
         exam_id = 0
         for match in matches:
