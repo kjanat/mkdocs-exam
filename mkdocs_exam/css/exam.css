@@ -1,10 +1,10 @@
-.quiz {
+.exam {
   border: 1px solid black;
   padding: 1rem;
   margin: 1rem 0;
 }
-/* Set margin-top of first quiz child */
-.quiz > *:first-child {
+/* Set margin-top of first exam child */
+.exam > *:first-child {
   margin-top: 0;
 }
 .hidden {

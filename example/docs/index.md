@@ -1,8 +1,8 @@
-# Quiz Example
+# Exam Example
 
 ## Single choice
 
-<?quiz?>
+<?exam?>
 
 question: Are you ready?
 answer-correct: Yes!
@@ -11,11 +11,11 @@ answer: Maybe!
 content:
 
 <h2>Provide some additional content</h2>
-<?/quiz?>
+<?/exam?>
 
 ## Multiple choice
 
-<?quiz?>
+<?exam?>
 
 question: Are you ready?
 answer-correct: Yes!
@@ -24,7 +24,7 @@ answer-correct: Maybe!
 content:
 
 <h2>Provide some additional content</h2>
-<?/quiz?>
+<?/exam?>
 
 ## Disable for a page
 
