@@ -1,0 +1,107 @@
+name: Build and Deploy
+
+# Review gh actions docs if you want to further define triggers, paths, etc
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Skip deployment to GitHub Pages'
+        type: boolean
+        default: false
+        required: false
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: ${{ (github.event_name == 'pull_request') && format('test-deploy-{0}', github.event.number) || (github.event_name == 'workflow_dispatch' && inputs.test) && 'test-deploy-manual' || 'deploy' }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./docs
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        id: setup-uv
+        with:
+          activate-environment: true
+          enable-cache: true
+          version: "latest"
+
+      - name: Do something if the cache was restored
+        if: steps.setup-uv.outputs.cache-hit == 'true'
+        run: echo "Cache was restored"
+
+      - name: Install python dependencies
+        run: uv pip install .
+
+      - name: Setup build environment
+        run: |
+          # Set variables from environment or hardcode if you want
+          REPO_OWNER="${GITHUB_REPOSITORY_OWNER:-kjanat}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+
+          # Update url and baseUrl in config file
+          echo "SITE_URL=https://${REPO_OWNER}.github.io/${REPO_NAME}" >> $GITHUB_ENV
+
+      - name: Build documentation
+        run: uv run mkdocs build --site-dir site --strict
+        env:
+          SITE_DESCRIPTION: ${{ github.event.repository.description }}
+          SITE_AUTHOR: ${{ github.event.repository.owner.login }}
+          SITE_URL: ${{ env.SITE_URL }}
+          REPO_NAME: ${{ github.repository }}
+          REPO_URL: ${{ github.event.repository.html_url }}
+
+      - name: Create robots.txt
+        run: |
+          cat > site/robots.txt << 'EOF'
+          User-agent: *
+          Disallow: /
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && !inputs.test)
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
