@@ -1,13 +1,13 @@
 ---
-quiz: disable
+exam: disable
 ---
 
-# Disabled Quiz
+# Disabled Exam
 
-All quizzes are disabled for this page, so you will just see the markdown code.
+All exams are disabled for this page, so you will just see the markdown code.
 
 ```markdown
-<?quiz?>
+<?exam?>
 
 question: Are you ready?
 answer-correct: Yes!
@@ -16,5 +16,5 @@ answer-correct: Maybe!
 content:
 
 <h2>Provide some additional content</h2>
-<?/quiz?>
+<?/exam?>
 ```
