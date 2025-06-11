@@ -52,9 +52,7 @@ jobs:
         run: echo "Cache was restored"
 
       - name: Install python dependencies
-        run: |
-          uv pip install mkdocs-material
-          uv pip install ../
+        run: uv pip install -e ..
 
       - name: Setup build environment
         run: |
@@ -66,7 +64,7 @@ jobs:
           echo "SITE_URL=https://${REPO_OWNER}.github.io/${REPO_NAME}" >> $GITHUB_ENV
 
       - name: Build documentation
-        run: uv run mkdocs build --site-dir site --strict
+        run: uv run --active mkdocs build --site-dir site --strict
         env:
           SITE_DESCRIPTION: ${{ github.event.repository.description }}
           SITE_AUTHOR: ${{ github.event.repository.owner.login }}
