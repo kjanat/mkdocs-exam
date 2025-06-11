@@ -73,12 +73,15 @@ jobs:
           REPO_NAME: ${{ github.repository }}
           REPO_URL: ${{ github.event.repository.html_url }}
 
-      - name: Create robots.txt
-        run: |
-          cat > site/robots.txt << 'EOF'
-          User-agent: *
-          Disallow: /
-          EOF
+      # - name: Create robots.txt
+      #   run: |
+      #     cat > site/robots.txt << 'EOF'
+      #     User-agent: *
+      #     Disallow: /
+      #     EOF
+
+      - name: Debug
+        run: ll -lAF
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -86,7 +89,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: .
 
   deploy:
     name: Deploy to GitHub Pages
