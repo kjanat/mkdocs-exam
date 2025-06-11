@@ -2,7 +2,7 @@
 
 ## Single choice
 
-<?exam?>
+<exam>
 
 question: Are you ready?
 answer-correct: Yes!
@@ -11,11 +11,11 @@ answer: Maybe!
 content:
 
 <h2>Provide some additional content</h2>
-<?/exam?>
+</exam>
 
 ## Multiple choice
 
-<?exam?>
+<exam>
 
 question: Are you ready?
 answer-correct: Yes!
@@ -24,7 +24,7 @@ answer-correct: Maybe!
 content:
 
 <h2>Provide some additional content</h2>
-<?/exam?>
+</exam>
 
 ## Disable for a page
 

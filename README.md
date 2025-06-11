@@ -24,14 +24,14 @@ plugins:
 Now you can create your first exam directly in markdown:
 
 ```markdown
-<?exam?>
+<exam>
 question: Are you ready?
 answer-correct: Yes!
 answer: No!
 answer: Maybe!
 content:
 <h2>Provide some additional content</h2>
-<?/exam?>
+</exam>
 ```
 
 > [!NOTE]
@@ -45,14 +45,14 @@ content:
 You can also create a multiple choice exam, by providing multiple answers as correct.
 
 ```markdown
-<?exam?>
+<exam>
 question: Are you ready?
 answer-correct: Yes!
 answer: No!
 answer-correct: Maybe!
 content:
 <h2>Provide some additional content</h2>
-<?/exam?>
+</exam>
 ```
 
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
