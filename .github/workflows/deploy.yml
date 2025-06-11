@@ -51,7 +51,7 @@ jobs:
         run: echo "Cache was restored"
 
       - name: Install python dependencies
-        run: uv pip install .
+        run: uv pip install ../
 
       - name: Setup build environment
         run: |
