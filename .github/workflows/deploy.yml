@@ -31,6 +31,8 @@ jobs:
   build:
     name: ${{ (github.event_name == 'pull_request') && 'Test Build' || (github.event_name == 'workflow_dispatch' && inputs.test) && 'Test Build' || 'Build MkDocs' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
