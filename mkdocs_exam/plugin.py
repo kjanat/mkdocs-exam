@@ -80,15 +80,8 @@ class MkDocsExamPlugin(BasePlugin):
                 input_type = as_checkboxes and "checkbox" or "radio"
                 correct = is_correct and "correct" or ""
                 full_answers.append(
-                    '<div><input type="{}" name="answer" value="{}" id="{}" {}>'
-                    "<label for=\"{}\">{}</label></div>".format(
-                        input_type,
-                        i,
-                        input_id,
-                        correct,
-                        input_id,
-                        answers[i],
-                    )
+                    f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
+                    f'<label for="{input_id}">{answers[i]}</label></div>'
                 )
             # Get the content of the exam
             content = exam_lines[exam_lines.index("content:") + 1:]
