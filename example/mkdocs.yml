@@ -1,7 +1,27 @@
-site_name: My Docs
+site_name: mkdocs-exam
+site_description: !ENV [SITE_DESCRIPTION, 'Mkdocs plugin to create training exams in markdown']
+site_author: !ENV [SITE_AUTHOR, 'kjanat']
+site_url: !ENV [SITE_URL, CF_PAGES_URL, 'http://localhost:8008'] # https://kjanat.github.io/gnk-examenvragen
+copyright: Copyright &copy; 2025 - Kaj Kowalski
+
+repo_name: !ENV [REPO_NAME, 'kjanat/mkdocs-exam']
+repo_url: !ENV [REPO_URL, 'https://github.com/kjanat/mkdocs-exam']
+
+edit_uri: edit/master/docs/
+
+dev_addr: localhost:8008
+
 theme:
   name: material
+  language: en
+
   palette:
-    scheme: slate
+    scheme: default
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
 plugins:
+  - search
   - mkdocs_quiz
