@@ -24,4 +24,4 @@ theme:
 
 plugins:
   - search
-  - mkdocs_exam
+  - mkdocs-exam

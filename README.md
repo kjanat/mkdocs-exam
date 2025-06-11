@@ -14,8 +14,11 @@ Add the following to your `mkdocs.yml`:
 
 ```yaml
 plugins:
-  - mkdocs_exam
+  - mkdocs-exam
 ```
+
+The plugin also responds to the old `mkdocs_exam` name for backward
+compatibility.
 
 ### Single choice
 
