@@ -18,7 +18,7 @@ setup(
     ],
     entry_points={
         'mkdocs.plugins': [
-            'mkdocs_exam = mkdocs_exam.plugin:MkDocsExamPlugin'
+            'mkdocs-exam = mkdocs_exam.plugin:MkDocsExamPlugin',
         ]
     }
 )

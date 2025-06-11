@@ -2,10 +2,10 @@
 
 ## Installation
 
-Install the package with pip:
+This plugin hasn't landed on PyPI yet. Install it straight from GitHub:
 
 ```bash
-pip install mkdocs_exam
+pip install git+https://github.com/kjanat/mkdocs-exam.git
 ```
 
 ## Create your first exam
@@ -14,7 +14,7 @@ Add the following to your `mkdocs.yml`:
 
 ```yaml
 plugins:
-  - mkdocs_exam
+  - mkdocs-exam
 ```
 
 ### Single choice
