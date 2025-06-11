@@ -63,19 +63,44 @@ class MkDocsExamPlugin(BasePlugin):
             as_checkboxes = len(multiple_correct) > 1
                 
             answers = list(
-                map(lambda x: x.startswith("answer-correct: ") and x.split("answer-correct: ")[1] or x.startswith("answer: ") and x.split("answer: ")[1], answers))
+                map(
+                    lambda x: (
+                        x.startswith("answer-correct: ")
+                        and x.split("answer-correct: ")[1]
+                        or x.startswith("answer: ")
+                        and x.split("answer: ")[1]
+                    ),
+                    answers,
+                )
+            )
             full_answers = []
             for i in range(len(answers)):
                 is_correct = answers[i] in multiple_correct
                 input_id = "exam-{}-{}".format(exam_id, i)
                 input_type = as_checkboxes and "checkbox" or "radio"
                 correct = is_correct and "correct" or ""
-                full_answers.append('<div><input type="{}" name="answer" value="{}" id="{}" {}><label for="{}">{}</label></div>'.format(
-                    input_type, i, input_id, correct, input_id, answers[i]))
+                full_answers.append(
+                    '<div><input type="{}" name="answer" value="{}" id="{}" {}>'
+                    "<label for=\"{}\">{}</label></div>".format(
+                        input_type,
+                        i,
+                        input_id,
+                        correct,
+                        input_id,
+                        answers[i],
+                    )
+                )
             # Get the content of the exam
             content = exam_lines[exam_lines.index("content:") + 1:]
-            exam_html = '<div class="exam"><h3>{}</h3><form><fieldset>{}</fieldset><button type="submit" class="exam-button">Submit</button></form><section class="content hidden">{}</section></div>'.format(
-                question, "".join(full_answers), "\n".join(content))
+            exam_html = (
+                '<div class="exam"><h3>{}</h3><form><fieldset>{}'
+                '</fieldset><button type="submit" class="exam-button">Submit</button>'
+                '</form><section class="content hidden">{}</section></div>'.format(
+                    question,
+                    "".join(full_answers),
+                    "\n".join(content),
+                )
+            )
             # old_exam = "exam-start" + match + "exam-end"
             old_exam = EXAM_START_TAG + match + EXAM_END_TAG
             markdown = markdown.replace(old_exam, exam_html)

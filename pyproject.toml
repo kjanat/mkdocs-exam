@@ -32,6 +32,7 @@ exclude = ["example*", "assets*", "build*"]
 [project.optional-dependencies]
 dev = [
   "ruff",
+  "pre-commit",
 ]
 
 [tool.ruff]
