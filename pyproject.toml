@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mkdocs-exam"
+version = "0.1.0"
+description = "A mkdocs plugin to create an exam in your markdown document."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+  {name = "Kaj Kowalski", email = "dev+mkdocs-exam@kjanat.com"},
+]
+dependencies = [
+  "mkdocs",
+  "mkdocs-material",
+]
+
+[project.urls]
+homepage = "https://github.com/kjanat/mkdocs-exam"
+
+[project.entry-points."mkdocs.plugins"]
+"mkdocs-exam" = "mkdocs_exam.plugin:MkDocsExamPlugin"
+
+[tool.setuptools.packages.find]
+include = ["mkdocs_exam"]
+exclude = ["example*", "assets*", "build*"]
+
+[tool.setuptools.package-data]
+"mkdocs_exam" = ["css/*", "js/*"]
+
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "pre-commit",
+]
+
+[tool.ruff]
+line-length = 120
