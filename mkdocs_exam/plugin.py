@@ -9,13 +9,13 @@ inp_file = (impresources.files(css) / 'exam.css')
 with inp_file.open("rt") as f:
     style = f.read()
 
-style = '<style type="text/css">{}</style>'.format(style)
+style = f'<style type="text/css">{style}</style>'
 
 js_file = (impresources.files(js) / 'exam.js')
 with js_file.open("rt") as f:
     js = f.read()
 
-js = '<script type="text/javascript" defer>{}</script>'.format(js)
+js = f'<script type="text/javascript" defer>{js}</script>'
 
 # <?exam?>
 # question: Are you ready?
@@ -56,27 +56,24 @@ class MkDocsExamPlugin(BasePlugin):
             answers = exam_lines[1: exam_lines.index("content:")]
             # correct_answer = list(filter(lambda x: x.startswith(
             #     "exam-answer-correct: "), answers))[0].split("exam-answer-correct: ")[1]
-            multiple_correct = list(
-                filter(lambda x: x.startswith("answer-correct: "), answers))
-            multiple_correct = list(
-                map(lambda x: x.split("answer-correct: ")[1], multiple_correct))
+            multiple_correct = [
+                x.split("answer-correct: ", 1)[1]
+                for x in answers
+                if x.startswith("answer-correct: ")
+            ]
             as_checkboxes = len(multiple_correct) > 1
-                
-            answers = list(
-                map(
-                    lambda x: (
-                        x.startswith("answer-correct: ")
-                        and x.split("answer-correct: ")[1]
-                        or x.startswith("answer: ")
-                        and x.split("answer: ")[1]
-                    ),
-                    answers,
-                )
-            )
+
+            answers = [
+                x.split("answer-correct: ", 1)[1]
+                if x.startswith("answer-correct: ")
+                else x.split("answer: ", 1)[1]
+                for x in answers
+                if x.startswith(("answer-correct: ", "answer: "))
+            ]
             full_answers = []
             for i in range(len(answers)):
                 is_correct = answers[i] in multiple_correct
-                input_id = "exam-{}-{}".format(exam_id, i)
+                input_id = f"exam-{exam_id}-{i}"
                 input_type = as_checkboxes and "checkbox" or "radio"
                 correct = is_correct and "correct" or ""
                 full_answers.append(

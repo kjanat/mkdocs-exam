@@ -5,6 +5,8 @@
 This plugin hasn't landed on PyPI yet. Clone the repository and install it in editable mode with **uv**:
 
 ```bash
+git clone https://github.com/kjanat/mkdocs-exam.git
+cd mkdocs-exam
 uv pip install -e .
 ```
 
