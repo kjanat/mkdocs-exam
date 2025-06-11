@@ -78,3 +78,7 @@ You can disable the exam for a page by adding the following to the top (meta) of
 exam: disable
 ---
 ```
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
