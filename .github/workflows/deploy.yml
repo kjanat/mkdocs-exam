@@ -54,7 +54,7 @@ jobs:
       - name: Install python dependencies
         run: |
           uv pip install mkdocs-material
-          uv pip install ../
+          uv pip install -e ../
 
       - name: Setup build environment
         run: |

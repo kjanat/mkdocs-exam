@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mkdocs-quiz"
+version = "0.1.0"
+description = "A mkdocs plugin to create a quiz in your markdown documents."
+readme = "README.md"
+license = {text = "Apache License 2.0"}
+authors = [ {name = "Sebastian J\u00f6rz", email = "sjoerz@skyface.de"} ]
+dependencies = ["mkdocs"]
+
+[project.urls]
+Homepage = "https://github.com/kjanat/mkdocs-exam"
+
+[tool.setuptools]
+packages = ["mkdocs_exam", "mkdocs_quiz"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"mkdocs_exam" = ["css/*", "js/*"]
+
+[project.entry-points."mkdocs.plugins"]
+mkdocs_quiz = "mkdocs_quiz.plugin:MkDocsQuizPlugin"

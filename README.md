@@ -5,7 +5,11 @@
 This plugin hasn't landed on PyPI yet. Install it straight from GitHub:
 
 ```bash
-pip install git+https://github.com/kjanat/mkdocs-exam.git
+uv pip install git+https://github.com/kjanat/mkdocs-exam.git
+```
+For local development, install the repository in editable mode:
+```bash
+uv pip install -e .
 ```
 
 ## Create your first exam

@@ -1,5 +1,7 @@
 README.md
-setup.py
+pyproject.toml
 mkdocs_exam/plugin.py
 mkdocs_exam/css/exam.css
 mkdocs_exam/js/exam.js
+mkdocs_quiz/__init__.py
+mkdocs_quiz/plugin.py
