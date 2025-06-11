@@ -81,7 +81,7 @@ jobs:
       #     EOF
 
       - name: Debug
-        run: ll -lAF
+        run: ls -lAF
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
