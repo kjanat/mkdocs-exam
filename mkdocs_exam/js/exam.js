@@ -30,6 +30,7 @@ document.querySelectorAll('.exam').forEach((exam) => {
       })
     } else {
       const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
+      resetFieldset(fieldset)
       isCorrect = true
       for (let i = 0; i < inputs.length; i++) {
         const expected = (inputs[i].getAttribute('correct') || '').split('|')
