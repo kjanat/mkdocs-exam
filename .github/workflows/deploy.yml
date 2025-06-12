@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       test:
-        description: 'Skip deployment to GitHub Pages'
+        description: "Skip deployment to GitHub Pages"
         type: boolean
         default: false
         required: false
@@ -46,7 +46,7 @@ jobs:
         with:
           activate-environment: true
           enable-cache: true
-          version: 'latest'
+          version: "latest"
           working-directory: example
 
       - name: Do something if the cache was restored

@@ -47,10 +47,10 @@ label.correct {
 label.wrong {
   color: red;
 }
-input[type='radio'].correct {
+input[type="radio"].correct {
   accent-color: green;
 }
-input[type='radio'].wrong {
+input[type="radio"].wrong {
   accent-color: red;
 }
 .content {
