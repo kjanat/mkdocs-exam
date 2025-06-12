@@ -26,3 +26,60 @@ content:
 
 <p>The <code>br</code> element simply causes a line break in the rendered page.</p>
 </exam>
+
+## Short answer
+
+<exam>
+type: short-answer
+question: Who wrote "1984"?
+answer-correct: George Orwell
+content:
+
+<p>The novel "1984" was written by George Orwell.</p>
+</exam>
+
+## Fill in the blank
+
+<exam>
+type: fill
+question: The capital of France is ___
+answer-correct: Paris
+content:
+
+<p>Paris is the capital city of France.</p>
+</exam>
+
+## True/false
+
+<exam>
+type: truefalse
+question: The Earth orbits the Sun.
+answer-correct: True
+content:
+
+<p>This is obviously true.</p>
+</exam>
+
+## Essay
+
+<exam>
+type: essay
+question: Explain the theory of relativity in one paragraph.
+answer-correct: It deals with space and time.
+content:
+
+<p>Provide an explanation.</p>
+</exam>
+
+## Matching
+
+<exam>
+type: matching
+question: Match the capitals to countries
+answer: Paris | France
+answer: Rome | Italy
+answer: Madrid | Spain
+content:
+
+<p>Capitals and their countries.</p>
+</exam>

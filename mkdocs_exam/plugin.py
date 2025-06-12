@@ -8,14 +8,14 @@ import re
 
 # Read bundled CSS and JS and wrap them for inline injection
 inp_file = impresources.files(css) / "exam.css"
-with inp_file.open("rt") as f:
+with inp_file.open("r", encoding="utf-8") as f:
     style = f.read()
 style = f'<style type="text/css">{style}</style>'
 
 js_file = impresources.files(js) / "exam.js"
-with js_file.open("rt") as f:
-    js = f.read()
-js = f'<script type="text/javascript" defer>{js}</script>'
+with js_file.open("r", encoding="utf-8") as f:
+    script_content = f.read()
+script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
 
 # <exam>
 # question: Are you ready?
@@ -27,19 +27,19 @@ js = f'<script type="text/javascript" defer>{js}</script>'
 # </exam>
 
 
-class MkDocsExamPlugin(BasePlugin):
+class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
     """Convert custom ``<exam>`` blocks into interactive HTML quizzes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize default state for the plugin."""
         self.enabled = True
         self.dirty = False
 
-    def on_startup(self, *, command, dirty: bool) -> None:
+    def on_startup(self, *, command: str, dirty: bool) -> None:
         """Configure the plugin on startup."""
         self.dirty = dirty
 
-    def on_page_markdown(self, markdown, page, config, **kwargs):
+    def on_page_markdown(self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None) -> str:  # type: ignore[override]
         """Parse exam blocks in markdown and generate the HTML quiz."""
 
         if "exam" in page.meta and page.meta["exam"] == "disable":
@@ -52,44 +52,81 @@ class MkDocsExamPlugin(BasePlugin):
         matches = re.findall(REGEX, markdown, re.DOTALL)
         exam_id = 0
         for match in matches:
-            # Split the block into lines and trim empty lines
-            exam_lines = match.splitlines()
-            while exam_lines[0] == "":
-                exam_lines = exam_lines[1:]
-            while exam_lines[-1] == "":
-                exam_lines = exam_lines[:-1]
+            exam_lines = [ln.strip() for ln in match.splitlines() if ln.strip()]
+            content_idx = exam_lines.index("content:")
+            header_lines = exam_lines[:content_idx]
+            content_lines = exam_lines[content_idx + 1 :]
 
-            question = exam_lines[0].split("question: ")[1]
+            q_type = "choice"
+            question = ""
+            answers: list[str] = []
+            correct_idx: list[int] = []
+            for line in header_lines:
+                if line.startswith("type:"):
+                    q_type = line.split("type:", 1)[1].strip().lower()
+                elif line.startswith("question:"):
+                    question = line.split("question:", 1)[1].strip()
+                elif line.startswith("answer-correct:"):
+                    answers.append(line.split("answer-correct:", 1)[1].strip())
+                    correct_idx.append(len(answers) - 1)
+                elif line.startswith("answer:"):
+                    answers.append(line.split("answer:", 1)[1].strip())
 
-            # All lines until ``content:`` are answers
-            answers = exam_lines[1 : exam_lines.index("content:")]
-            # Determine which answers are marked as correct
-            multiple_correct = [x.split("answer-correct: ", 1)[1] for x in answers if x.startswith("answer-correct: ")]
-            as_checkboxes = len(multiple_correct) > 1
+            html_question = question
+            full_answers: list[str] = []
 
-            answers = [
-                x.split("answer-correct: ", 1)[1] if x.startswith("answer-correct: ") else x.split("answer: ", 1)[1]
-                for x in answers
-                if x.startswith(("answer-correct: ", "answer: "))
-            ]
+            if q_type == "choice" or q_type == "truefalse":
+                if q_type == "truefalse":
+                    if not answers:
+                        answers = ["True", "False"]
+                        if not correct_idx:
+                            correct_idx = [0]
+                    elif len(answers) == 1:
+                        if answers[0].strip().lower() in {"true", "yes"}:
+                            answers.append("False")
+                        else:
+                            answers.append("True")
+                as_checkboxes = len(correct_idx) > 1
+                for i, ans in enumerate(answers):
+                    is_correct = i in correct_idx
+                    input_id = f"exam-{exam_id}-{i}"
+                    input_type = "checkbox" if as_checkboxes else "radio"
+                    correct = "correct" if is_correct else ""
+                    full_answers.append(
+                        f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
+                        f'<label for="{input_id}">{ans}</label></div>'
+                    )
+            elif q_type in {"short-answer", "fill", "essay"}:
+                correct_vals = [answers[i] for i in correct_idx] or answers
+                correct_attr = "|".join(correct_vals)
+                if q_type == "essay":  # use textarea for long-form answers
+                    full_answers.append(
+                        f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
+                    )
+                elif q_type == "fill":
+                    html_question = question.replace(
+                        "___", f'<input type="text" name="answer" correct="{correct_attr}">'
+                    )
+                else:
+                    full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
+            elif q_type == "matching":
+                pairs = [ans.split("|") for ans in answers]
+                left = [p[0].strip() for p in pairs]
+                right = [p[1].strip() for p in pairs]
+                options = "".join(f"<option>{r}</option>" for r in right)
+                for i, left_item in enumerate(left):
+                    full_answers.append(
+                        f"<div><label>{left_item} "
+                        f'<select name="answer" correct="{right[i]}">{options}</select>'
+                        "</label></div>"
+                    )
 
-            full_answers = []
-            for i in range(len(answers)):
-                is_correct = answers[i] in multiple_correct
-                input_id = f"exam-{exam_id}-{i}"
-                input_type = "checkbox" if as_checkboxes else "radio"
-                correct = "correct" if is_correct else ""
-                full_answers.append(
-                    f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
-                    f'<label for="{input_id}">{answers[i]}</label></div>'
-                )
-            # Extract the explanatory HTML that follows ``content:``
-            content = exam_lines[exam_lines.index("content:") + 1 :]
+            html_answers = "".join(full_answers)
             exam_html = (
-                f'<div class="exam"><h3>{question}</h3><form><fieldset>'
-                f"{''.join(full_answers)}</fieldset>"
+                f'<div class="exam" data-type="{q_type}"><h3>{html_question}</h3><form><fieldset>'
+                f"{html_answers}</fieldset>"
                 '<button type="submit" class="exam-button">Submit</button>'
-                f'</form><section class="content hidden">{"\n".join(content)}</section></div>'
+                f'</form><section class="content hidden">{"\n".join(content_lines)}</section></div>'
             )
             # Replace the original block with the generated HTML
             old_exam = EXAM_START_TAG + match + EXAM_END_TAG
@@ -101,5 +138,5 @@ class MkDocsExamPlugin(BasePlugin):
         """Append inline resources to the rendered HTML page."""
 
         # Inject CSS and JavaScript so the quiz works without extra files
-        html = html + style + js
+        html = html + style + script_tag
         return html
