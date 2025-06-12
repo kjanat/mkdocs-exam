@@ -99,7 +99,7 @@ class MkDocsExamPlugin(BasePlugin):
             elif q_type in {"short-answer", "fill", "essay"}:
                 correct_vals = [answers[i] for i in correct_idx] or answers
                 correct_attr = "|".join(correct_vals)
-                if q_type == "essay":
+                if q_type == "essay":  # use textarea for long-form answers
                     full_answers.append(
                         f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
                     )
