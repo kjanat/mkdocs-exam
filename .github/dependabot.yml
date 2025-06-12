@@ -5,53 +5,53 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Amsterdam"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Amsterdam'
     groups:
       production-dependencies:
         patterns:
-          - "*"
+          - '*'
         exclude-patterns:
-          - "*eslint*"
-          - "*prettier*"
-          - "*jest*"
-          - "*test*"
+          - '*eslint*'
+          - '*prettier*'
+          - '*jest*'
+          - '*test*'
       development-dependencies:
         patterns:
-          - "*eslint*"
-          - "*prettier*"
-          - "*jest*"
-          - "*test*"
-          - "*dev*"
+          - '*eslint*'
+          - '*prettier*'
+          - '*jest*'
+          - '*test*'
+          - '*dev*'
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "deps"
-      prefix-development: "deps-dev"
-      include: "scope"
+      prefix: 'deps'
+      prefix-development: 'deps-dev'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "automated"
+      - 'dependencies'
+      - 'automated'
 
-  - package-ecosystem: "pip"
-    directory: "/"
+  - package-ecosystem: 'pip'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Amsterdam"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Amsterdam'
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "deps"
-      include: "scope"
+      prefix: 'deps'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "python"
-      - "automated"
+      - 'dependencies'
+      - 'python'
+      - 'automated'
 
   # - package-ecosystem: 'uv'
   #   directory: '/'
@@ -69,18 +69,18 @@ updates:
   #     - 'python'
   #     - 'automated'
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Amsterdam"
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Europe/Amsterdam'
     open-pull-requests-limit: 3
     commit-message:
-      prefix: "ci"
-      include: "scope"
+      prefix: 'ci'
+      include: 'scope'
     labels:
-      - "github-actions"
-      - "ci/cd"
-      - "automated"
+      - 'github-actions'
+      - 'ci/cd'
+      - 'automated'

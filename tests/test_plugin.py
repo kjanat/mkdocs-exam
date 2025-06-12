@@ -36,7 +36,7 @@ def test_exam_block_converts_to_html():
         '<label for="exam-0-2">Maybe!</label></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
         '</form><section class="content hidden">\n'
-        '<h2>Provide some additional content</h2></section></div>\n'
+        "<h2>Provide some additional content</h2></section></div>\n"
     )
     assert result == expected
 

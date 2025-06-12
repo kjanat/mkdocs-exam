@@ -26,6 +26,7 @@ js = f'<script type="text/javascript" defer>{js}</script>'
 # <h2>Provide some additional content</h2>
 # </exam>
 
+
 class MkDocsExamPlugin(BasePlugin):
     """Convert custom ``<exam>`` blocks into interactive HTML quizzes."""
 
@@ -63,17 +64,11 @@ class MkDocsExamPlugin(BasePlugin):
             # All lines until ``content:`` are answers
             answers = exam_lines[1 : exam_lines.index("content:")]
             # Determine which answers are marked as correct
-            multiple_correct = [
-                x.split("answer-correct: ", 1)[1]
-                for x in answers
-                if x.startswith("answer-correct: ")
-            ]
+            multiple_correct = [x.split("answer-correct: ", 1)[1] for x in answers if x.startswith("answer-correct: ")]
             as_checkboxes = len(multiple_correct) > 1
 
             answers = [
-                x.split("answer-correct: ", 1)[1]
-                if x.startswith("answer-correct: ")
-                else x.split("answer: ", 1)[1]
+                x.split("answer-correct: ", 1)[1] if x.startswith("answer-correct: ") else x.split("answer: ", 1)[1]
                 for x in answers
                 if x.startswith(("answer-correct: ", "answer: "))
             ]
@@ -92,7 +87,7 @@ class MkDocsExamPlugin(BasePlugin):
             content = exam_lines[exam_lines.index("content:") + 1 :]
             exam_html = (
                 f'<div class="exam"><h3>{question}</h3><form><fieldset>'
-                f'{"".join(full_answers)}</fieldset>'
+                f"{''.join(full_answers)}</fieldset>"
                 '<button type="submit" class="exam-button">Submit</button>'
                 f'</form><section class="content hidden">{"\n".join(content)}</section></div>'
             )
