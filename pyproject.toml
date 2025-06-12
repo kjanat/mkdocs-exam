@@ -12,9 +12,17 @@ license = {text = "MIT"}
 authors = [
   {name = "Kaj Kowalski", email = "dev+mkdocs-exam@kjanat.com"},
 ]
+
 dependencies = [
   "mkdocs",
   "mkdocs-material",
+]
+
+[dependency-groups]
+dev = [
+  "ruff",
+  "pre-commit",
+  "pytest",
 ]
 
 [project.urls]
@@ -29,13 +37,6 @@ exclude = ["example*", "assets*", "build*"]
 
 [tool.setuptools.package-data]
 "mkdocs_exam" = ["css/*", "js/*"]
-
-[project.optional-dependencies]
-dev = [
-  "ruff",
-  "pre-commit",
-  "pytest",
-]
 
 [tool.ruff]
 line-length = 120

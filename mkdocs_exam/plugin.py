@@ -8,14 +8,14 @@ import re
 
 # Read bundled CSS and JS and wrap them for inline injection
 inp_file = impresources.files(css) / "exam.css"
-with inp_file.open("rt") as f:
+with inp_file.open("r", encoding="utf-8") as f:
     style = f.read()
 style = f'<style type="text/css">{style}</style>'
 
 js_file = impresources.files(js) / "exam.js"
-with js_file.open("rt") as f:
-    js = f.read()
-js = f'<script type="text/javascript" defer>{js}</script>'
+with js_file.open("r", encoding="utf-8") as f:
+    script_content = f.read()
+script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
 
 # <exam>
 # question: Are you ready?
@@ -27,19 +27,19 @@ js = f'<script type="text/javascript" defer>{js}</script>'
 # </exam>
 
 
-class MkDocsExamPlugin(BasePlugin):
+class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
     """Convert custom ``<exam>`` blocks into interactive HTML quizzes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize default state for the plugin."""
         self.enabled = True
         self.dirty = False
 
-    def on_startup(self, *, command, dirty: bool) -> None:
+    def on_startup(self, *, command: str, dirty: bool) -> None:
         """Configure the plugin on startup."""
         self.dirty = dirty
 
-    def on_page_markdown(self, markdown, page, config, **kwargs):
+    def on_page_markdown(self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None) -> str:  # type: ignore[override]
         """Parse exam blocks in markdown and generate the HTML quiz."""
 
         if "exam" in page.meta and page.meta["exam"] == "disable":
@@ -138,5 +138,5 @@ class MkDocsExamPlugin(BasePlugin):
         """Append inline resources to the rendered HTML page."""
 
         # Inject CSS and JavaScript so the quiz works without extra files
-        html = html + style + js
+        html = html + style + script_tag
         return html
