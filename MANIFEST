@@ -1,5 +1,4 @@
 README.md
-setup.py
 mkdocs_exam/plugin.py
 mkdocs_exam/css/exam.css
 mkdocs_exam/js/exam.js
