@@ -26,4 +26,3 @@ content:
 
 <p>The <code>br</code> element simply causes a line break in the rendered page.</p>
 </exam>
-

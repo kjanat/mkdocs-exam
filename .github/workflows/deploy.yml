@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       test:
-        description: 'Skip deployment to GitHub Pages'
+        description: "Skip deployment to GitHub Pages"
         type: boolean
         default: false
         required: false
