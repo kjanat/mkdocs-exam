@@ -48,3 +48,25 @@ content:
 
 <p>Paris is the capital city of France.</p>
 </exam>
+
+## True/false
+
+<exam>
+type: truefalse
+question: The Earth orbits the Sun.
+answer-correct: True
+content:
+
+<p>This is obviously true.</p>
+</exam>
+
+## Essay
+
+<exam>
+type: essay
+question: Explain the theory of relativity in one paragraph.
+answer-correct: It deals with space and time.
+content:
+
+<p>Provide an explanation.</p>
+</exam>

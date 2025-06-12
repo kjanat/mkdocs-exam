@@ -18,7 +18,7 @@ document.querySelectorAll('.exam').forEach((exam) => {
       }
       markFields(selected, isCorrect)
     } else {
-      const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"]')
+      const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
       isCorrect = true
       for (let i = 0; i < inputs.length; i++) {
         const expected = (inputs[i].getAttribute('correct') || '').split('|')
@@ -56,7 +56,7 @@ function resetFieldset (fieldset) {
   for (let i = 0; i < fieldsetChildren.length; i++) {
     fieldsetChildren[i].classList.remove('wrong')
     fieldsetChildren[i].classList.remove('correct')
-    const input = fieldsetChildren[i].querySelector('input')
+    const input = fieldsetChildren[i].querySelector('input, textarea')
     if (input) {
       input.classList.remove('wrong')
       input.classList.remove('correct')

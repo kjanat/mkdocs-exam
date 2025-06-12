@@ -88,6 +88,59 @@ def test_fill_question():
     assert result == expected
 
 
+def test_true_false_default_answers():
+    markdown = textwrap.dedent(
+        """
+        <exam>
+
+        type: truefalse
+        question: The Earth orbits the Sun.
+        answer-correct: True
+        content:
+
+        <p>This is obviously true.</p>
+        </exam>
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    expected = (
+        "\n"
+        '<div class="exam" data-type="truefalse"><h3>The Earth orbits the Sun.</h3><form><fieldset>'
+        '<div><input type="radio" name="answer" value="0" id="exam-0-0" correct><label for="exam-0-0">True</label></div>'
+        '<div><input type="radio" name="answer" value="1" id="exam-0-1" ><label for="exam-0-1">False</label></div>'
+        '</fieldset><button type="submit" class="exam-button">Submit</button>'
+        '</form><section class="content hidden"><p>This is obviously true.</p></section></div>\n'
+    )
+    assert result == expected
+
+
+def test_essay_question():
+    markdown = textwrap.dedent(
+        """
+        <exam>
+
+        type: essay
+        question: Explain the theory of relativity in one paragraph.
+        answer-correct: It deals with space and time.
+        content:
+
+        <p>Provide an explanation.</p>
+        </exam>
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    expected = (
+        "\n"
+        '<div class="exam" data-type="essay"><h3>Explain the theory of relativity in one paragraph.</h3><form><fieldset>'
+        '<div><textarea name="answer" rows="4" correct="It deals with space and time."></textarea></div>'
+        '</fieldset><button type="submit" class="exam-button">Submit</button>'
+        '</form><section class="content hidden"><p>Provide an explanation.</p></section></div>\n'
+    )
+    assert result == expected
+
+
 def test_exam_disabled_leaves_markdown_unchanged():
     markdown = textwrap.dedent(
         """

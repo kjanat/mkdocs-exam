@@ -76,6 +76,16 @@ class MkDocsExamPlugin(BasePlugin):
             full_answers: list[str] = []
 
             if q_type == "choice" or q_type == "truefalse":
+                if q_type == "truefalse":
+                    if not answers:
+                        answers = ["True", "False"]
+                        if not correct_idx:
+                            correct_idx = [0]
+                    elif len(answers) == 1:
+                        if answers[0].strip().lower() in {"true", "yes"}:
+                            answers.append("False")
+                        else:
+                            answers.append("True")
                 as_checkboxes = len(correct_idx) > 1
                 for i, ans in enumerate(answers):
                     is_correct = i in correct_idx
@@ -89,9 +99,14 @@ class MkDocsExamPlugin(BasePlugin):
             elif q_type in {"short-answer", "essay"}:
                 correct_vals = [answers[i] for i in correct_idx] or answers
                 correct_attr = "|".join(correct_vals)
-                full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
-            elif q_type == "fill":
-                correct_vals = [answers[i] for i in correct_idx] or answers
+                if q_type == "essay":
+                    full_answers.append(
+                        f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
+                    )
+                else:
+                    full_answers.append(
+                        f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>'
+                    )
                 correct_attr = "|".join(correct_vals)
                 html_question = question.replace("___", f'<input type="text" name="answer" correct="{correct_attr}">')
             else:

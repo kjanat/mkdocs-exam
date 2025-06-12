@@ -83,6 +83,35 @@ content:
 </exam>
 ```
 
+### True/false
+
+This type can be used for simple statements that are either true or false. If no
+answers are provided, the plugin will automatically use *True* and *False*.
+
+```markdown
+<exam>
+type: truefalse
+question: The Earth orbits the Sun.
+answer-correct: True
+content:
+<p>This is obviously true.</p>
+</exam>
+```
+
+### Essay
+
+For longer open questions the `essay` type renders a multiline textarea.
+
+```markdown
+<exam>
+type: essay
+question: Explain the theory of relativity in one paragraph.
+answer-correct: It deals with space and time.
+content:
+<p>Provide an explanation.</p>
+</exam>
+```
+
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
 
 ## Screenshots
