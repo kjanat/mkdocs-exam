@@ -104,9 +104,7 @@ class MkDocsExamPlugin(BasePlugin):
                         f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
                     )
                 else:
-                    full_answers.append(
-                        f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>'
-                    )
+                    full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
                 correct_attr = "|".join(correct_vals)
                 html_question = question.replace("___", f'<input type="text" name="answer" correct="{correct_attr}">')
             else:

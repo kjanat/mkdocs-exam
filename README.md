@@ -86,7 +86,7 @@ content:
 ### True/false
 
 This type can be used for simple statements that are either true or false. If no
-answers are provided, the plugin will automatically use *True* and *False*.
+answers are provided, the plugin will automatically use _True_ and _False_.
 
 ```markdown
 <exam>
