@@ -120,15 +120,6 @@ class MkDocsExamPlugin(BasePlugin):
                         f'<select name="answer" correct="{right[i]}">{options}</select>'
                         "</label></div>"
                     )
-                for i, ans in enumerate(answers):
-                    is_correct = i in correct_idx
-                    input_id = f"exam-{exam_id}-{i}"
-                    input_type = "checkbox" if as_checkboxes else "radio"
-                    correct = "correct" if is_correct else ""
-                    full_answers.append(
-                        f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
-                        f'<label for="{input_id}">{ans}</label></div>'
-                    )
 
             html_answers = "".join(full_answers)
             exam_html = (

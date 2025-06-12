@@ -6,7 +6,7 @@ document.querySelectorAll('.exam').forEach((exam) => {
     event.preventDefault()
     let isCorrect = false
 
-    if (type === 'choice') {
+    if (type === 'choice' || type === 'truefalse') {
       const selected = form.querySelectorAll('input[name="answer"]:checked')
       const correct = fieldset.querySelectorAll('input[name="answer"][correct]')
       isCorrect = selected.length === correct.length
