@@ -105,8 +105,8 @@ class MkDocsExamPlugin(BasePlugin):
                     )
                 elif q_type == "fill":
                     html_question = question.replace(
-                        "___",
-                        (f'<input type="text" name="answer" correct="{correct_attr}">'),
+                        "___", f'<input type="text" name="answer" correct="{correct_attr}">'
+                    )
                 else:
                     full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
             elif q_type == "matching":
