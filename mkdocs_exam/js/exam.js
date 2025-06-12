@@ -1,54 +1,54 @@
-document.querySelectorAll(".exam").forEach((exam) => {
-  const form = exam.querySelector("form");
-  const fieldset = form.querySelector("fieldset");
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
+document.querySelectorAll('.exam').forEach((exam) => {
+  const form = exam.querySelector('form')
+  const fieldset = form.querySelector('fieldset')
+  form.addEventListener('submit', (event) => {
+    event.preventDefault()
     const selectedAnswers = form.querySelectorAll(
-      'input[name="answer"]:checked',
-    );
+      'input[name="answer"]:checked'
+    )
     const correctAnswers = fieldset.querySelectorAll(
-      'input[name="answer"][correct]',
-    );
+      'input[name="answer"][correct]'
+    )
     // Check if all correct answers are selected
-    let is_correct = selectedAnswers.length === correctAnswers.length;
+    let isCorrect = selectedAnswers.length === correctAnswers.length
     for (let i = 0; i < selectedAnswers.length; i++) {
-      if (!selectedAnswers[i].hasAttribute("correct")) {
-        is_correct = false;
-        break;
+      if (!selectedAnswers[i].hasAttribute('correct')) {
+        isCorrect = false
+        break
       }
     }
-    const section = exam.querySelector("section");
-    if (is_correct) {
-      section.classList.remove("hidden");
-      resetFieldset(fieldset);
+    const section = exam.querySelector('section')
+    if (isCorrect) {
+      section.classList.remove('hidden')
+      resetFieldset(fieldset)
       // Mark all fields with colors
-      const allAnswers = fieldset.querySelectorAll('input[name="answer"]');
+      const allAnswers = fieldset.querySelectorAll('input[name="answer"]')
       for (let i = 0; i < allAnswers.length; i++) {
-        if (allAnswers[i].hasAttribute("correct")) {
-          allAnswers[i].parentElement.classList.add("correct");
+        if (allAnswers[i].hasAttribute('correct')) {
+          allAnswers[i].parentElement.classList.add('correct')
         } else {
-          allAnswers[i].parentElement.classList.add("wrong");
+          allAnswers[i].parentElement.classList.add('wrong')
         }
       }
     } else {
-      section.classList.add("hidden");
-      resetFieldset(fieldset);
+      section.classList.add('hidden')
+      resetFieldset(fieldset)
       // Mark wrong fields with colors
       for (let i = 0; i < selectedAnswers.length; i++) {
-        if (!selectedAnswers[i].hasAttribute("correct")) {
-          selectedAnswers[i].parentElement.classList.add("wrong");
+        if (!selectedAnswers[i].hasAttribute('correct')) {
+          selectedAnswers[i].parentElement.classList.add('wrong')
         } else {
-          selectedAnswers[i].parentElement.classList.add("correct");
+          selectedAnswers[i].parentElement.classList.add('correct')
         }
       }
     }
-  });
-});
+  })
+})
 
-function resetFieldset(fieldset) {
-  const fieldsetChildren = fieldset.children;
+function resetFieldset (fieldset) {
+  const fieldsetChildren = fieldset.children
   for (let i = 0; i < fieldsetChildren.length; i++) {
-    fieldsetChildren[i].classList.remove("wrong");
-    fieldsetChildren[i].classList.remove("correct");
+    fieldsetChildren[i].classList.remove('wrong')
+    fieldsetChildren[i].classList.remove('correct')
   }
 }
