@@ -55,7 +55,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             exam_lines = [ln.strip() for ln in match.splitlines() if ln.strip()]
             content_idx = exam_lines.index("content:")
             header_lines = exam_lines[:content_idx]
-            content = exam_lines[content_idx + 1 :]
+            content_lines = exam_lines[content_idx + 1 :]
 
             q_type = "choice"
             question = ""
@@ -126,7 +126,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                 f'<div class="exam" data-type="{q_type}"><h3>{html_question}</h3><form><fieldset>'
                 f"{html_answers}</fieldset>"
                 '<button type="submit" class="exam-button">Submit</button>'
-                f'</form><section class="content hidden">{"\n".join(content)}</section></div>'
+                f'</form><section class="content hidden">{"\n".join(content_lines)}</section></div>'
             )
             # Replace the original block with the generated HTML
             old_exam = EXAM_START_TAG + match + EXAM_END_TAG
