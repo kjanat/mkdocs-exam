@@ -3,20 +3,22 @@ document.querySelectorAll('.exam').forEach((exam) => {
   const fieldset = form.querySelector('fieldset')
   form.addEventListener('submit', (event) => {
     event.preventDefault()
-    const selectedAnswers = form.querySelectorAll('input[name="answer"]:checked')
+    const selectedAnswers = form.querySelectorAll(
+      'input[name="answer"]:checked'
+    )
     const correctAnswers = fieldset.querySelectorAll(
       'input[name="answer"][correct]'
     )
     // Check if all correct answers are selected
-    let is_correct = selectedAnswers.length === correctAnswers.length
+    let isCorrect = selectedAnswers.length === correctAnswers.length
     for (let i = 0; i < selectedAnswers.length; i++) {
       if (!selectedAnswers[i].hasAttribute('correct')) {
-        is_correct = false
+        isCorrect = false
         break
       }
     }
     const section = exam.querySelector('section')
-    if (is_correct) {
+    if (isCorrect) {
       section.classList.remove('hidden')
       resetFieldset(fieldset)
       // Mark all fields with colors

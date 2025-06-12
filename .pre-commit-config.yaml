@@ -1,7 +1,24 @@
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.285
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: "v4.0.0-alpha.8"
     hooks:
-      - id: ruff
+      - id: prettier
+        language_version: system
+        files: \.(json|md|html|css|ya?ml)$
+        additional_dependencies:
+          - prettier@latest
+          - prettier-config-standard@latest
+  - repo: https://github.com/standard/standard
+    rev: v17.1.2
+    hooks:
+      - id: standard
+        language_version: system
+        types: [javascript]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.13
+    hooks:
+      # Run the linter.
+      - id: ruff-check
         args: [--fix]
-
+      # Run the formatter.
+      - id: ruff-format
