@@ -17,6 +17,17 @@ document.querySelectorAll('.exam').forEach((exam) => {
         }
       }
       markFields(selected, isCorrect)
+    } else if (type === 'matching') {
+      const selects = fieldset.querySelectorAll('select[name="answer"]')
+      isCorrect = true
+      selects.forEach((sel) => {
+        const expected = sel.getAttribute('correct')
+        const ok = sel.value === expected
+        if (!ok) {
+          isCorrect = false
+        }
+        sel.classList.add(ok ? 'correct' : 'wrong')
+      })
     } else {
       const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
       isCorrect = true
@@ -56,7 +67,7 @@ function resetFieldset (fieldset) {
   for (let i = 0; i < fieldsetChildren.length; i++) {
     fieldsetChildren[i].classList.remove('wrong')
     fieldsetChildren[i].classList.remove('correct')
-    const input = fieldsetChildren[i].querySelector('input, textarea')
+    const input = fieldsetChildren[i].querySelector('input, textarea, select')
     if (input) {
       input.classList.remove('wrong')
       input.classList.remove('correct')

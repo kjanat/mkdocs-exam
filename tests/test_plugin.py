@@ -141,6 +141,36 @@ def test_essay_question():
     assert result == expected
 
 
+def test_matching_question():
+    markdown = textwrap.dedent(
+        """
+        <exam>
+
+        type: matching
+        question: Match the capitals to countries
+        answer: Paris | France
+        answer: Rome | Italy
+        answer: Madrid | Spain
+        content:
+
+        <p>Capitals and their countries.</p>
+        </exam>
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    expected = (
+        "\n"
+        '<div class="exam" data-type="matching"><h3>Match the capitals to countries</h3><form><fieldset>'
+        '<div><label>Paris <select name="answer" correct="France"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
+        '<div><label>Rome <select name="answer" correct="Italy"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
+        '<div><label>Madrid <select name="answer" correct="Spain"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
+        '</fieldset><button type="submit" class="exam-button">Submit</button>'
+        '</form><section class="content hidden"><p>Capitals and their countries.</p></section></div>\n'
+    )
+    assert result == expected
+
+
 def test_exam_disabled_leaves_markdown_unchanged():
     markdown = textwrap.dedent(
         """

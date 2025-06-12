@@ -109,6 +109,17 @@ class MkDocsExamPlugin(BasePlugin):
                         f'<input type="text" name="answer" correct="{correct_attr}">',
                 else:
                     full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
+            elif q_type == "matching":
+                pairs = [ans.split("|") for ans in answers]
+                left = [p[0].strip() for p in pairs]
+                right = [p[1].strip() for p in pairs]
+                options = "".join(f"<option>{r}</option>" for r in right)
+                for i, left_item in enumerate(left):
+                    full_answers.append(
+                        f"<div><label>{left_item} "
+                        f'<select name="answer" correct="{right[i]}">{options}</select>'
+                        "</label></div>"
+                    )
                 for i, ans in enumerate(answers):
                     is_correct = i in correct_idx
                     input_id = f"exam-{exam_id}-{i}"

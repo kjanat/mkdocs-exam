@@ -70,3 +70,16 @@ content:
 
 <p>Provide an explanation.</p>
 </exam>
+
+## Matching
+
+<exam>
+type: matching
+question: Match the capitals to countries
+answer: Paris | France
+answer: Rome | Italy
+answer: Madrid | Spain
+content:
+
+<p>Capitals and their countries.</p>
+</exam>

@@ -65,6 +65,12 @@ input[type="radio"].wrong {
 .exam textarea.wrong {
   border: 2px solid red;
 }
+.exam select.correct {
+  border: 2px solid green;
+}
+.exam select.wrong {
+  border: 2px solid red;
+}
 .content {
   margin: 10px;
 }

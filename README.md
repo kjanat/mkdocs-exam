@@ -112,6 +112,23 @@ content:
 </exam>
 ```
 
+### Matching
+
+Provide pairs separated by a pipe (`|`). Each left item will be shown with a
+drop-down to select the corresponding right item.
+
+```markdown
+<exam>
+type: matching
+question: Match the capitals to countries
+answer: Paris | France
+answer: Rome | Italy
+answer: Madrid | Spain
+content:
+<p>Capitals and their countries.</p>
+</exam>
+```
+
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
 
 ## Screenshots
