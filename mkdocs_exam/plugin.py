@@ -96,20 +96,19 @@ class MkDocsExamPlugin(BasePlugin):
                         f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
                         f'<label for="{input_id}">{ans}</label></div>'
                     )
-            elif q_type in {"short-answer", "essay"}:
+            elif q_type in {"short-answer", "fill", "essay"}:
                 correct_vals = [answers[i] for i in correct_idx] or answers
                 correct_attr = "|".join(correct_vals)
                 if q_type == "essay":
                     full_answers.append(
                         f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
                     )
+                elif q_type == "fill":
+                    html_question = question.replace(
+                        "___",
+                        f'<input type="text" name="answer" correct="{correct_attr}">',
                 else:
                     full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
-                correct_attr = "|".join(correct_vals)
-                html_question = question.replace("___", f'<input type="text" name="answer" correct="{correct_attr}">')
-            else:
-                # fallback to choice rendering
-                as_checkboxes = len(correct_idx) > 1
                 for i, ans in enumerate(answers):
                     is_correct = i in correct_idx
                     input_id = f"exam-{exam_id}-{i}"
