@@ -5,16 +5,16 @@ from mkdocs.structure.pages import Page
 from importlib import resources as impresources
 from . import css, js
 import re
-inp_file = (impresources.files(css) / 'exam.css')
+
+# Read bundled CSS and JS and wrap them for inline injection
+inp_file = impresources.files(css) / "exam.css"
 with inp_file.open("rt") as f:
     style = f.read()
-
 style = f'<style type="text/css">{style}</style>'
 
-js_file = (impresources.files(js) / 'exam.js')
+js_file = impresources.files(js) / "exam.js"
 with js_file.open("rt") as f:
     js = f.read()
-
 js = f'<script type="text/javascript" defer>{js}</script>'
 
 # <exam>
@@ -27,7 +27,10 @@ js = f'<script type="text/javascript" defer>{js}</script>'
 # </exam>
 
 class MkDocsExamPlugin(BasePlugin):
+    """Convert custom ``<exam>`` blocks into interactive HTML quizzes."""
+
     def __init__(self):
+        """Initialize default state for the plugin."""
         self.enabled = True
         self.dirty = False
 
@@ -36,26 +39,30 @@ class MkDocsExamPlugin(BasePlugin):
         self.dirty = dirty
 
     def on_page_markdown(self, markdown, page, config, **kwargs):
+        """Parse exam blocks in markdown and generate the HTML quiz."""
+
         if "exam" in page.meta and page.meta["exam"] == "disable":
             return markdown
-        # Regex from exam_tag
+
+        # Look for ``<exam>`` ... ``</exam>`` blocks using a non-greedy regex
         EXAM_START_TAG = "<exam>"
         EXAM_END_TAG = "</exam>"
         REGEX = f"{re.escape(EXAM_START_TAG)}(.*?){re.escape(EXAM_END_TAG)}"
         matches = re.findall(REGEX, markdown, re.DOTALL)
         exam_id = 0
         for match in matches:
+            # Split the block into lines and trim empty lines
             exam_lines = match.splitlines()
-            # Remove 0 and -1 if empty
             while exam_lines[0] == "":
                 exam_lines = exam_lines[1:]
             while exam_lines[-1] == "":
                 exam_lines = exam_lines[:-1]
+
             question = exam_lines[0].split("question: ")[1]
 
-            answers = exam_lines[1: exam_lines.index("content:")]
-            # correct_answer = list(filter(lambda x: x.startswith(
-            #     "exam-answer-correct: "), answers))[0].split("exam-answer-correct: ")[1]
+            # All lines until ``content:`` are answers
+            answers = exam_lines[1 : exam_lines.index("content:")]
+            # Determine which answers are marked as correct
             multiple_correct = [
                 x.split("answer-correct: ", 1)[1]
                 for x in answers
@@ -70,31 +77,34 @@ class MkDocsExamPlugin(BasePlugin):
                 for x in answers
                 if x.startswith(("answer-correct: ", "answer: "))
             ]
+
             full_answers = []
             for i in range(len(answers)):
                 is_correct = answers[i] in multiple_correct
                 input_id = f"exam-{exam_id}-{i}"
-                input_type = as_checkboxes and "checkbox" or "radio"
-                correct = is_correct and "correct" or ""
+                input_type = "checkbox" if as_checkboxes else "radio"
+                correct = "correct" if is_correct else ""
                 full_answers.append(
                     f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
                     f'<label for="{input_id}">{answers[i]}</label></div>'
                 )
-            # Get the content of the exam
-            content = exam_lines[exam_lines.index("content:") + 1:]
+            # Extract the explanatory HTML that follows ``content:``
+            content = exam_lines[exam_lines.index("content:") + 1 :]
             exam_html = (
                 f'<div class="exam"><h3>{question}</h3><form><fieldset>'
                 f'{"".join(full_answers)}</fieldset>'
                 '<button type="submit" class="exam-button">Submit</button>'
                 f'</form><section class="content hidden">{"\n".join(content)}</section></div>'
             )
-            # old_exam = "exam-start" + match + "exam-end"
+            # Replace the original block with the generated HTML
             old_exam = EXAM_START_TAG + match + EXAM_END_TAG
             markdown = markdown.replace(old_exam, exam_html)
             exam_id += 1
         return markdown
 
     def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:
+        """Append inline resources to the rendered HTML page."""
 
+        # Inject CSS and JavaScript so the quiz works without extra files
         html = html + style + js
         return html

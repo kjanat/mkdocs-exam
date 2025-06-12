@@ -11,6 +11,11 @@ edit_uri: edit/master/docs/
 
 dev_addr: localhost:8008
 
+nav:
+  - Home: index.md
+  - Disabled Exam: disable.md
+  - Advanced: advanced.md
+
 theme:
   name: material
   language: en
