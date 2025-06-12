@@ -89,9 +89,7 @@ class MkDocsExamPlugin(BasePlugin):
             elif q_type in {"short-answer", "essay"}:
                 correct_vals = [answers[i] for i in correct_idx] or answers
                 correct_attr = "|".join(correct_vals)
-                full_answers.append(
-                    f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>'
-                )
+                full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
             elif q_type == "fill":
                 correct_vals = [answers[i] for i in correct_idx] or answers
                 correct_attr = "|".join(correct_vals)
