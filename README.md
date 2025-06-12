@@ -55,6 +55,34 @@ content:
 </exam>
 ```
 
+### Short answer
+
+Provide the expected answer as `answer-correct` and set the type to `short-answer`:
+
+```markdown
+<exam>
+type: short-answer
+question: What color is the sky?
+answer-correct: blue
+content:
+<p>The sky often appears blue due to Rayleigh scattering.</p>
+</exam>
+```
+
+### Fill in the blank
+
+Use three underscores (`___`) as placeholder in your question and provide the correct answer.
+
+```markdown
+<exam>
+type: fill
+question: 2 + 2 = ___
+answer-correct: 4
+content:
+<p>A simple addition problem.</p>
+</exam>
+```
+
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
 
 ## Screenshots

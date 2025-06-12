@@ -26,3 +26,25 @@ content:
 
 <p>The <code>br</code> element simply causes a line break in the rendered page.</p>
 </exam>
+
+## Short answer
+
+<exam>
+type: short-answer
+question: Who wrote "1984"?
+answer-correct: George Orwell
+content:
+
+<p>The novel "1984" was written by George Orwell.</p>
+</exam>
+
+## Fill in the blank
+
+<exam>
+type: fill
+question: The capital of France is ___
+answer-correct: Paris
+content:
+
+<p>Paris is the capital city of France.</p>
+</exam>

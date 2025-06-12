@@ -53,6 +53,12 @@ input[type="radio"].correct {
 input[type="radio"].wrong {
   accent-color: red;
 }
+.exam input[type="text"].correct {
+  border: 2px solid green;
+}
+.exam input[type="text"].wrong {
+  border: 2px solid red;
+}
 .content {
   margin: 10px;
 }

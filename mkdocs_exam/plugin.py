@@ -52,42 +52,67 @@ class MkDocsExamPlugin(BasePlugin):
         matches = re.findall(REGEX, markdown, re.DOTALL)
         exam_id = 0
         for match in matches:
-            # Split the block into lines and trim empty lines
-            exam_lines = match.splitlines()
-            while exam_lines[0] == "":
-                exam_lines = exam_lines[1:]
-            while exam_lines[-1] == "":
-                exam_lines = exam_lines[:-1]
+            exam_lines = [ln.strip() for ln in match.splitlines() if ln.strip()]
+            content_idx = exam_lines.index("content:")
+            header_lines = exam_lines[:content_idx]
+            content = exam_lines[content_idx + 1 :]
 
-            question = exam_lines[0].split("question: ")[1]
+            q_type = "choice"
+            question = ""
+            answers: list[str] = []
+            correct_idx: list[int] = []
+            for line in header_lines:
+                if line.startswith("type:"):
+                    q_type = line.split("type:", 1)[1].strip().lower()
+                elif line.startswith("question:"):
+                    question = line.split("question:", 1)[1].strip()
+                elif line.startswith("answer-correct:"):
+                    answers.append(line.split("answer-correct:", 1)[1].strip())
+                    correct_idx.append(len(answers) - 1)
+                elif line.startswith("answer:"):
+                    answers.append(line.split("answer:", 1)[1].strip())
 
-            # All lines until ``content:`` are answers
-            answers = exam_lines[1 : exam_lines.index("content:")]
-            # Determine which answers are marked as correct
-            multiple_correct = [x.split("answer-correct: ", 1)[1] for x in answers if x.startswith("answer-correct: ")]
-            as_checkboxes = len(multiple_correct) > 1
+            html_question = question
+            full_answers: list[str] = []
 
-            answers = [
-                x.split("answer-correct: ", 1)[1] if x.startswith("answer-correct: ") else x.split("answer: ", 1)[1]
-                for x in answers
-                if x.startswith(("answer-correct: ", "answer: "))
-            ]
-
-            full_answers = []
-            for i in range(len(answers)):
-                is_correct = answers[i] in multiple_correct
-                input_id = f"exam-{exam_id}-{i}"
-                input_type = "checkbox" if as_checkboxes else "radio"
-                correct = "correct" if is_correct else ""
+            if q_type == "choice" or q_type == "truefalse":
+                as_checkboxes = len(correct_idx) > 1
+                for i, ans in enumerate(answers):
+                    is_correct = i in correct_idx
+                    input_id = f"exam-{exam_id}-{i}"
+                    input_type = "checkbox" if as_checkboxes else "radio"
+                    correct = "correct" if is_correct else ""
+                    full_answers.append(
+                        f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
+                        f'<label for="{input_id}">{ans}</label></div>'
+                    )
+            elif q_type in {"short-answer", "essay"}:
+                correct_vals = [answers[i] for i in correct_idx] or answers
+                correct_attr = "|".join(correct_vals)
                 full_answers.append(
-                    f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
-                    f'<label for="{input_id}">{answers[i]}</label></div>'
+                    f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>'
                 )
-            # Extract the explanatory HTML that follows ``content:``
-            content = exam_lines[exam_lines.index("content:") + 1 :]
+            elif q_type == "fill":
+                correct_vals = [answers[i] for i in correct_idx] or answers
+                correct_attr = "|".join(correct_vals)
+                html_question = question.replace("___", f'<input type="text" name="answer" correct="{correct_attr}">')
+            else:
+                # fallback to choice rendering
+                as_checkboxes = len(correct_idx) > 1
+                for i, ans in enumerate(answers):
+                    is_correct = i in correct_idx
+                    input_id = f"exam-{exam_id}-{i}"
+                    input_type = "checkbox" if as_checkboxes else "radio"
+                    correct = "correct" if is_correct else ""
+                    full_answers.append(
+                        f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
+                        f'<label for="{input_id}">{ans}</label></div>'
+                    )
+
+            html_answers = "".join(full_answers)
             exam_html = (
-                f'<div class="exam"><h3>{question}</h3><form><fieldset>'
-                f"{''.join(full_answers)}</fieldset>"
+                f'<div class="exam" data-type="{q_type}"><h3>{html_question}</h3><form><fieldset>'
+                f"{html_answers}</fieldset>"
                 '<button type="submit" class="exam-button">Submit</button>'
                 f'</form><section class="content hidden">{"\n".join(content)}</section></div>'
             )

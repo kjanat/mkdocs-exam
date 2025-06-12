@@ -1,54 +1,65 @@
 document.querySelectorAll('.exam').forEach((exam) => {
   const form = exam.querySelector('form')
   const fieldset = form.querySelector('fieldset')
+  const type = exam.dataset.type || 'choice'
   form.addEventListener('submit', (event) => {
     event.preventDefault()
-    const selectedAnswers = form.querySelectorAll(
-      'input[name="answer"]:checked'
-    )
-    const correctAnswers = fieldset.querySelectorAll(
-      'input[name="answer"][correct]'
-    )
-    // Check if all correct answers are selected
-    let isCorrect = selectedAnswers.length === correctAnswers.length
-    for (let i = 0; i < selectedAnswers.length; i++) {
-      if (!selectedAnswers[i].hasAttribute('correct')) {
-        isCorrect = false
-        break
+    let isCorrect = false
+
+    if (type === 'choice') {
+      const selected = form.querySelectorAll('input[name="answer"]:checked')
+      const correct = fieldset.querySelectorAll('input[name="answer"][correct]')
+      isCorrect = selected.length === correct.length
+      for (let i = 0; i < selected.length; i++) {
+        if (!selected[i].hasAttribute('correct')) {
+          isCorrect = false
+          break
+        }
+      }
+      markFields(selected, isCorrect)
+    } else {
+      const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"]')
+      isCorrect = true
+      for (let i = 0; i < inputs.length; i++) {
+        const expected = (inputs[i].getAttribute('correct') || '').split('|')
+        const val = inputs[i].value.trim().toLowerCase()
+        const ok = expected.map((e) => e.trim().toLowerCase()).includes(val)
+        if (!ok) {
+          isCorrect = false
+        }
+        inputs[i].classList.add(ok ? 'correct' : 'wrong')
       }
     }
+
     const section = exam.querySelector('section')
     if (isCorrect) {
       section.classList.remove('hidden')
-      resetFieldset(fieldset)
-      // Mark all fields with colors
-      const allAnswers = fieldset.querySelectorAll('input[name="answer"]')
-      for (let i = 0; i < allAnswers.length; i++) {
-        if (allAnswers[i].hasAttribute('correct')) {
-          allAnswers[i].parentElement.classList.add('correct')
-        } else {
-          allAnswers[i].parentElement.classList.add('wrong')
-        }
-      }
     } else {
       section.classList.add('hidden')
-      resetFieldset(fieldset)
-      // Mark wrong fields with colors
-      for (let i = 0; i < selectedAnswers.length; i++) {
-        if (!selectedAnswers[i].hasAttribute('correct')) {
-          selectedAnswers[i].parentElement.classList.add('wrong')
-        } else {
-          selectedAnswers[i].parentElement.classList.add('correct')
-        }
-      }
     }
   })
 })
+
+function markFields (selected, correct) {
+  resetFieldset(selected[0].closest('fieldset'))
+  for (let i = 0; i < selected.length; i++) {
+    if (!selected[i].hasAttribute('correct')) {
+      selected[i].parentElement.classList.add('wrong')
+    } else {
+      selected[i].parentElement.classList.add('correct')
+    }
+  }
+}
 
 function resetFieldset (fieldset) {
   const fieldsetChildren = fieldset.children
   for (let i = 0; i < fieldsetChildren.length; i++) {
     fieldsetChildren[i].classList.remove('wrong')
     fieldsetChildren[i].classList.remove('correct')
+    const input = fieldsetChildren[i].querySelector('input')
+    if (input) {
+      input.classList.remove('wrong')
+      input.classList.remove('correct')
+    }
   }
 }
