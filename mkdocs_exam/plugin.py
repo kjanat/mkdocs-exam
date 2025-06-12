@@ -95,6 +95,50 @@ class MkDocsExamPlugin(BasePlugin):
             old_exam = EXAM_START_TAG + match + EXAM_END_TAG
             markdown = markdown.replace(old_exam, exam_html)
             exam_id += 1
+
+        # Parse drag-and-drop exams
+        DRAG_START_TAG = "<drag>"
+        DRAG_END_TAG = "</drag>"
+        DRAG_REGEX = f"{re.escape(DRAG_START_TAG)}(.*?){re.escape(DRAG_END_TAG)}"
+        drag_matches = re.findall(DRAG_REGEX, markdown, re.DOTALL)
+        drag_id = 0
+        for match in drag_matches:
+            drag_lines = match.splitlines()
+            while drag_lines and drag_lines[0] == "":
+                drag_lines = drag_lines[1:]
+            while drag_lines and drag_lines[-1] == "":
+                drag_lines = drag_lines[:-1]
+
+            question = drag_lines[0].split("question: ")[1]
+            pairs = drag_lines[1 : drag_lines.index("content:")]
+            parsed_pairs = []
+            for p in pairs:
+                if not p.startswith("pair: "):
+                    continue
+                pair = p.split("pair: ", 1)[1]
+                left, right = pair.split(" -> ", 1)
+                parsed_pairs.append((left, right))
+
+            content = drag_lines[drag_lines.index("content:") + 1 :]
+
+            drags_html = []
+            drops_html = []
+            for i, (left, right) in enumerate(parsed_pairs):
+                drags_html.append(f'<div class="drag-item" draggable="true" data-id="drag-{drag_id}-{i}">{left}</div>')
+                drops_html.append(f'<div class="drop-zone" data-target="drag-{drag_id}-{i}">{right}</div>')
+
+            drag_html = (
+                f'<div class="drag-exam"><h3>{question}</h3>'
+                "<form>"
+                f'<div class="drag-container">{"".join(drags_html)}</div>'
+                f'<div class="drop-container">{"".join(drops_html)}</div>'
+                '<button type="submit" class="exam-button">Submit</button>'
+                f'</form><section class="content hidden">{"\n".join(content)}</section></div>'
+            )
+
+            old_drag = DRAG_START_TAG + match + DRAG_END_TAG
+            markdown = markdown.replace(old_drag, drag_html)
+            drag_id += 1
         return markdown
 
     def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:

@@ -55,6 +55,20 @@ content:
 </exam>
 ```
 
+### Drag and drop
+
+Move each item to the correct target.
+
+```markdown
+<drag>
+question: Match the capitals.
+pair: Berlin -> Germany
+pair: Madrid -> Spain
+content:
+<p>The capitals belong to their countries.</p>
+</drag>
+```
+
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
 
 ## Screenshots

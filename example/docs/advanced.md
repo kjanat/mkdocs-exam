@@ -26,3 +26,14 @@ content:
 
 <p>The <code>br</code> element simply causes a line break in the rendered page.</p>
 </exam>
+
+## Drag and drop
+
+<drag>
+question: Match the capitals.
+pair: Berlin -> Germany
+pair: Madrid -> Spain
+content:
+
+<p>Drag each capital onto the correct country.</p>
+</drag>

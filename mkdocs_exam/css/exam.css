@@ -56,3 +56,32 @@ input[type="radio"].wrong {
 .content {
   margin: 10px;
 }
+
+/* Drag-and-drop exams */
+.drag-container,
+.drop-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.drag-item {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  cursor: grab;
+  background-color: var(--md-default-bg-color);
+}
+.drop-zone {
+  min-width: 4rem;
+  min-height: 2rem;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drop-zone.wrong {
+  border-color: red;
+}
+.drop-zone.correct {
+  border-color: green;
+}

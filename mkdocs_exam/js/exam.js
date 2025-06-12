@@ -45,6 +45,52 @@ document.querySelectorAll('.exam').forEach((exam) => {
   })
 })
 
+// Drag-and-drop exams
+document.querySelectorAll('.drag-exam').forEach((exam) => {
+  const form = exam.querySelector('form')
+  let dragged = null
+  exam.querySelectorAll('.drag-item').forEach((item) => {
+    item.addEventListener('dragstart', () => {
+      dragged = item
+    })
+  })
+  exam.querySelectorAll('.drop-zone').forEach((zone) => {
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault()
+    })
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault()
+      if (dragged) {
+        zone.innerHTML = ''
+        zone.appendChild(dragged)
+        dragged = null
+      }
+    })
+  })
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault()
+    let isCorrect = true
+    exam.querySelectorAll('.drop-zone').forEach((zone) => {
+      zone.classList.remove('wrong')
+      zone.classList.remove('correct')
+      const item = zone.querySelector('.drag-item')
+      if (!item || item.dataset.id !== zone.dataset.target) {
+        isCorrect = false
+        zone.classList.add('wrong')
+      } else {
+        zone.classList.add('correct')
+      }
+    })
+    const section = exam.querySelector('section')
+    if (isCorrect) {
+      section.classList.remove('hidden')
+    } else {
+      section.classList.add('hidden')
+    }
+  })
+})
+
 function resetFieldset (fieldset) {
   const fieldsetChildren = fieldset.children
   for (let i = 0; i < fieldsetChildren.length; i++) {
