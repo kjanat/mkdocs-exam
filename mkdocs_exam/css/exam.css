@@ -1,14 +1,17 @@
 /* Define custom properties for exam colors */
 :root {
-  --exam-correct-color: var(--md-accent-fg-color, #00e676);
-  --exam-wrong-color: var(--md-code-hl-color, #f44336);
-  --exam-border-color: var(--md-default-fg-color--light, #ccc);
+  --exam-correct-color: #4caf50; /* Green fallback */
+  --exam-wrong-color: var(--md-code-hl-color, #f44336); /* Red fallback */
+  --exam-border-color: var(--md-default-fg-color--lighter, #ccc);
 }
 
 .exam {
   border: 1px solid var(--exam-border-color);
   padding: 1rem;
   margin: 1rem 0;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Set margin-top of first exam child */
@@ -31,6 +34,7 @@ form button {
   font-size: 0.8rem;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  margin-top: 1.5rem;
 }
 
 form button:hover {
@@ -38,7 +42,7 @@ form button:hover {
 }
 
 form button:focus {
-  outline: 2px solid var(--md-accent-fg-color);
+  outline: 2px solid var(--md-default-fg-color--light);
   outline-offset: 2px;
 }
 
@@ -54,10 +58,32 @@ fieldset {
   border: none;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-fieldset input {
+fieldset div {
+  margin: 0.25rem 0;
+}
+
+fieldset input[type="radio"],
+fieldset input[type="checkbox"] {
   margin: 0 10px;
+}
+
+fieldset input[type="text"] {
+  margin: 0.25rem 0;
+  padding: 0.5rem;
+  border: 1px solid var(--exam-border-color);
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--md-default-bg-color, #fff);
+  color: var(--md-default-fg-color, #000);
 }
 
 fieldset input:focus {
@@ -85,6 +111,20 @@ input[type="radio"].wrong {
   accent-color: var(--exam-wrong-color);
 }
 
+.exam input[type="text"] {
+  padding: 0.5rem;
+  border: 1px solid var(--exam-border-color);
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--md-default-bg-color, #fff);
+  color: var(--md-default-fg-color, #000);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
 .exam input[type="text"].correct {
   border: 2px solid var(--exam-correct-color);
 }
@@ -94,8 +134,27 @@ input[type="radio"].wrong {
 }
 
 .exam input[type="text"]:focus {
-  outline: 2px solid var(--md-accent-fg-color);
+  outline: 2px solid var(--md-default-fg-color--light);
   outline-offset: 2px;
+}
+
+.exam textarea {
+  padding: 0.5rem;
+  border: 1px solid var(--exam-border-color);
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 100%;
+  min-height: 80px;
+  box-sizing: border-box;
+  background-color: var(--md-default-bg-color, #fff);
+  color: var(--md-default-fg-color, #000);
+  font-family: inherit;
+  line-height: 1.4;
+  resize: vertical;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .exam textarea.correct {
@@ -107,7 +166,7 @@ input[type="radio"].wrong {
 }
 
 .exam textarea:focus {
-  outline: 2px solid var(--md-accent-fg-color);
+  outline: 2px solid var(--md-default-fg-color--light);
   outline-offset: 2px;
 }
 
@@ -120,7 +179,7 @@ input[type="radio"].wrong {
 }
 
 .exam select:focus {
-  outline: 2px solid var(--md-accent-fg-color);
+  outline: 2px solid var(--md-default-fg-color--light);
   outline-offset: 2px;
 }
 
@@ -129,14 +188,16 @@ input[type="radio"].wrong {
 .exam textarea,
 .exam select {
   border-radius: 0.25rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .exam input[type="text"]:focus,
 .exam textarea:focus,
 .exam select:focus {
-  box-shadow: 0 0 0 3px var(--md-accent-fg-color, #2196f3);
-  border-color: var(--md-accent-fg-color, #2196f3);
+  box-shadow: 0 0 0 3px var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.1));
+  border-color: var(--md-default-fg-color--light, #999);
 }
 
 /* Improved radio and checkbox styling */
@@ -148,7 +209,7 @@ fieldset input[type="checkbox"] {
 
 fieldset input[type="radio"]:focus,
 fieldset input[type="checkbox"]:focus {
-  outline: 2px solid var(--md-accent-fg-color, #2196f3);
+  outline: 2px solid var(--md-default-fg-color--light);
   outline-offset: 2px;
 }
 
@@ -158,7 +219,7 @@ fieldset input[type="checkbox"]:focus {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
+
   fieldset label:hover {
     background-color: var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.05));
     border-radius: 0.25rem;
@@ -180,13 +241,13 @@ fieldset input[type="checkbox"]:focus {
     border-width: 2px;
     border-color: currentColor;
   }
-  
+
   .exam input[type="text"],
   .exam textarea,
   .exam select {
     border-width: 2px;
   }
-  
+
   form button {
     border: 2px solid currentColor;
   }
@@ -199,22 +260,22 @@ fieldset input[type="checkbox"]:focus {
     margin: 0.75rem 0;
     border-radius: 0.5rem;
   }
-  
+
   fieldset {
     gap: 0.75rem;
     padding: 0;
   }
-  
+
   fieldset input {
     margin: 0.25rem 0.5rem;
   }
-  
+
   fieldset label {
     margin: 0.25rem 0.5rem;
     line-height: 1.4;
     word-wrap: break-word;
   }
-  
+
   form button {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -222,7 +283,7 @@ fieldset input[type="checkbox"]:focus {
     margin: 0.5rem 0;
     border-radius: 0.5rem;
   }
-  
+
   .exam input[type="text"],
   .exam textarea,
   .exam select {
@@ -232,7 +293,7 @@ fieldset input[type="checkbox"]:focus {
     font-size: 1rem;
     border-radius: 0.25rem;
   }
-  
+
   .exam textarea {
     min-height: 100px;
     resize: vertical;
@@ -244,16 +305,16 @@ fieldset input[type="checkbox"]:focus {
     padding: 0.5rem;
     margin: 0.5rem 0;
   }
-  
+
   fieldset input {
     margin: 0.125rem 0.25rem;
   }
-  
+
   fieldset label {
     margin: 0.125rem 0.25rem;
     font-size: 0.95rem;
   }
-  
+
   form button {
     padding: 0.875rem 1rem;
     font-size: 1.1rem;
@@ -266,13 +327,13 @@ fieldset input[type="checkbox"]:focus {
     max-width: 90%;
     margin: 1rem auto;
   }
-  
+
   fieldset {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 0.5rem;
   }
-  
+
   fieldset input,
   fieldset label {
     margin: 0.25rem 0.5rem;
@@ -284,7 +345,7 @@ fieldset input[type="checkbox"]:focus {
   .exam {
     border-width: 0.5px;
   }
-  
+
   .exam input[type="text"].correct,
   .exam input[type="text"].wrong,
   .exam textarea.correct,
@@ -301,19 +362,19 @@ fieldset input[type="checkbox"]:focus {
     min-height: 44px;
     padding: 0.75rem 1rem;
   }
-  
+
   fieldset input[type="radio"],
   fieldset input[type="checkbox"] {
     min-width: 18px;
     min-height: 18px;
     margin: 0.5rem;
   }
-  
+
   fieldset label {
     padding: 0.5rem 0.25rem;
     cursor: pointer;
   }
-  
+
   .exam input[type="text"],
   .exam textarea,
   .exam select {
@@ -330,11 +391,11 @@ fieldset input[type="checkbox"]:focus {
     margin: 0.5rem 0;
     padding: 0.5rem;
   }
-  
+
   form button {
     display: none;
   }
-  
+
   .hidden {
     display: block !important;
   }
