@@ -3,7 +3,6 @@ repos:
     rev: "v4.0.0-alpha.8"
     hooks:
       - id: prettier
-        language_version: system
         files: \.(json|md|html|css|ya?ml)$
         additional_dependencies:
           - prettier@latest
@@ -12,7 +11,6 @@ repos:
     rev: v17.1.2
     hooks:
       - id: standard
-        language_version: system
         types: [javascript]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.13

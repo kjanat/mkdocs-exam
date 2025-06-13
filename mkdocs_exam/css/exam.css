@@ -3,10 +3,12 @@
   padding: 1rem;
   margin: 1rem 0;
 }
+
 /* Set margin-top of first exam child */
 .exam > *:first-child {
   margin-top: 0;
 }
+
 .hidden {
   display: none;
 }
@@ -25,6 +27,7 @@ form button {
 .wrong label {
   color: red;
 }
+
 .correct label {
   color: green;
 }
@@ -34,9 +37,11 @@ fieldset {
   display: flex;
   flex-direction: column;
 }
+
 fieldset input {
   margin: 0 10px;
 }
+
 fieldset label {
   margin: 0 10px;
 }
@@ -44,33 +49,43 @@ fieldset label {
 label.correct {
   color: green;
 }
+
 label.wrong {
   color: red;
 }
+
 input[type="radio"].correct {
   accent-color: green;
 }
+
 input[type="radio"].wrong {
   accent-color: red;
 }
+
 .exam input[type="text"].correct {
   border: 2px solid green;
 }
+
 .exam input[type="text"].wrong {
   border: 2px solid red;
 }
+
 .exam textarea.correct {
   border: 2px solid green;
 }
+
 .exam textarea.wrong {
   border: 2px solid red;
 }
+
 .exam select.correct {
   border: 2px solid green;
 }
+
 .exam select.wrong {
   border: 2px solid red;
 }
+
 .content {
   margin: 10px;
 }
