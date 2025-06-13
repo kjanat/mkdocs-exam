@@ -129,7 +129,9 @@ input[type="radio"].wrong {
 .exam textarea,
 .exam select {
   border-radius: 0.25rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .exam input[type="text"]:focus,
@@ -158,7 +160,7 @@ fieldset input[type="checkbox"]:focus {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
+
   fieldset label:hover {
     background-color: var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.05));
     border-radius: 0.25rem;
@@ -180,13 +182,13 @@ fieldset input[type="checkbox"]:focus {
     border-width: 2px;
     border-color: currentColor;
   }
-  
+
   .exam input[type="text"],
   .exam textarea,
   .exam select {
     border-width: 2px;
   }
-  
+
   form button {
     border: 2px solid currentColor;
   }
@@ -199,22 +201,22 @@ fieldset input[type="checkbox"]:focus {
     margin: 0.75rem 0;
     border-radius: 0.5rem;
   }
-  
+
   fieldset {
     gap: 0.75rem;
     padding: 0;
   }
-  
+
   fieldset input {
     margin: 0.25rem 0.5rem;
   }
-  
+
   fieldset label {
     margin: 0.25rem 0.5rem;
     line-height: 1.4;
     word-wrap: break-word;
   }
-  
+
   form button {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -222,7 +224,7 @@ fieldset input[type="checkbox"]:focus {
     margin: 0.5rem 0;
     border-radius: 0.5rem;
   }
-  
+
   .exam input[type="text"],
   .exam textarea,
   .exam select {
@@ -232,7 +234,7 @@ fieldset input[type="checkbox"]:focus {
     font-size: 1rem;
     border-radius: 0.25rem;
   }
-  
+
   .exam textarea {
     min-height: 100px;
     resize: vertical;
@@ -244,16 +246,16 @@ fieldset input[type="checkbox"]:focus {
     padding: 0.5rem;
     margin: 0.5rem 0;
   }
-  
+
   fieldset input {
     margin: 0.125rem 0.25rem;
   }
-  
+
   fieldset label {
     margin: 0.125rem 0.25rem;
     font-size: 0.95rem;
   }
-  
+
   form button {
     padding: 0.875rem 1rem;
     font-size: 1.1rem;
@@ -266,13 +268,13 @@ fieldset input[type="checkbox"]:focus {
     max-width: 90%;
     margin: 1rem auto;
   }
-  
+
   fieldset {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 0.5rem;
   }
-  
+
   fieldset input,
   fieldset label {
     margin: 0.25rem 0.5rem;
@@ -284,7 +286,7 @@ fieldset input[type="checkbox"]:focus {
   .exam {
     border-width: 0.5px;
   }
-  
+
   .exam input[type="text"].correct,
   .exam input[type="text"].wrong,
   .exam textarea.correct,
@@ -301,19 +303,19 @@ fieldset input[type="checkbox"]:focus {
     min-height: 44px;
     padding: 0.75rem 1rem;
   }
-  
+
   fieldset input[type="radio"],
   fieldset input[type="checkbox"] {
     min-width: 18px;
     min-height: 18px;
     margin: 0.5rem;
   }
-  
+
   fieldset label {
     padding: 0.5rem 0.25rem;
     cursor: pointer;
   }
-  
+
   .exam input[type="text"],
   .exam textarea,
   .exam select {
@@ -330,11 +332,11 @@ fieldset input[type="checkbox"]:focus {
     margin: 0.5rem 0;
     padding: 0.5rem;
   }
-  
+
   form button {
     display: none;
   }
-  
+
   .hidden {
     display: block !important;
   }
