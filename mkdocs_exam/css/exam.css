@@ -1,3 +1,8 @@
+:root {
+  --exam-correct-color: var(--md-success-fg-color, #4caf50);
+  --exam-wrong-color: var(--md-error-fg-color, #f44336);
+}
+
 .exam {
   border: 1px solid black;
   padding: 1rem;
@@ -20,13 +25,14 @@ form button {
   text-decoration: none;
   display: inline-block;
   font-size: 0.8rem;
+  cursor: pointer;
 }
 
 .wrong label {
-  color: red;
+  color: var(--exam-wrong-color);
 }
 .correct label {
-  color: green;
+  color: var(--exam-correct-color);
 }
 
 fieldset {
@@ -42,35 +48,42 @@ fieldset label {
 }
 
 label.correct {
-  color: green;
+  color: var(--exam-correct-color);
 }
 label.wrong {
-  color: red;
+  color: var(--exam-wrong-color);
 }
 input[type="radio"].correct {
-  accent-color: green;
+  accent-color: var(--exam-correct-color);
 }
 input[type="radio"].wrong {
-  accent-color: red;
+  accent-color: var(--exam-wrong-color);
 }
 .exam input[type="text"].correct {
-  border: 2px solid green;
+  border: 2px solid var(--exam-correct-color);
 }
 .exam input[type="text"].wrong {
-  border: 2px solid red;
+  border: 2px solid var(--exam-wrong-color);
 }
 .exam textarea.correct {
-  border: 2px solid green;
+  border: 2px solid var(--exam-correct-color);
 }
 .exam textarea.wrong {
-  border: 2px solid red;
+  border: 2px solid var(--exam-wrong-color);
 }
 .exam select.correct {
-  border: 2px solid green;
+  border: 2px solid var(--exam-correct-color);
 }
 .exam select.wrong {
-  border: 2px solid red;
+  border: 2px solid var(--exam-wrong-color);
 }
-.content {
-  margin: 10px;
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus,
+input[type="radio"]:focus,
+input[type="checkbox"]:focus,
+button:focus {
+  outline: 2px solid var(--md-primary-fg-color);
+  outline-offset: 2px;
 }

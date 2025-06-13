@@ -153,6 +153,19 @@ exam: disable
 ---
 ```
 
+## Styling
+
+The bundled stylesheet provides two custom properties to control answer colors:
+
+```css
+:root {
+  --exam-correct-color: #4caf50;
+  --exam-wrong-color: #f44336;
+}
+```
+
+Override them in your theme to harmonize with your palette.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
