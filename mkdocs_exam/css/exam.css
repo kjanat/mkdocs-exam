@@ -1,7 +1,7 @@
 /* Define custom properties for exam colors */
 :root {
   --exam-correct-color: #4caf50; /* Green fallback */
-  --exam-wrong-color: var(--md-code-hl-color, #f44336); /* Red fallback */
+  --exam-wrong-color: #f44336; /* Red fallback */
   --exam-border-color: var(--md-default-fg-color--lighter, #ccc);
 }
 
