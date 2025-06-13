@@ -188,3 +188,4 @@ artifact.tar
 .mypy_cache/
 .specstory/
 .vscode/
+.github/copilot-instructions.md
