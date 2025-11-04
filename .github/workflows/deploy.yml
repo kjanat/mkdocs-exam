@@ -54,7 +54,13 @@ jobs:
         run: echo "Cache was restored"
 
       - name: Install python dependencies
-        run: uv pip install -e ..
+        run: uv pip install -e ..[dev]
+
+      - name: Run tests with coverage
+        working-directory: .
+        run: |
+          uv run pytest tests/ -v --cov=mkdocs_exam --cov-report=term-missing --cov-report=html
+        continue-on-error: false
 
       - name: Setup build environment
         run: |

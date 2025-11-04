@@ -1,142 +1,149 @@
+"""MkDocs plugin for creating interactive exam blocks."""
+
+import logging
+from importlib import resources as impresources
+from typing import Any
+
+from mkdocs.config import config_options
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin
 from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
-from importlib import resources as impresources
+
 from . import css, js
-import re
+from .constants import CSSClasses, DefaultConfig, ExamTags
+from .html_builder import build_exam_html
+from .parser import ExamParseError, find_exam_blocks, parse_exam_block, replace_exam_blocks
+
+logger = logging.getLogger("mkdocs.plugins.mkdocs-exam")
 
 # Read bundled CSS and JS and wrap them for inline injection
 inp_file = impresources.files(css) / "exam.css"
 with inp_file.open("r", encoding="utf-8") as f:
-    style = f.read()
-style = f'<style type="text/css">{style}</style>'
+    style_content = f.read()
+style_tag = f'<style type="text/css">{style_content}</style>'
 
 js_file = impresources.files(js) / "exam.js"
 with js_file.open("r", encoding="utf-8") as f:
     script_content = f.read()
 script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
 
-# <exam>
-# question: Are you ready?
-# answer-correct: Yes!
-# answer: No!
-# answer: Maybe!
-# content:
-# <h2>Provide some additional content</h2>
-# </exam>
-
 
 class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
     """Convert custom ``<exam>`` blocks into interactive HTML quizzes."""
 
+    config_scheme = (
+        ("submit_text", config_options.Type(str, default=DefaultConfig.SUBMIT_TEXT)),
+        ("reset_text", config_options.Type(str, default=DefaultConfig.RESET_TEXT)),
+        ("show_score", config_options.Type(bool, default=DefaultConfig.SHOW_SCORE)),
+        ("allow_retry", config_options.Type(bool, default=DefaultConfig.ALLOW_RETRY)),
+        ("essay_rows", config_options.Type(int, default=DefaultConfig.ESSAY_ROWS)),
+    )
+
     def __init__(self) -> None:
         """Initialize default state for the plugin."""
-        self.enabled = True
-        self.dirty = False
+        super().__init__()
+        self.enabled: bool = True
+        self.dirty: bool = False
 
     def on_startup(self, *, command: str, dirty: bool) -> None:
         """Configure the plugin on startup."""
         self.dirty = dirty
+        logger.info("MkDocs Exam Plugin initialized")
 
-    def on_page_markdown(self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None) -> str:  # type: ignore[override]
-        """Parse exam blocks in markdown and generate the HTML quiz."""
+    def on_page_markdown(
+        self,
+        markdown: str,
+        page: Page,
+        config: MkDocsConfig,
+        files: Files | None = None,
+    ) -> str:
+        """
+        Parse exam blocks in markdown and generate the HTML quiz.
 
+        Args:
+            markdown: Page markdown content.
+            page: Current page object.
+            config: MkDocs configuration.
+            files: All files in the site.
+
+        Returns:
+            Markdown with exam blocks replaced by HTML.
+        """
+        # Check if exams are disabled for this page
         if "exam" in page.meta and page.meta["exam"] == "disable":
+            logger.debug(f"Exams disabled for page: {page.file.src_path}")
             return markdown
 
-        # Look for ``<exam>`` ... ``</exam>`` blocks using a non-greedy regex
-        EXAM_START_TAG = "<exam>"
-        EXAM_END_TAG = "</exam>"
-        REGEX = f"{re.escape(EXAM_START_TAG)}(.*?){re.escape(EXAM_END_TAG)}"
-        matches = re.findall(REGEX, markdown, re.DOTALL)
+        # Find all exam blocks
+        exam_blocks = find_exam_blocks(markdown)
+        if not exam_blocks:
+            return markdown
+
+        logger.info(f"Found {len(exam_blocks)} exam block(s) in {page.file.src_path}")
+
+        # Parse and convert each exam block
+        replacements: dict[str, str] = {}
         exam_id = 0
-        for match in matches:
-            exam_lines = [ln.strip() for ln in match.splitlines() if ln.strip()]
-            content_idx = exam_lines.index("content:")
-            header_lines = exam_lines[:content_idx]
-            content_lines = exam_lines[content_idx + 1 :]
 
-            q_type = "choice"
-            question = ""
-            answers: list[str] = []
-            correct_idx: list[int] = []
-            for line in header_lines:
-                if line.startswith("type:"):
-                    q_type = line.split("type:", 1)[1].strip().lower()
-                elif line.startswith("question:"):
-                    question = line.split("question:", 1)[1].strip()
-                elif line.startswith("answer-correct:"):
-                    answers.append(line.split("answer-correct:", 1)[1].strip())
-                    correct_idx.append(len(answers) - 1)
-                elif line.startswith("answer:"):
-                    answers.append(line.split("answer:", 1)[1].strip())
+        for block_content in exam_blocks:
+            try:
+                # Parse the exam block
+                exam_data = parse_exam_block(block_content, exam_id)
 
-            html_question = question
-            full_answers: list[str] = []
+                # Build HTML from parsed data
+                exam_html = build_exam_html(exam_data, self.config)
 
-            if q_type == "choice" or q_type == "truefalse":
-                if q_type == "truefalse":
-                    if not answers:
-                        answers = ["True", "False"]
-                        if not correct_idx:
-                            correct_idx = [0]
-                    elif len(answers) == 1:
-                        if answers[0].strip().lower() in {"true", "yes"}:
-                            answers.append("False")
-                        else:
-                            answers.append("True")
-                as_checkboxes = len(correct_idx) > 1
-                for i, ans in enumerate(answers):
-                    is_correct = i in correct_idx
-                    input_id = f"exam-{exam_id}-{i}"
-                    input_type = "checkbox" if as_checkboxes else "radio"
-                    correct = "correct" if is_correct else ""
-                    full_answers.append(
-                        f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}>'
-                        f'<label for="{input_id}">{ans}</label></div>'
-                    )
-            elif q_type in {"short-answer", "fill", "essay"}:
-                correct_vals = [answers[i] for i in correct_idx] or answers
-                correct_attr = "|".join(correct_vals)
-                if q_type == "essay":  # use textarea for long-form answers
-                    full_answers.append(
-                        f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
-                    )
-                elif q_type == "fill":
-                    html_question = question.replace(
-                        "___", f'<input type="text" name="answer" correct="{correct_attr}">'
-                    )
-                else:
-                    full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
-            elif q_type == "matching":
-                pairs = [ans.split("|") for ans in answers]
-                left = [p[0].strip() for p in pairs]
-                right = [p[1].strip() for p in pairs]
-                options = "".join(f"<option>{r}</option>" for r in right)
-                for i, left_item in enumerate(left):
-                    full_answers.append(
-                        f"<div><label>{left_item} "
-                        f'<select name="answer" correct="{right[i]}">{options}</select>'
-                        "</label></div>"
-                    )
+                # Store replacement mapping
+                original_block = ExamTags.START + block_content + ExamTags.END
+                replacements[original_block] = exam_html
 
-            html_answers = "".join(full_answers)
-            exam_html = (
-                f'<div class="exam" data-type="{q_type}"><h3>{html_question}</h3><form><fieldset>'
-                f"{html_answers}</fieldset>"
-                '<button type="submit" class="exam-button">Submit</button>'
-                f'</form><section class="content hidden">{"\n".join(content_lines)}</section></div>'
-            )
-            # Replace the original block with the generated HTML
-            old_exam = EXAM_START_TAG + match + EXAM_END_TAG
-            markdown = markdown.replace(old_exam, exam_html)
-            exam_id += 1
+                exam_id += 1
+
+            except ExamParseError as e:
+                # Log error and leave block unchanged
+                logger.error(f"Failed to parse exam block in {page.file.src_path}: {e}")
+                # Optionally, insert error message in place of exam
+                error_html = (
+                    f'<div class="admonition error">'
+                    f'<p class="admonition-title">Exam Parse Error</p>'
+                    f'<p>{e}</p>'
+                    f'</div>'
+                )
+                original_block = ExamTags.START + block_content + ExamTags.END
+                replacements[original_block] = error_html
+
+        # Replace all exam blocks with HTML
+        markdown = replace_exam_blocks(markdown, replacements)
         return markdown
 
-    def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:
-        """Append inline resources to the rendered HTML page."""
+    def on_page_content(
+        self,
+        html: str,
+        *,
+        page: Page,
+        config: MkDocsConfig,
+        files: Files,
+    ) -> str | None:
+        """
+        Append inline resources to the rendered HTML page.
 
-        # Inject CSS and JavaScript so the quiz works without extra files
-        html = html + style + script_tag
+        Only inject CSS and JavaScript if the page contains exams.
+
+        Args:
+            html: Rendered HTML content.
+            page: Current page object.
+            config: MkDocs configuration.
+            files: All files in the site.
+
+        Returns:
+            HTML with CSS/JS injected if exams are present.
+        """
+        # Only inject if page has exams (performance optimization)
+        if f'class="{CSSClasses.EXAM}"' not in html:
+            return html
+
+        # Inject CSS and JavaScript for quiz functionality
+        html = html + style_tag + script_tag
+        logger.debug(f"Injected exam resources into {page.file.src_path}")
         return html
