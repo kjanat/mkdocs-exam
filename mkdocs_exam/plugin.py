@@ -1,24 +1,32 @@
 from mkdocs.config.defaults import MkDocsConfig
-from mkdocs.plugins import BasePlugin
+from mkdocs.plugins import BasePlugin, get_plugin_logger
 from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
+from mkdocs.exceptions import PluginError
 from importlib import resources as impresources
+from typing import Any
 from . import css, js
 import re
 import yaml
 import os
-import logging
 
 # Read bundled CSS and JS and wrap them for inline injection
-inp_file = impresources.files(css) / "exam.css"
-with inp_file.open("r", encoding="utf-8") as f:
-    style = f.read()
-style = f'<style type="text/css">{style}</style>'
+try:
+    inp_file = impresources.files(css) / "exam.css"
+    with inp_file.open("r", encoding="utf-8") as f:
+        style = f.read()
+    style = f'<style type="text/css">{style}</style>'
 
-js_file = impresources.files(js) / "exam.js"
-with js_file.open("r", encoding="utf-8") as f:
-    script_content = f.read()
-script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
+    js_file = impresources.files(js) / "exam.js"
+    with js_file.open("r", encoding="utf-8") as f:
+        script_content = f.read()
+    script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
+except Exception as e:
+    # Use a fallback if resources can't be loaded
+    style = ""
+    script_tag = ""
+    import warnings
+    warnings.warn(f"Failed to load mkdocs-exam resources: {e}")
 
 # ```yaml
 # question: "Are you ready?"
@@ -31,10 +39,10 @@ script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
 #   ## Provide some additional content
 # ```
 
-logger = logging.getLogger("mkdocs.plugins.mkdocs-exam")
+logger = get_plugin_logger(__name__)
 
 
-def interpolate_env_vars(value: any) -> any:
+def interpolate_env_vars(value: Any) -> Any:
     """
     Recursively interpolate environment variables in strings.
     Supports formats: ${VAR}, ${VAR:-default}
@@ -174,7 +182,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         )
         return exam_html
 
-    def on_page_markdown(self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None) -> str:  # type: ignore[override]
+    def on_page_markdown(self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any) -> str:
         """
         Parse exam blocks in markdown and generate HTML quizzes.
         Supports:
@@ -228,15 +236,28 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                     markdown = re.sub(old_exam_pattern, combined_html, markdown, count=1)
 
             except yaml.YAMLError as e:
-                logger.error(f"[{page_path}] YAML parsing error: {e}")
-                # Keep the original block if YAML is invalid
-                continue
+                error_msg = f"YAML parsing error in {page_path}: {str(e)}"
+                logger.error(error_msg)
+                raise PluginError(error_msg) from e
+            except Exception as e:
+                error_msg = f"Unexpected error processing exam in {page_path}: {str(e)}"
+                logger.error(error_msg)
+                raise PluginError(error_msg) from e
 
         return markdown
 
-    def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:
+    def on_page_content(self, html: str, page: Page, config: MkDocsConfig, files: Files, **kwargs: Any) -> str:
         """Append inline resources to the rendered HTML page."""
-
         # Inject CSS and JavaScript so the quiz works without extra files
         html = html + style + script_tag
         return html
+
+    def on_build_error(self, error: Exception, **kwargs: Any) -> None:
+        """
+        Handle build errors gracefully.
+        This event is called when an error occurs during the build process.
+        """
+        # Log the error for debugging
+        logger.debug(f"Build error encountered: {error}")
+        # Allow error to propagate - we don't suppress it
+        return None
