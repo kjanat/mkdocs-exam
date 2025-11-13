@@ -3,6 +3,7 @@ from mkdocs.plugins import BasePlugin, get_plugin_logger
 from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
 from mkdocs.exceptions import PluginError
+from mkdocs.config import config_options
 from importlib import resources as impresources
 from typing import Any
 from . import css, js
@@ -53,7 +54,9 @@ ALLOWED_EXAM_TYPES = {
     "matching",
     "numeric",
     "code-completion",
-    "ordering",  # New types we'll implement
+    "ordering",
+    "categorization",  # Drag items into categories
+    "hotspot",  # Click regions on images
 }
 
 
@@ -84,6 +87,15 @@ def interpolate_env_vars(value: Any) -> Any:
 
 class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
     """Convert custom ``<exam>`` blocks into interactive HTML quizzes with full YAML support."""
+
+    config_scheme = (
+        ("enabled", config_options.Type(bool, default=True)),
+        ("default_type", config_options.Type(str, default="choice")),
+        ("default_points", config_options.Type(int, default=1)),
+        ("show_answers", config_options.Type(bool, default=False)),
+        ("randomize_answers", config_options.Type(bool, default=False)),
+        ("theme", config_options.Type(str, default="default")),
+    )
 
     def __init__(self) -> None:
         """Initialize default state for the plugin."""
@@ -126,6 +138,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         show_explanation = exam_data.get("show-explanation", "on-correct")  # always, on-correct, on-wrong, never
         points = exam_data.get("points", 1)
         time_limit = exam_data.get("time-limit")  # seconds
+        partial_credit = exam_data.get("partial-credit", False)  # Enable weighted scoring
 
         content_lines = exam_data.get("content", "").strip().splitlines()
 
@@ -159,14 +172,17 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         html_question = escape_html(question)
         full_answers: list[str] = []
 
-        # Process answers with feedback support
+        # Process answers with feedback and weight support
         answer_feedbacks: list[str] = []
+        answer_weights: list[float] = []
         for ans in answer_correct + answer_list:
             if isinstance(ans, dict):
-                # Answer with feedback: {value: "...", feedback: "..."}
+                # Answer with feedback/weight: {value: "...", feedback: "...", weight: 0.5}
                 answer_feedbacks.append(ans.get("feedback", ""))
+                answer_weights.append(ans.get("weight", 1.0))
             else:
                 answer_feedbacks.append("")
+                answer_weights.append(1.0)
 
         if q_type == "choice" or q_type == "truefalse":
             if q_type == "truefalse":
@@ -189,8 +205,11 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                 ans_escaped = escape_html(ans)
                 feedback = escape_html(answer_feedbacks[i]) if i < len(answer_feedbacks) else ""
                 feedback_attr = f' data-feedback="{feedback}"' if feedback else ""
+                # Add weight for partial credit support
+                weight = answer_weights[i] if i < len(answer_weights) else 1.0
+                weight_attr = f' data-weight="{weight}"' if partial_credit else ""
                 full_answers.append(
-                    f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}{feedback_attr}>'
+                    f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}{feedback_attr}{weight_attr}>'
                     f'<label for="{input_id}">{ans_escaped}</label></div>'
                 )
         elif q_type in {"short-answer", "fill", "essay"}:
@@ -242,7 +261,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                 code_html += part
             full_answers.append(f'<div><pre><code class="language-{language}">{code_html}</code></pre></div>')
         elif q_type == "ordering":
-            # New ordering type
+            # Ordering/sequencing type
             items = exam_data.get("items", [])
             correct_order = exam_data.get("correct-order", list(range(len(items))))
             items_html = ""
@@ -251,6 +270,49 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             full_answers.append(
                 f'<div class="ordering-container" data-correct-order="{",".join(map(str, correct_order))}">{items_html}</div>'
             )
+        elif q_type == "categorization":
+            # Categorization type - drag items into categories
+            items = exam_data.get("items", [])
+            categories = exam_data.get("categories", [])
+            correct_mapping = exam_data.get("correct-mapping", {})  # {item_index: category_index}
+
+            # Build categories HTML
+            categories_html = '<div class="categorization-container">'
+            categories_html += '<div class="categorization-items">'
+            for i, item in enumerate(items):
+                correct_cat = correct_mapping.get(str(i), correct_mapping.get(i, 0))
+                item_escaped = escape_html(str(item))
+                categories_html += f'<div class="categorization-item" data-item-index="{i}" data-correct-category="{correct_cat}" draggable="true">{item_escaped}</div>'
+            categories_html += '</div>'
+            categories_html += '<div class="categorization-categories">'
+            for i, category in enumerate(categories):
+                cat_escaped = escape_html(str(category))
+                categories_html += f'<div class="categorization-category" data-category-index="{i}"><h4>{cat_escaped}</h4><div class="category-drop-zone"></div></div>'
+            categories_html += '</div>'
+            categories_html += '</div>'
+            full_answers.append(categories_html)
+        elif q_type == "hotspot":
+            # Hotspot/image map type - click regions on an image
+            image_src = escape_html(exam_data.get("image", ""))
+            regions = exam_data.get("regions", [])
+
+            # Build hotspot HTML
+            hotspot_html = '<div class="hotspot-container">'
+            hotspot_html += f'<div class="hotspot-image-wrapper"><img src="{image_src}" class="hotspot-image" alt="Hotspot question">'
+            # Add clickable regions as overlays
+            for i, region in enumerate(regions):
+                x = region.get("x", 0)
+                y = region.get("y", 0)
+                width = region.get("width", 50)
+                height = region.get("height", 50)
+                is_correct = region.get("correct", False)
+                correct_attr = "correct" if is_correct else ""
+                hotspot_html += (
+                    f'<div class="hotspot-region" data-region-index="{i}" {correct_attr} '
+                    f'style="left:{x}%;top:{y}%;width:{width}%;height:{height}%;"></div>'
+                )
+            hotspot_html += '</div></div>'
+            full_answers.append(hotspot_html)
 
         html_answers = "".join(full_answers)
         content_html = "\n".join(content_lines)

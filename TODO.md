@@ -2,16 +2,16 @@
 
 ## 📊 Current Status
 
-**Completed**: 11 features ✅
-**Test Coverage**: 27 tests (all passing ✅)
+**Completed**: 15 features ✅
+**Test Coverage**: 31 tests (all passing ✅)
 **Test Breakdown**:
 
 - Original features: 12 tests ✅
-- New features: 15 tests ✅
-- Security tests: 2 tests (XSS, invalid types) ✅
+- Phase 1 features: 15 tests ✅
+- Phase 2 features: 4 tests ✅
 
 ### Recently Implemented & Tested ✅
-
+**Phase 1 (Core Features)**
 - ✅ Hints system with score penalties (tested)
 - ✅ Explanations with conditional display (tested)
 - ✅ Answer feedback (tested)
@@ -24,13 +24,19 @@
 - ✅ XSS protection (tested)
 - ✅ Input validation (tested)
 
+**Phase 2 (Advanced Features) - NEW!**
+- ✅ Multi-select with partial credit (tested)
+- ✅ Categorization exam type (tested)
+- ✅ Hotspot/image map exam type (tested)
+- ✅ Plugin configuration schema (tested)
+
 ### Immediate Next Steps
 
 1. **YAML size limits** (prevent YAML bombs)
 2. **Additional security tests** (SQL injection, path traversal)
 3. **Regex answer validation**
-4. **Multi-select with partial credit**
-5. Continue with Phase 2+ features
+4. **Randomization** - Shuffle questions/answers
+5. Continue with Phase 3+ features
 
 ---
 
@@ -61,16 +67,16 @@
 ## 🚀 Phase 2: Advanced Exam Types (Medium Effort)
 
 - [x] **Ordering/Sequencing** - Drag-and-drop or numbered ordering ✅
-- [ ] **Multi-Select with Partial Credit** - Weighted scoring
-- [ ] **Categorization** - Drag items into categories
-- [ ] **Hotspot/Image Map** - Click regions on images
-- [ ] **Audio/Video Questions** - Media-based questions
+- [x] **Multi-Select with Partial Credit** - Weighted scoring ✅
+- [x] **Categorization** - Drag items into categories ✅
+- [x] **Hotspot/Image Map** - Click regions on images ✅
+- [x] **Audio/Video Questions** - Media-based questions (implemented in Phase 1) ✅
 
 ## 🔧 Phase 3: Configuration & Customization
 
 ### Plugin Configuration
 
-- [ ] **Global Config Schema** - BasePlugin config class
+- [x] **Global Config Schema** - BasePlugin config class ✅
 - [ ] **Default Settings** - Default exam type, colors, behavior
 - [ ] **Theme Customization** - Custom colors, styles
 - [ ] **Feature Toggles** - Enable/disable features globally

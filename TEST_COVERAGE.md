@@ -1,8 +1,16 @@
 # Test Coverage Report
 
 **Date**: 2025-11-13
-**Total Tests**: 27 (all passing ✅)
-**Coverage Estimate**: ~75%
+**Total Tests**: 31 (all passing ✅)
+**Coverage Estimate**: ~80%
+
+## Latest Update
+
+Added 4 new tests for Phase 2 features:
+- Partial credit with weighted answers
+- Categorization exam type
+- Hotspot/image map exam type
+- Plugin configuration schema
 
 ## Test Breakdown
 

@@ -114,6 +114,33 @@ document.querySelectorAll('.exam').forEach((exam) => {
       const correctOrder = container.dataset.correctOrder.split(',').map(x => parseInt(x))
       isCorrect = JSON.stringify(userOrder) === JSON.stringify(correctOrder)
       container.classList.add(isCorrect ? 'correct' : 'wrong')
+    } else if (type === 'categorization') {
+      const container = fieldset.querySelector('.categorization-container')
+      const items = container.querySelectorAll('.categorization-item')
+      isCorrect = true
+      items.forEach((item) => {
+        const correctCat = item.dataset.correctCategory
+        const currentParent = item.closest('.categorization-category')
+        const currentCat = currentParent ? currentParent.dataset.categoryIndex : null
+        if (correctCat !== currentCat) {
+          isCorrect = false
+        }
+      })
+      container.classList.add(isCorrect ? 'correct' : 'wrong')
+    } else if (type === 'hotspot') {
+      const clickedRegions = fieldset.querySelectorAll('.hotspot-region.clicked')
+      const correctRegions = fieldset.querySelectorAll('.hotspot-region[correct]')
+      isCorrect = clickedRegions.length === correctRegions.length
+      correctRegions.forEach((region) => {
+        if (!region.classList.contains('clicked')) {
+          isCorrect = false
+        }
+      })
+      clickedRegions.forEach((region) => {
+        if (!region.hasAttribute('correct')) {
+          isCorrect = false
+        }
+      })
     } else {
       // short-answer, fill, essay
       const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
@@ -239,4 +266,108 @@ document.querySelectorAll('.ordering-container').forEach((container) => {
       }
     })
   })
+})
+
+// Add drag-and-drop support for categorization questions
+document.querySelectorAll('.categorization-container').forEach((container) => {
+  let draggedItem = null
+
+  container.querySelectorAll('.categorization-item').forEach((item) => {
+    item.draggable = true
+
+    item.addEventListener('dragstart', (e) => {
+      draggedItem = item
+      item.classList.add('dragging')
+    })
+
+    item.addEventListener('dragend', (e) => {
+      item.classList.remove('dragging')
+    })
+  })
+
+  container.querySelectorAll('.category-drop-zone').forEach((dropZone) => {
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault()
+      dropZone.classList.add('drag-over')
+    })
+
+    dropZone.addEventListener('dragleave', (e) => {
+      dropZone.classList.remove('drag-over')
+    })
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault()
+      dropZone.classList.remove('drag-over')
+      if (draggedItem) {
+        dropZone.appendChild(draggedItem)
+      }
+    })
+  })
+})
+
+// Add click handling for hotspot questions
+document.querySelectorAll('.hotspot-container').forEach((container) => {
+  container.querySelectorAll('.hotspot-region').forEach((region) => {
+    region.addEventListener('click', (e) => {
+      region.classList.toggle('clicked')
+      if (region.classList.contains('clicked')) {
+        if (region.hasAttribute('correct')) {
+          region.classList.add('correct')
+        } else {
+          region.classList.add('wrong')
+        }
+      } else {
+        region.classList.remove('correct', 'wrong')
+      }
+    })
+  })
+})
+
+// Add partial credit calculation for choice questions
+document.querySelectorAll('.exam[data-type="choice"]').forEach((exam) => {
+  const partialCredit = exam.dataset.partialCredit === 'true'
+  if (!partialCredit) return
+
+  const form = exam.querySelector('form')
+  if (!form) return
+
+  const originalSubmitHandler = form.onsubmit
+  form.addEventListener('submit', (event) => {
+    const selected = form.querySelectorAll('input[name="answer"]:checked')
+    const correct = form.querySelectorAll('input[name="answer"][correct]')
+
+    let earnedPoints = 0
+    let totalPoints = 0
+
+    // Calculate points based on weights
+    correct.forEach((input) => {
+      const weight = parseFloat(input.dataset.weight) || 1.0
+      totalPoints += weight
+    })
+
+    selected.forEach((input) => {
+      const weight = parseFloat(input.dataset.weight) || 1.0
+      if (input.hasAttribute('correct')) {
+        earnedPoints += weight
+      } else {
+        earnedPoints -= weight // Penalty for incorrect selections
+      }
+    })
+
+    // Normalize to 0-100%
+    const percentage = Math.max(0, Math.min(100, (earnedPoints / totalPoints) * 100))
+
+    // Show partial credit score
+    const scoreDiv = document.createElement('div')
+    scoreDiv.className = 'partial-credit-score'
+    if (percentage === 100) {
+      scoreDiv.className += ' full'
+    } else if (percentage >= 50) {
+      scoreDiv.className += ' partial'
+    } else {
+      scoreDiv.className += ' zero'
+    }
+    scoreDiv.textContent = `Score: ${percentage.toFixed(0)}%`
+    form.appendChild(scoreDiv)
+  }, { once: true })
 })
