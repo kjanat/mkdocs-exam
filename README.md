@@ -197,6 +197,32 @@ content: |
 ```
 ````
 
+## Core Features
+
+### LocalStorage Persistence
+
+**Never lose your answers again!** All exam answers are automatically saved to your browser's localStorage as you type or interact.
+
+**Features:**
+- ✅ Auto-saves on every interaction (typing, clicking, dragging)
+- ✅ Restores state on page reload
+- ✅ Expires after 24 hours to prevent stale data
+- ✅ Clears automatically on successful submission
+- ✅ Works with all exam types (choice, categorization, hotspot, ordering, etc.)
+- ✅ Saves hints revealed and time remaining
+- ✅ Privacy-friendly - all data stays in your browser
+
+**What's Saved:**
+- Selected answers (checkboxes, radio buttons)
+- Text inputs and essay responses
+- Drag-and-drop positions (categorization, ordering)
+- Clicked regions (hotspot/image map)
+- Numeric values and code completion
+- Revealed hints
+- Remaining time on timed questions
+
+**Try it yourself:** See the [Persistence Demo](https://kjanat.github.io/mkdocs-exam/persistence-demo/) page to test this feature live!
+
 ## Pedagogical Features
 
 ### Hints with Score Penalties

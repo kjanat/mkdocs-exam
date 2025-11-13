@@ -17,6 +17,7 @@ nav:
   - Advanced: advanced.md
   - Phase 1 Features: new-features.md
   - Phase 2 Features: phase2-features.md
+  - Persistence Demo: persistence-demo.md
   - Disabled Exam: disable.md
 
 theme:

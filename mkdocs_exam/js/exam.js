@@ -1,5 +1,72 @@
+// ==================== LocalStorage Persistence ====================
+
+const STORAGE_PREFIX = 'mkdocs-exam-state:'
+const EXPIRY_HOURS = 24
+
+/**
+ * Generate unique storage key for an exam
+ */
+function getStorageKey(examIndex) {
+  const path = window.location.pathname
+  return `${STORAGE_PREFIX}${path}:exam-${examIndex}`
+}
+
+/**
+ * Save exam state to localStorage
+ */
+function saveExamState(examIndex, state) {
+  try {
+    const data = {
+      timestamp: Date.now(),
+      state: state
+    }
+    localStorage.setItem(getStorageKey(examIndex), JSON.stringify(data))
+  } catch (e) {
+    console.warn('Failed to save exam state:', e)
+  }
+}
+
+/**
+ * Load exam state from localStorage
+ * Returns null if expired or not found
+ */
+function loadExamState(examIndex) {
+  try {
+    const key = getStorageKey(examIndex)
+    const json = localStorage.getItem(key)
+    if (!json) return null
+
+    const data = JSON.parse(json)
+    const age = Date.now() - data.timestamp
+    const maxAge = EXPIRY_HOURS * 60 * 60 * 1000
+
+    if (age > maxAge) {
+      localStorage.removeItem(key)
+      return null
+    }
+
+    return data.state
+  } catch (e) {
+    console.warn('Failed to load exam state:', e)
+    return null
+  }
+}
+
+/**
+ * Clear exam state from localStorage
+ */
+function clearExamState(examIndex) {
+  try {
+    localStorage.removeItem(getStorageKey(examIndex))
+  } catch (e) {
+    console.warn('Failed to clear exam state:', e)
+  }
+}
+
+// ==================== Initialize Exams ====================
+
 // Initialize all exams on the page
-document.querySelectorAll('.exam').forEach((exam) => {
+document.querySelectorAll('.exam').forEach((exam, examIndex) => {
   const form = exam.querySelector('form')
   const fieldset = form.querySelector('fieldset')
   const type = exam.dataset.type || 'choice'
@@ -10,11 +77,33 @@ document.querySelectorAll('.exam').forEach((exam) => {
   let timerInterval = null
   let hintsUsed = 0
 
+  // Load saved state
+  const savedState = loadExamState(examIndex)
+
   // Initialize hints
   const hintsContainer = exam.querySelector('.exam-hints')
   if (hintsContainer) {
     hintsContainer.classList.remove('hidden')
     const hintButtons = hintsContainer.querySelectorAll('.hint-button')
+
+    // Restore hint state
+    if (savedState && savedState.hintsUsed) {
+      savedState.hintsUsed.forEach((hintIndex) => {
+        const btn = hintButtons[hintIndex]
+        if (btn) {
+          const hint = btn.parentElement
+          const hintText = hint.querySelector('.hint-text')
+          const penalty = parseInt(hint.dataset.penalty) || 0
+
+          hintText.classList.remove('hidden')
+          currentScore = Math.max(0, currentScore - (points * penalty / 100))
+          hintsUsed++
+          btn.disabled = true
+          btn.textContent = `Hint ${hintIndex + 1} (used)`
+        }
+      })
+    }
+
     hintButtons.forEach((btn, index) => {
       btn.addEventListener('click', () => {
         const hint = btn.parentElement
@@ -27,6 +116,9 @@ document.querySelectorAll('.exam').forEach((exam) => {
           hintsUsed++
           btn.disabled = true
           btn.textContent = `Hint ${index + 1} (used)`
+
+          // Save hint usage
+          saveExamState(examIndex, getCurrentState())
         }
       })
     })
@@ -34,7 +126,8 @@ document.querySelectorAll('.exam').forEach((exam) => {
 
   // Initialize time limit
   if (timeLimit) {
-    let timeRemaining = timeLimit
+    // Restore time remaining or use full time limit
+    let timeRemaining = (savedState && savedState.timeRemaining) ? savedState.timeRemaining : timeLimit
     const timerDiv = document.createElement('div')
     timerDiv.className = 'exam-timer'
     timerDiv.textContent = `Time: ${timeRemaining}s`
@@ -51,8 +144,195 @@ document.querySelectorAll('.exam').forEach((exam) => {
         form.querySelector('button[type="submit"]').click()
         form.querySelector('button[type="submit"]').disabled = true
       }
+
+      // Save time remaining every second
+      saveExamState(examIndex, getCurrentState())
     }, 1000)
   }
+
+  // Function to capture current exam state
+  function getCurrentState() {
+    const state = {
+      type: type,
+      hintsUsed: [],
+      timeRemaining: null
+    }
+
+    // Capture hint state
+    const hintContainer = exam.querySelector('.exam-hints')
+    if (hintContainer) {
+      const hintButtons = hintContainer.querySelectorAll('.hint-button')
+      hintButtons.forEach((btn, index) => {
+        if (btn.disabled) {
+          state.hintsUsed.push(index)
+        }
+      })
+    }
+
+    // Capture time remaining (from closure)
+    if (timerInterval) {
+      const timerDiv = exam.querySelector('.exam-timer')
+      if (timerDiv) {
+        const match = timerDiv.textContent.match(/(\d+)s/)
+        if (match) {
+          state.timeRemaining = parseInt(match[1])
+        }
+      }
+    }
+
+    // Capture type-specific state
+    if (type === 'choice' || type === 'truefalse') {
+      const selected = form.querySelectorAll('input[name="answer"]:checked')
+      state.selectedAnswers = Array.from(selected).map(input => input.value)
+    } else if (type === 'categorization') {
+      state.categorizationState = {}
+      const container = fieldset.querySelector('.categorization-container')
+      if (container) {
+        const items = container.querySelectorAll('.categorization-item')
+        items.forEach((item) => {
+          const itemIndex = item.dataset.itemIndex
+          const currentParent = item.closest('.categorization-category')
+          const categoryIndex = currentParent ? currentParent.dataset.categoryIndex : null
+          state.categorizationState[itemIndex] = categoryIndex
+        })
+      }
+    } else if (type === 'hotspot') {
+      const clickedRegions = fieldset.querySelectorAll('.hotspot-region.clicked')
+      state.hotspotClicked = Array.from(clickedRegions).map(r => r.dataset.regionIndex)
+    } else if (type === 'ordering') {
+      const container = fieldset.querySelector('.ordering-container')
+      if (container) {
+        const items = Array.from(container.querySelectorAll('.ordering-item'))
+        state.orderingOrder = items.map(item => item.dataset.index)
+      }
+    } else if (type === 'numeric') {
+      const input = fieldset.querySelector('input[type="number"]')
+      if (input) {
+        state.numericValue = input.value
+      }
+    } else if (type === 'code-completion') {
+      const inputs = fieldset.querySelectorAll('input.code-blank')
+      state.codeBlankValues = Array.from(inputs).map(input => input.value)
+    } else if (type === 'matching') {
+      const selects = fieldset.querySelectorAll('select[name="answer"]')
+      state.matchingSelections = Array.from(selects).map(select => select.value)
+    } else {
+      // short-answer, fill, essay
+      const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
+      state.textInputValues = Array.from(inputs).map(input => input.value)
+    }
+
+    return state
+  }
+
+  // Restore saved state for all exam types
+  if (savedState) {
+    // Restore choice/truefalse answers
+    if (type === 'choice' || type === 'truefalse') {
+      if (savedState.selectedAnswers) {
+        savedState.selectedAnswers.forEach((value) => {
+          const input = form.querySelector(`input[name="answer"][value="${value}"]`)
+          if (input) {
+            input.checked = true
+          }
+        })
+      }
+    }
+    // Restore categorization
+    else if (type === 'categorization' && savedState.categorizationState) {
+      const container = fieldset.querySelector('.categorization-container')
+      if (container) {
+        Object.keys(savedState.categorizationState).forEach((itemIndex) => {
+          const categoryIndex = savedState.categorizationState[itemIndex]
+          const item = container.querySelector(`.categorization-item[data-item-index="${itemIndex}"]`)
+          const category = container.querySelector(`.categorization-category[data-category-index="${categoryIndex}"]`)
+          if (item && category) {
+            const dropZone = category.querySelector('.category-drop-zone')
+            if (dropZone) {
+              dropZone.appendChild(item)
+            }
+          }
+        })
+      }
+    }
+    // Restore hotspot
+    else if (type === 'hotspot' && savedState.hotspotClicked) {
+      savedState.hotspotClicked.forEach((regionIndex) => {
+        const region = fieldset.querySelector(`.hotspot-region[data-region-index="${regionIndex}"]`)
+        if (region) {
+          region.classList.add('clicked')
+          if (region.hasAttribute('correct')) {
+            region.classList.add('correct')
+          } else {
+            region.classList.add('wrong')
+          }
+        }
+      })
+    }
+    // Restore ordering
+    else if (type === 'ordering' && savedState.orderingOrder) {
+      const container = fieldset.querySelector('.ordering-container')
+      if (container) {
+        const itemsMap = {}
+        container.querySelectorAll('.ordering-item').forEach((item) => {
+          itemsMap[item.dataset.index] = item
+        })
+        container.innerHTML = ''
+        savedState.orderingOrder.forEach((index) => {
+          if (itemsMap[index]) {
+            container.appendChild(itemsMap[index])
+          }
+        })
+      }
+    }
+    // Restore numeric
+    else if (type === 'numeric' && savedState.numericValue !== undefined) {
+      const input = fieldset.querySelector('input[type="number"]')
+      if (input) {
+        input.value = savedState.numericValue
+      }
+    }
+    // Restore code-completion
+    else if (type === 'code-completion' && savedState.codeBlankValues) {
+      const inputs = fieldset.querySelectorAll('input.code-blank')
+      savedState.codeBlankValues.forEach((value, index) => {
+        if (inputs[index]) {
+          inputs[index].value = value
+        }
+      })
+    }
+    // Restore matching
+    else if (type === 'matching' && savedState.matchingSelections) {
+      const selects = fieldset.querySelectorAll('select[name="answer"]')
+      savedState.matchingSelections.forEach((value, index) => {
+        if (selects[index]) {
+          selects[index].value = value
+        }
+      })
+    }
+    // Restore text inputs
+    else if (savedState.textInputValues) {
+      const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
+      savedState.textInputValues.forEach((value, index) => {
+        if (inputs[index]) {
+          inputs[index].value = value
+        }
+      })
+    }
+  }
+
+  // Store save function on exam element for use in drag handlers
+  exam._saveState = () => saveExamState(examIndex, getCurrentState())
+
+  // Add event listeners to save state on input changes
+  form.querySelectorAll('input, textarea, select').forEach((input) => {
+    input.addEventListener('change', () => {
+      exam._saveState()
+    })
+    input.addEventListener('input', () => {
+      exam._saveState()
+    })
+  })
 
   // Handle form submission
   form.addEventListener('submit', (event) => {
@@ -192,6 +472,9 @@ document.querySelectorAll('.exam').forEach((exam) => {
 
     // Disable submit button
     form.querySelector('button[type="submit"]').disabled = true
+
+    // Clear saved state on successful submit
+    clearExamState(examIndex)
   })
 })
 
@@ -235,6 +518,11 @@ function showAnswerFeedback (selectedInputs) {
 document.querySelectorAll('.ordering-container').forEach((container) => {
   let draggedItem = null
 
+  // Find exam index for state persistence
+  const examElement = container.closest('.exam')
+  const allExams = Array.from(document.querySelectorAll('.exam'))
+  const examIndex = allExams.indexOf(examElement)
+
   container.querySelectorAll('.ordering-item').forEach((item) => {
     item.draggable = true
 
@@ -245,6 +533,10 @@ document.querySelectorAll('.ordering-container').forEach((container) => {
 
     item.addEventListener('dragend', (e) => {
       item.classList.remove('dragging')
+      // Save state after drag ends
+      if (examElement && examElement._saveState) {
+        examElement._saveState()
+      }
     })
 
     item.addEventListener('dragover', (e) => {
@@ -272,6 +564,9 @@ document.querySelectorAll('.ordering-container').forEach((container) => {
 document.querySelectorAll('.categorization-container').forEach((container) => {
   let draggedItem = null
 
+  // Find exam element for state persistence
+  const examElement = container.closest('.exam')
+
   container.querySelectorAll('.categorization-item').forEach((item) => {
     item.draggable = true
 
@@ -282,6 +577,10 @@ document.querySelectorAll('.categorization-container').forEach((container) => {
 
     item.addEventListener('dragend', (e) => {
       item.classList.remove('dragging')
+      // Save state after drag ends
+      if (examElement && examElement._saveState) {
+        examElement._saveState()
+      }
     })
   })
 
@@ -300,6 +599,10 @@ document.querySelectorAll('.categorization-container').forEach((container) => {
       dropZone.classList.remove('drag-over')
       if (draggedItem) {
         dropZone.appendChild(draggedItem)
+        // Save state after drop
+        if (examElement && examElement._saveState) {
+          examElement._saveState()
+        }
       }
     })
   })
@@ -307,6 +610,9 @@ document.querySelectorAll('.categorization-container').forEach((container) => {
 
 // Add click handling for hotspot questions
 document.querySelectorAll('.hotspot-container').forEach((container) => {
+  // Find exam element for state persistence
+  const examElement = container.closest('.exam')
+
   container.querySelectorAll('.hotspot-region').forEach((region) => {
     region.addEventListener('click', (e) => {
       region.classList.toggle('clicked')
@@ -318,6 +624,11 @@ document.querySelectorAll('.hotspot-container').forEach((container) => {
         }
       } else {
         region.classList.remove('correct', 'wrong')
+      }
+
+      // Save state after click
+      if (examElement && examElement._saveState) {
+        examElement._saveState()
       }
     })
   })
