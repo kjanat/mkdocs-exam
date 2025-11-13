@@ -5,6 +5,7 @@ from mkdocs.structure.pages import Page
 from importlib import resources as impresources
 from . import css, js
 import re
+import yaml
 
 # Read bundled CSS and JS and wrap them for inline injection
 inp_file = impresources.files(css) / "exam.css"
@@ -17,14 +18,16 @@ with js_file.open("r", encoding="utf-8") as f:
     script_content = f.read()
 script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
 
-# <exam>
-# question: Are you ready?
-# answer-correct: Yes!
-# answer: No!
-# answer: Maybe!
-# content:
-# <h2>Provide some additional content</h2>
-# </exam>
+# ```yaml
+# question: "Are you ready?"
+# answer-correct:
+#   - "Yes!"
+# answer:
+#   - "No!"
+#   - "Maybe!"
+# content: |
+#   ## Provide some additional content
+# ```
 
 
 class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
@@ -45,32 +48,48 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         if "exam" in page.meta and page.meta["exam"] == "disable":
             return markdown
 
-        # Look for ``<exam>`` ... ``</exam>`` blocks using a non-greedy regex
-        EXAM_START_TAG = "<exam>"
-        EXAM_END_TAG = "</exam>"
-        REGEX = f"{re.escape(EXAM_START_TAG)}(.*?){re.escape(EXAM_END_TAG)}"
+        # Look for ```exam or ```yaml codeblocks
+        REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
         matches = re.findall(REGEX, markdown, re.DOTALL)
         exam_id = 0
         for match in matches:
-            exam_lines = [ln.strip() for ln in match.splitlines() if ln.strip()]
-            content_idx = exam_lines.index("content:")
-            header_lines = exam_lines[:content_idx]
-            content_lines = exam_lines[content_idx + 1 :]
+            # Parse YAML content
+            try:
+                exam_data = yaml.safe_load(match)
+            except yaml.YAMLError as e:
+                # Skip invalid YAML blocks
+                continue
 
-            q_type = "choice"
-            question = ""
+            # Extract exam properties from YAML
+            q_type = exam_data.get("type", "choice").lower()
+            question = exam_data.get("question", "")
+            content_lines = exam_data.get("content", "").strip().splitlines()
+
+            # Process answers
             answers: list[str] = []
             correct_idx: list[int] = []
-            for line in header_lines:
-                if line.startswith("type:"):
-                    q_type = line.split("type:", 1)[1].strip().lower()
-                elif line.startswith("question:"):
-                    question = line.split("question:", 1)[1].strip()
-                elif line.startswith("answer-correct:"):
-                    answers.append(line.split("answer-correct:", 1)[1].strip())
-                    correct_idx.append(len(answers) - 1)
-                elif line.startswith("answer:"):
-                    answers.append(line.split("answer:", 1)[1].strip())
+
+            # Get answer-correct field
+            answer_correct = exam_data.get("answer-correct", [])
+            if isinstance(answer_correct, str):
+                answer_correct = [answer_correct]
+            elif answer_correct is None:
+                answer_correct = []
+
+            # Get answer field
+            answer_list = exam_data.get("answer", [])
+            if isinstance(answer_list, str):
+                answer_list = [answer_list]
+            elif answer_list is None:
+                answer_list = []
+
+            # Combine answers, tracking which are correct
+            for ans in answer_correct:
+                answers.append(str(ans))
+                correct_idx.append(len(answers) - 1)
+
+            for ans in answer_list:
+                answers.append(str(ans))
 
             html_question = question
             full_answers: list[str] = []
@@ -122,15 +141,22 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                     )
 
             html_answers = "".join(full_answers)
+            content_html = "\n".join(content_lines)
             exam_html = (
                 f'<div class="exam" data-type="{q_type}"><h3>{html_question}</h3><form><fieldset>'
                 f"{html_answers}</fieldset>"
                 '<button type="submit" class="exam-button">Submit</button>'
-                f'</form><section class="content hidden">{"\n".join(content_lines)}</section></div>'
+                f'</form><section class="content hidden">{content_html}</section></div>'
             )
             # Replace the original block with the generated HTML
-            old_exam = EXAM_START_TAG + match + EXAM_END_TAG
-            markdown = markdown.replace(old_exam, exam_html)
+            # Find the full codeblock (including delimiters) and replace it
+            old_exam_pattern = re.escape(f"```yaml\n{match}```")
+            if re.search(old_exam_pattern, markdown):
+                markdown = re.sub(old_exam_pattern, exam_html, markdown, count=1)
+            else:
+                # Try with ```exam
+                old_exam_pattern = re.escape(f"```exam\n{match}```")
+                markdown = re.sub(old_exam_pattern, exam_html, markdown, count=1)
             exam_id += 1
         return markdown
 

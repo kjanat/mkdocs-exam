@@ -11,16 +11,16 @@ class DummyPage:
 def test_exam_block_converts_to_html():
     markdown = textwrap.dedent(
         """
-        <exam>
-
-        question: Are you ready?
-        answer-correct: Yes!
-        answer: No!
-        answer: Maybe!
-        content:
-
-        <h2>Provide some additional content</h2>
-        </exam>
+        ```yaml
+        question: "Are you ready?"
+        answer-correct:
+          - "Yes!"
+        answer:
+          - "No!"
+          - "Maybe!"
+        content: |
+          ## Provide some additional content
+        ```
         """
     )
     plugin = MkDocsExamPlugin()
@@ -32,7 +32,7 @@ def test_exam_block_converts_to_html():
         '<div><input type="radio" name="answer" value="1" id="exam-0-1" ><label for="exam-0-1">No!</label></div>'
         '<div><input type="radio" name="answer" value="2" id="exam-0-2" ><label for="exam-0-2">Maybe!</label></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
-        '</form><section class="content hidden"><h2>Provide some additional content</h2></section></div>\n'
+        '</form><section class="content hidden">## Provide some additional content</section></div>\n'
     )
     assert result == expected
 
@@ -40,15 +40,14 @@ def test_exam_block_converts_to_html():
 def test_short_answer_question():
     markdown = textwrap.dedent(
         """
-        <exam>
-
+        ```yaml
         type: short-answer
-        question: What color is the sky?
-        answer-correct: blue
-        content:
-
-        <p>It is often blue.</p>
-        </exam>
+        question: "What color is the sky?"
+        answer-correct:
+          - "blue"
+        content: |
+          It is often blue.
+        ```
         """
     )
     plugin = MkDocsExamPlugin()
@@ -58,7 +57,7 @@ def test_short_answer_question():
         '<div class="exam" data-type="short-answer"><h3>What color is the sky?</h3><form><fieldset>'
         '<div><input type="text" name="answer" correct="blue" ></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
-        '</form><section class="content hidden"><p>It is often blue.</p></section></div>\n'
+        '</form><section class="content hidden">It is often blue.</section></div>\n'
     )
     assert result == expected
 
@@ -66,15 +65,14 @@ def test_short_answer_question():
 def test_fill_question():
     markdown = textwrap.dedent(
         """
-        <exam>
-
+        ```yaml
         type: fill
-        question: 2 + 2 = ___
-        answer-correct: 4
-        content:
-
-        <p>Easy math.</p>
-        </exam>
+        question: "2 + 2 = ___"
+        answer-correct:
+          - "4"
+        content: |
+          Easy math.
+        ```
         """
     )
     plugin = MkDocsExamPlugin()
@@ -83,7 +81,7 @@ def test_fill_question():
         "\n"
         '<div class="exam" data-type="fill"><h3>2 + 2 = <input type="text" name="answer" correct="4"></h3><form><fieldset>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
-        '</form><section class="content hidden"><p>Easy math.</p></section></div>\n'
+        '</form><section class="content hidden">Easy math.</section></div>\n'
     )
     assert result == expected
 
@@ -91,15 +89,14 @@ def test_fill_question():
 def test_true_false_default_answers():
     markdown = textwrap.dedent(
         """
-        <exam>
-
+        ```yaml
         type: truefalse
-        question: The Earth orbits the Sun.
-        answer-correct: True
-        content:
-
-        <p>This is obviously true.</p>
-        </exam>
+        question: "The Earth orbits the Sun."
+        answer-correct:
+          - "True"
+        content: |
+          This is obviously true.
+        ```
         """
     )
     plugin = MkDocsExamPlugin()
@@ -110,7 +107,7 @@ def test_true_false_default_answers():
         '<div><input type="radio" name="answer" value="0" id="exam-0-0" correct><label for="exam-0-0">True</label></div>'
         '<div><input type="radio" name="answer" value="1" id="exam-0-1" ><label for="exam-0-1">False</label></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
-        '</form><section class="content hidden"><p>This is obviously true.</p></section></div>\n'
+        '</form><section class="content hidden">This is obviously true.</section></div>\n'
     )
     assert result == expected
 
@@ -118,15 +115,14 @@ def test_true_false_default_answers():
 def test_essay_question():
     markdown = textwrap.dedent(
         """
-        <exam>
-
+        ```yaml
         type: essay
-        question: Explain the theory of relativity in one paragraph.
-        answer-correct: It deals with space and time.
-        content:
-
-        <p>Provide an explanation.</p>
-        </exam>
+        question: "Explain the theory of relativity in one paragraph."
+        answer-correct:
+          - "It deals with space and time."
+        content: |
+          Provide an explanation.
+        ```
         """
     )
     plugin = MkDocsExamPlugin()
@@ -136,7 +132,7 @@ def test_essay_question():
         '<div class="exam" data-type="essay"><h3>Explain the theory of relativity in one paragraph.</h3><form><fieldset>'
         '<div><textarea name="answer" rows="4" correct="It deals with space and time."></textarea></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
-        '</form><section class="content hidden"><p>Provide an explanation.</p></section></div>\n'
+        '</form><section class="content hidden">Provide an explanation.</section></div>\n'
     )
     assert result == expected
 
@@ -144,17 +140,16 @@ def test_essay_question():
 def test_matching_question():
     markdown = textwrap.dedent(
         """
-        <exam>
-
+        ```yaml
         type: matching
-        question: Match the capitals to countries
-        answer: Paris | France
-        answer: Rome | Italy
-        answer: Madrid | Spain
-        content:
-
-        <p>Capitals and their countries.</p>
-        </exam>
+        question: "Match the capitals to countries"
+        answer:
+          - "Paris | France"
+          - "Rome | Italy"
+          - "Madrid | Spain"
+        content: |
+          Capitals and their countries.
+        ```
         """
     )
     plugin = MkDocsExamPlugin()
@@ -166,7 +161,7 @@ def test_matching_question():
         '<div><label>Rome <select name="answer" correct="Italy"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
         '<div><label>Madrid <select name="answer" correct="Spain"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
-        '</form><section class="content hidden"><p>Capitals and their countries.</p></section></div>\n'
+        '</form><section class="content hidden">Capitals and their countries.</section></div>\n'
     )
     assert result == expected
 
@@ -174,16 +169,16 @@ def test_matching_question():
 def test_exam_disabled_leaves_markdown_unchanged():
     markdown = textwrap.dedent(
         """
-        <exam>
-
-        question: Are you ready?
-        answer-correct: Yes!
-        answer: No!
-        answer: Maybe!
-        content:
-
-        <h2>Provide some additional content</h2>
-        </exam>
+        ```yaml
+        question: "Are you ready?"
+        answer-correct:
+          - "Yes!"
+        answer:
+          - "No!"
+          - "Maybe!"
+        content: |
+          ## Provide some additional content
+        ```
         """
     )
     plugin = MkDocsExamPlugin()

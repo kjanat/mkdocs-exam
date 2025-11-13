@@ -23,111 +23,120 @@ plugins:
 
 Now you can create your first exam directly in markdown:
 
-```markdown
-<exam>
-question: Are you ready?
-answer-correct: Yes!
-answer: No!
-answer: Maybe!
-content:
-<h2>Provide some additional content</h2>
-</exam>
+````markdown
+```yaml
+question: "Are you ready?"
+answer-correct:
+  - "Yes!"
+answer:
+  - "No!"
+  - "Maybe!"
+content: |
+  ## Provide some additional content
 ```
+````
 
 > [!NOTE]
-> The answers can get styled with HTML (like `<code>Yes!</code>`)
+> The questions, answers, and content support full **Markdown** syntax
 
-> [!IMPORTANT]
-> The exam content needs to be valid **_HTML_**
+> [!TIP]
+> You can use either `` ```yaml `` or `` ```exam `` as the codeblock language
 
 ### Multiple choice
 
 You can also create a multiple choice exam, by providing multiple answers as correct.
 
-```markdown
-<exam>
-question: Are you ready?
-answer-correct: Yes!
-answer: No!
-answer-correct: Maybe!
-content:
-<h2>Provide some additional content</h2>
-</exam>
+````markdown
+```yaml
+question: "Are you ready?"
+answer-correct:
+  - "Yes!"
+  - "Maybe!"
+answer:
+  - "No!"
+content: |
+  ## Provide some additional content
 ```
+````
 
 ### Short answer
 
 Provide the expected answer as `answer-correct` and set the type to `short-answer`:
 
-```markdown
-<exam>
+````markdown
+```yaml
 type: short-answer
-question: What color is the sky?
-answer-correct: blue
-content:
-<p>The sky often appears blue due to Rayleigh scattering.</p>
-</exam>
+question: "What color is the sky?"
+answer-correct:
+  - "blue"
+content: |
+  The sky often appears blue due to Rayleigh scattering.
 ```
+````
 
 ### Fill in the blank
 
 Use three underscores (`___`) as placeholder in your question and provide the correct answer.
 
-```markdown
-<exam>
+````markdown
+```yaml
 type: fill
-question: 2 + 2 = ___
-answer-correct: 4
-content:
-<p>A simple addition problem.</p>
-</exam>
+question: "2 + 2 = ___"
+answer-correct:
+  - "4"
+content: |
+  A simple addition problem.
 ```
+````
 
 ### True/false
 
 This type can be used for simple statements that are either true or false. If no
 answers are provided, the plugin will automatically use _True_ and _False_.
 
-```markdown
-<exam>
+````markdown
+```yaml
 type: truefalse
-question: The Earth orbits the Sun.
-answer-correct: True
-content:
-<p>This is obviously true.</p>
-</exam>
+question: "The Earth orbits the Sun."
+answer-correct:
+  - "True"
+content: |
+  This is obviously true.
 ```
+````
 
 ### Essay
 
 For longer open questions the `essay` type renders a multiline textarea.
 
-```markdown
-<exam>
+````markdown
+```yaml
 type: essay
-question: Explain the theory of relativity in one paragraph.
-answer-correct: It deals with space and time.
-content:
-<p>Provide an explanation.</p>
-</exam>
+question: "Explain the theory of relativity in one paragraph."
+answer-correct:
+  - "It deals with space and time."
+content: |
+  Provide an explanation.
 ```
+````
 
 ### Matching
 
 Provide pairs separated by a pipe (`|`). Each left item will be shown with a
 drop-down to select the corresponding right item.
 
-```markdown
-<exam>
+````markdown
+```yaml
 type: matching
-question: Match the capitals to countries
-answer: Paris | France
-answer: Rome | Italy
-answer: Madrid | Spain
-content:
-<p>Capitals and their countries.</p>
-</exam>
+question: "Match the capitals to countries"
+answer:
+  - "Paris | France"
+  - "Rome | Italy"
+  - "Madrid | Spain"
+content: |
+  Capitals and their countries.
 ```
+````
 
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
 

@@ -16,6 +16,7 @@ authors = [
 dependencies = [
   "mkdocs",
   "mkdocs-material",
+  "pyyaml",
 ]
 
 [dependency-groups]
