@@ -11,7 +11,9 @@
 - Phase 2 features: 4 tests ✅
 
 ### Recently Implemented & Tested ✅
+
 **Phase 1 (Core Features)**
+
 - ✅ Hints system with score penalties (tested)
 - ✅ Explanations with conditional display (tested)
 - ✅ Answer feedback (tested)
@@ -25,6 +27,7 @@
 - ✅ Input validation (tested)
 
 **Phase 2 (Advanced Features) - NEW!**
+
 - ✅ Multi-select with partial credit (tested)
 - ✅ Categorization exam type (tested)
 - ✅ Hotspot/image map exam type (tested)

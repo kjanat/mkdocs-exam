@@ -7,6 +7,7 @@
 ## Latest Update
 
 Added 4 new tests for Phase 2 features:
+
 - Partial credit with weighted answers
 - Categorization exam type
 - Hotspot/image map exam type

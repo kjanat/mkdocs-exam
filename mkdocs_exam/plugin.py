@@ -283,13 +283,13 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                 correct_cat = correct_mapping.get(str(i), correct_mapping.get(i, 0))
                 item_escaped = escape_html(str(item))
                 categories_html += f'<div class="categorization-item" data-item-index="{i}" data-correct-category="{correct_cat}" draggable="true">{item_escaped}</div>'
-            categories_html += '</div>'
+            categories_html += "</div>"
             categories_html += '<div class="categorization-categories">'
             for i, category in enumerate(categories):
                 cat_escaped = escape_html(str(category))
                 categories_html += f'<div class="categorization-category" data-category-index="{i}"><h4>{cat_escaped}</h4><div class="category-drop-zone"></div></div>'
-            categories_html += '</div>'
-            categories_html += '</div>'
+            categories_html += "</div>"
+            categories_html += "</div>"
             full_answers.append(categories_html)
         elif q_type == "hotspot":
             # Hotspot/image map type - click regions on an image
@@ -311,7 +311,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                     f'<div class="hotspot-region" data-region-index="{i}" {correct_attr} '
                     f'style="left:{x}%;top:{y}%;width:{width}%;height:{height}%;"></div>'
                 )
-            hotspot_html += '</div></div>'
+            hotspot_html += "</div></div>"
             full_answers.append(hotspot_html)
 
         html_answers = "".join(full_answers)
