@@ -138,6 +138,177 @@ content: |
 ```
 ````
 
+## New Exam Types
+
+### Numeric
+
+Accept numeric answers within a tolerance range:
+
+````markdown
+```yaml
+type: numeric
+question: "What is the value of π (pi) to 2 decimal places?"
+answer-correct:
+  - 3.14
+tolerance: 0.01
+unit: ""
+points: 5
+content: |
+  π (pi) is approximately 3.14159...
+```
+````
+
+### Code Completion
+
+Fill-in-the-blank for code with syntax highlighting:
+
+````markdown
+```yaml
+type: code-completion
+question: "Complete the Python function:"
+template: |
+  def add(a, b):
+      return a ___ b
+language: python
+blanks:
+  - correct: ["+"]
+points: 10
+content: |
+  The addition operator in Python is +
+```
+````
+
+### Ordering
+
+Drag-and-drop items into the correct order:
+
+````markdown
+```yaml
+type: ordering
+question: "Arrange these steps in order:"
+items:
+  - "Step 1"
+  - "Step 2"
+  - "Step 3"
+correct-order: [0, 1, 2]
+points: 10
+content: |
+  Order matters!
+```
+````
+
+## Pedagogical Features
+
+### Hints with Score Penalties
+
+Provide progressive hints that reduce the score when revealed:
+
+````markdown
+```yaml
+question: "What is the capital of France?"
+answer-correct:
+  - "Paris"
+hints:
+  - text: "It's known as the City of Light"
+    penalty: 10
+  - text: "The Eiffel Tower is located here"
+    penalty: 20
+points: 10
+content: |
+  Paris is the capital of France.
+```
+````
+
+### Explanations
+
+Show explanations conditionally (always, on-correct, on-wrong, never):
+
+````markdown
+```yaml
+question: "What is 2 + 2?"
+answer-correct:
+  - "4"
+answer:
+  - "3"
+  - "5"
+explanation: "Addition is combining two numbers. 2 + 2 = 4."
+show-explanation: "on-correct"
+content: |
+  Great job!
+```
+````
+
+### Answer Feedback
+
+Provide specific feedback for each answer choice:
+
+````markdown
+```yaml
+question: "Which planet is closest to the Sun?"
+answer-correct:
+  - value: "Mercury"
+    feedback: "Correct! Mercury orbits closest to the Sun."
+answer:
+  - value: "Venus"
+    feedback: "Venus is the second planet."
+content: |
+  Mercury is closest to the Sun.
+```
+````
+
+### Rich Media Support
+
+Add images, videos, or audio to questions:
+
+````markdown
+```yaml
+question: "What shape is shown?"
+media:
+  type: image
+  src: "https://example.com/triangle.png"
+  alt: "A geometric shape"
+  caption: "Geometric shape"
+answer-correct:
+  - "Triangle"
+answer:
+  - "Square"
+  - "Circle"
+content: |
+  The image shows a triangle.
+```
+````
+
+### Time Limits
+
+Add countdown timers that auto-submit when time expires:
+
+````markdown
+```yaml
+question: "Quick! What is 7 × 8?"
+answer-correct:
+  - "56"
+time-limit: 30
+points: 10
+content: |
+  Speed matters!
+```
+````
+
+### Points and Scoring
+
+Assign custom point values to questions:
+
+````markdown
+```yaml
+question: "What is the capital of Australia?"
+answer-correct:
+  - "Canberra"
+points: 20
+content: |
+  Canberra is the capital.
+```
+````
+
 ## Advanced Features
 
 ### Multi-Document YAML

@@ -27,7 +27,7 @@ def test_exam_block_converts_to_html():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
     expected = (
         "\n"
-        '<div class="exam" data-type="choice"><h3>Are you ready?</h3><form><fieldset>'
+        '<div class="exam" data-type="choice" data-points="1"><h3>Are you ready?</h3><form><fieldset>'
         '<div><input type="radio" name="answer" value="0" id="exam-0-0" correct><label for="exam-0-0">Yes!</label></div>'
         '<div><input type="radio" name="answer" value="1" id="exam-0-1" ><label for="exam-0-1">No!</label></div>'
         '<div><input type="radio" name="answer" value="2" id="exam-0-2" ><label for="exam-0-2">Maybe!</label></div>'
@@ -54,7 +54,7 @@ def test_short_answer_question():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
     expected = (
         "\n"
-        '<div class="exam" data-type="short-answer"><h3>What color is the sky?</h3><form><fieldset>'
+        '<div class="exam" data-type="short-answer" data-points="1"><h3>What color is the sky?</h3><form><fieldset>'
         '<div><input type="text" name="answer" correct="blue" ></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
         '</form><section class="content hidden">It is often blue.</section></div>\n'
@@ -79,7 +79,7 @@ def test_fill_question():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
     expected = (
         "\n"
-        '<div class="exam" data-type="fill"><h3>2 + 2 = <input type="text" name="answer" correct="4"></h3><form><fieldset>'
+        '<div class="exam" data-type="fill" data-points="1"><h3>2 + 2 = <input type="text" name="answer" correct="4"></h3><form><fieldset>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
         '</form><section class="content hidden">Easy math.</section></div>\n'
     )
@@ -103,7 +103,7 @@ def test_true_false_default_answers():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
     expected = (
         "\n"
-        '<div class="exam" data-type="truefalse"><h3>The Earth orbits the Sun.</h3><form><fieldset>'
+        '<div class="exam" data-type="truefalse" data-points="1"><h3>The Earth orbits the Sun.</h3><form><fieldset>'
         '<div><input type="radio" name="answer" value="0" id="exam-0-0" correct><label for="exam-0-0">True</label></div>'
         '<div><input type="radio" name="answer" value="1" id="exam-0-1" ><label for="exam-0-1">False</label></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
@@ -129,7 +129,7 @@ def test_essay_question():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
     expected = (
         "\n"
-        '<div class="exam" data-type="essay"><h3>Explain the theory of relativity in one paragraph.</h3><form><fieldset>'
+        '<div class="exam" data-type="essay" data-points="1"><h3>Explain the theory of relativity in one paragraph.</h3><form><fieldset>'
         '<div><textarea name="answer" rows="4" correct="It deals with space and time."></textarea></div>'
         '</fieldset><button type="submit" class="exam-button">Submit</button>'
         '</form><section class="content hidden">Provide an explanation.</section></div>\n'
@@ -156,7 +156,7 @@ def test_matching_question():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
     expected = (
         "\n"
-        '<div class="exam" data-type="matching"><h3>Match the capitals to countries</h3><form><fieldset>'
+        '<div class="exam" data-type="matching" data-points="1"><h3>Match the capitals to countries</h3><form><fieldset>'
         '<div><label>Paris <select name="answer" correct="France"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
         '<div><label>Rome <select name="answer" correct="Italy"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
         '<div><label>Madrid <select name="answer" correct="Spain"><option>France</option><option>Italy</option><option>Spain</option></select></label></div>'
