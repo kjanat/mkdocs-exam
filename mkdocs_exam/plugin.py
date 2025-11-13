@@ -45,6 +45,22 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         if "exam" in page.meta and page.meta["exam"] == "disable":
             return markdown
 
+        # Extract code fences to protect them from processing
+        # Match ``` or ~~~ fences with same closing delimiter
+        code_fence_pattern = r'(```|~~~)([^\n]*\n)(.*?)\1'
+        code_fences = []
+        code_fence_placeholders = {}
+
+        for i, match in enumerate(re.finditer(code_fence_pattern, markdown, re.DOTALL)):
+            fence = match.group(0)
+            placeholder = f"__CODE_FENCE_PLACEHOLDER_{i}__"
+            code_fences.append((match.start(), match.end(), placeholder, fence))
+            code_fence_placeholders[placeholder] = fence
+
+        # Replace code fences with placeholders (from end to start to preserve positions)
+        for start, end, placeholder, fence in reversed(code_fences):
+            markdown = markdown[:start] + placeholder + markdown[end:]
+
         # Look for ``<exam>`` ... ``</exam>`` blocks using a non-greedy regex
         EXAM_START_TAG = "<exam>"
         EXAM_END_TAG = "</exam>"
@@ -132,6 +148,11 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             old_exam = EXAM_START_TAG + match + EXAM_END_TAG
             markdown = markdown.replace(old_exam, exam_html)
             exam_id += 1
+
+        # Restore code fences
+        for placeholder, fence in code_fence_placeholders.items():
+            markdown = markdown.replace(placeholder, fence)
+
         return markdown
 
     def on_page_content(self, html: str, *, page: Page, config: MkDocsConfig, files: Files) -> str | None:
