@@ -86,10 +86,10 @@ function myFunction(paramName) {
 
 ```javascript
 /** @type {string} - Description of the variable */
-const MY_CONSTANT = 'value'
+const MY_CONSTANT = "value";
 
 /** @type {number[]} - Array of numbers */
-const numbers = [1, 2, 3]
+const numbers = [1, 2, 3];
 ```
 
 ### Current Type Checking Configuration
@@ -188,11 +188,11 @@ function saveExamState(examIndex, state) {
     /** @type {StoredExamData} */
     const data = {
       timestamp: Date.now(),
-      state: state
-    }
-    localStorage.setItem(getStorageKey(examIndex), JSON.stringify(data))
+      state: state,
+    };
+    localStorage.setItem(getStorageKey(examIndex), JSON.stringify(data));
   } catch (e) {
-    console.warn('Failed to save exam state:', e)
+    console.warn("Failed to save exam state:", e);
   }
 }
 ```

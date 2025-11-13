@@ -20,15 +20,6 @@
     // JSDoc validation (without full type checking)
     "maxNodeModuleJsDepth": 0
   },
-  "include": [
-    "mkdocs_exam/js/**/*.js",
-    "mkdocs_exam/js/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "**/*.spec.js",
-    "**/*.test.js"
-  ]
+  "include": ["mkdocs_exam/js/**/*.js", "mkdocs_exam/js/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "build", "**/*.spec.js", "**/*.test.js"]
 }
