@@ -316,3 +316,367 @@ def test_exam_with_exam_fence():
     assert "Using exam fence" in result
     assert "Yes" in result
     assert '<div class="exam"' in result
+
+
+# ============================================================================
+# NEW FEATURES TESTS
+# ============================================================================
+
+
+def test_hints_system():
+    """Test hints with score penalties"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "What is the capital of France?"
+        answer-correct:
+          - "Paris"
+        hints:
+          - text: "City of Light"
+            penalty: 10
+          - text: "Eiffel Tower location"
+            penalty: 20
+        points: 10
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'data-points="10"' in result
+    assert 'exam-hints' in result
+    assert 'City of Light' in result
+    assert 'Eiffel Tower location' in result
+    assert 'data-penalty="10"' in result
+    assert 'data-penalty="20"' in result
+
+
+def test_explanation_on_correct():
+    """Test explanation shown only on correct answer"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "What is 2 + 2?"
+        answer-correct:
+          - "4"
+        explanation: "Addition combines numbers"
+        show-explanation: "on-correct"
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'exam-explanation' in result
+    assert 'Addition combines numbers' in result
+    assert 'data-show="on-correct"' in result
+
+
+def test_explanation_always():
+    """Test explanation always shown"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "Test question"
+        answer-correct:
+          - "Answer"
+        explanation: "This is the explanation"
+        show-explanation: "always"
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'exam-explanation' in result
+    assert 'This is the explanation' in result
+    assert 'data-show="always"' in result
+
+
+def test_answer_feedback():
+    """Test answer-specific feedback"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "Which is closest to the Sun?"
+        answer-correct:
+          - value: "Mercury"
+            feedback: "Correct! Mercury is closest."
+        answer:
+          - value: "Venus"
+            feedback: "Venus is second."
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'Mercury' in result
+    assert 'Venus' in result
+    assert 'Correct! Mercury is closest.' in result
+    assert 'Venus is second.' in result
+    assert 'data-feedback=' in result
+
+
+def test_numeric_exam_type():
+    """Test numeric answer with tolerance"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        type: numeric
+        question: "What is π to 2 decimal places?"
+        answer-correct:
+          - 3.14
+        tolerance: 0.01
+        unit: ""
+        points: 5
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'data-type="numeric"' in result
+    assert 'type="number"' in result
+    assert 'data-correct="3.14"' in result
+    assert 'data-tolerance="0.01"' in result
+    assert 'data-points="5"' in result
+
+
+def test_numeric_with_unit():
+    """Test numeric answer with unit"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        type: numeric
+        question: "Meters in a kilometer?"
+        answer-correct:
+          - 1000
+        tolerance: 0
+        unit: "m"
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'data-type="numeric"' in result
+    assert 'data-correct="1000"' in result
+    assert 'data-unit="m"' in result
+
+
+def test_code_completion_exam_type():
+    """Test code completion with blanks"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        type: code-completion
+        question: "Complete the function:"
+        template: |
+          def add(a, b):
+              return a ___ b
+        language: python
+        blanks:
+          - correct: ["+"]
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'data-type="code-completion"' in result
+    assert 'code-blank' in result
+    assert 'def add(a, b):' in result
+    assert 'return a' in result
+
+
+def test_ordering_exam_type():
+    """Test ordering/sequencing questions"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        type: ordering
+        question: "Arrange in order:"
+        items:
+          - "First"
+          - "Second"
+          - "Third"
+        correct-order: [0, 1, 2]
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'data-type="ordering"' in result
+    assert 'ordering-container' in result
+    assert 'ordering-item' in result
+    assert 'First' in result
+    assert 'Second' in result
+    assert 'Third' in result
+    assert 'data-correct-order="0,1,2"' in result
+
+
+def test_rich_media_image():
+    """Test image media support"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "What shape is this?"
+        media:
+          type: image
+          src: "https://example.com/triangle.png"
+          alt: "A shape"
+          caption: "Geometric shape"
+        answer-correct:
+          - "Triangle"
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'exam-media' in result
+    assert '<img' in result
+    assert 'src="https://example.com/triangle.png"' in result
+    assert 'alt="A shape"' in result
+    assert 'Geometric shape' in result
+
+
+def test_rich_media_video():
+    """Test video media support"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "What is shown?"
+        media:
+          type: video
+          src: "https://example.com/video.mp4"
+          caption: "Demo video"
+        answer-correct:
+          - "Demo"
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'exam-media' in result
+    assert '<video' in result
+    assert 'src="https://example.com/video.mp4"' in result
+    assert 'Demo video' in result
+
+
+def test_time_limit():
+    """Test time limit with countdown"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "Quick question"
+        answer-correct:
+          - "Fast"
+        time-limit: 30
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'data-time-limit="30"' in result
+
+
+def test_custom_points():
+    """Test custom point values"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "Hard question"
+        answer-correct:
+          - "Answer"
+        points: 25
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'data-points="25"' in result
+
+
+def test_xss_prevention():
+    """Test that HTML is escaped to prevent XSS"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "<script>alert('xss')</script>Question"
+        answer-correct:
+          - "<img src=x onerror=alert(1)>"
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    # Should escape HTML tags
+    assert '<script>' not in result
+    assert '&lt;script&gt;' in result
+    assert '<img src=x' not in result
+    assert '&lt;img' in result
+
+
+def test_invalid_exam_type_rejected():
+    """Test that invalid exam types are rejected and default to choice"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        type: malicious-type
+        question: "Test"
+        answer-correct:
+          - "Answer"
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    # Should log warning and default to 'choice' type
+    assert '<div class="exam"' in result
+    assert 'data-type="choice"' in result
+    # Invalid type should not appear in output
+    assert 'malicious-type' not in result
+
+
+def test_combined_features():
+    """Test multiple features together"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "Combined test"
+        answer-correct:
+          - value: "Correct"
+            feedback: "Great job!"
+        answer:
+          - value: "Wrong"
+            feedback: "Try again"
+        hints:
+          - text: "Think carefully"
+            penalty: 15
+        explanation: "This is why"
+        show-explanation: "always"
+        points: 20
+        time-limit: 60
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    # Check all features are present
+    assert 'data-points="20"' in result
+    assert 'data-time-limit="60"' in result
+    assert 'exam-hints' in result
+    assert 'data-penalty="15"' in result
+    assert 'exam-explanation' in result
+    assert 'data-show="always"' in result
+    assert 'Great job!' in result
+    assert 'Try again' in result
