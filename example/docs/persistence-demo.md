@@ -3,6 +3,7 @@
 This page demonstrates the new localStorage persistence feature. All your answers are automatically saved as you type or interact with the exams!
 
 **Try this:**
+
 1. Answer some questions below
 2. Refresh the page (F5)
 3. Your answers will be restored automatically!
@@ -44,12 +45,12 @@ categories:
   - "Fruits"
   - "Trees"
 correct-mapping:
-  0: 0  # Dog -> Animals
-  1: 0  # Cat -> Animals
-  2: 1  # Apple -> Fruits
-  3: 1  # Banana -> Fruits
-  4: 2  # Oak -> Trees
-  5: 2  # Pine -> Trees
+  0: 0 # Dog -> Animals
+  1: 0 # Cat -> Animals
+  2: 1 # Apple -> Fruits
+  3: 1 # Banana -> Fruits
+  4: 2 # Oak -> Trees
+  5: 2 # Pine -> Trees
 points: 15
 content: |
   Drag positions are saved! Try moving items around, then refresh.
@@ -234,6 +235,7 @@ The localStorage persistence feature:
 ### Storage Keys
 
 Data is stored with keys like:
+
 ```
 mkdocs-exam-state:/docs/persistence-demo/:exam-0
 mkdocs-exam-state:/docs/persistence-demo/:exam-1
@@ -242,6 +244,7 @@ mkdocs-exam-state:/docs/persistence-demo/:exam-1
 ### Clear Saved Data
 
 To manually clear saved data:
+
 1. Open browser DevTools (F12)
 2. Go to Application > Local Storage
 3. Find keys starting with `mkdocs-exam-state:`

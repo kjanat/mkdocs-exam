@@ -204,6 +204,7 @@ content: |
 **Never lose your answers again!** All exam answers are automatically saved to your browser's localStorage as you type or interact.
 
 **Features:**
+
 - ✅ Auto-saves on every interaction (typing, clicking, dragging)
 - ✅ Restores state on page reload
 - ✅ Expires after 24 hours to prevent stale data
@@ -213,6 +214,7 @@ content: |
 - ✅ Privacy-friendly - all data stays in your browser
 
 **What's Saved:**
+
 - Selected answers (checkboxes, radio buttons)
 - Text inputs and essay responses
 - Drag-and-drop positions (categorization, ordering)

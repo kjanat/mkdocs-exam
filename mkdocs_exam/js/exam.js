@@ -6,7 +6,7 @@ const EXPIRY_HOURS = 24
 /**
  * Generate unique storage key for an exam
  */
-function getStorageKey(examIndex) {
+function getStorageKey (examIndex) {
   const path = window.location.pathname
   return `${STORAGE_PREFIX}${path}:exam-${examIndex}`
 }
@@ -14,11 +14,11 @@ function getStorageKey(examIndex) {
 /**
  * Save exam state to localStorage
  */
-function saveExamState(examIndex, state) {
+function saveExamState (examIndex, state) {
   try {
     const data = {
       timestamp: Date.now(),
-      state: state
+      state
     }
     localStorage.setItem(getStorageKey(examIndex), JSON.stringify(data))
   } catch (e) {
@@ -30,7 +30,7 @@ function saveExamState(examIndex, state) {
  * Load exam state from localStorage
  * Returns null if expired or not found
  */
-function loadExamState(examIndex) {
+function loadExamState (examIndex) {
   try {
     const key = getStorageKey(examIndex)
     const json = localStorage.getItem(key)
@@ -55,7 +55,7 @@ function loadExamState(examIndex) {
 /**
  * Clear exam state from localStorage
  */
-function clearExamState(examIndex) {
+function clearExamState (examIndex) {
   try {
     localStorage.removeItem(getStorageKey(examIndex))
   } catch (e) {
@@ -151,9 +151,9 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
   }
 
   // Function to capture current exam state
-  function getCurrentState() {
+  function getCurrentState () {
     const state = {
-      type: type,
+      type,
       hintsUsed: [],
       timeRemaining: null
     }
