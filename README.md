@@ -368,7 +368,7 @@ content: |
 
 All string fields (question, answers, content) support **full Markdown syntax**:
 
-````markdown
+`````markdown
 ````yaml
 question: "What does `git commit` do?"
 answer-correct:
@@ -387,10 +387,12 @@ content: |
   ```bash
   git commit -m "Your message"
 ````
+`````
 
 ```
 
 ```
+
 ````
 
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
@@ -420,3 +422,4 @@ exam: disable
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+````

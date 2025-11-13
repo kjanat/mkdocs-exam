@@ -5,11 +5,13 @@
 **Completed**: 11 features ✅
 **Test Coverage**: 27 tests (all passing ✅)
 **Test Breakdown**:
+
 - Original features: 12 tests ✅
 - New features: 15 tests ✅
 - Security tests: 2 tests (XSS, invalid types) ✅
 
 ### Recently Implemented & Tested ✅
+
 - ✅ Hints system with score penalties (tested)
 - ✅ Explanations with conditional display (tested)
 - ✅ Answer feedback (tested)
@@ -23,6 +25,7 @@
 - ✅ Input validation (tested)
 
 ### Immediate Next Steps
+
 1. **YAML size limits** (prevent YAML bombs)
 2. **Additional security tests** (SQL injection, path traversal)
 3. **Regex answer validation**
@@ -41,6 +44,7 @@
 ## 🎯 Phase 1: Core Enhanced Features (High Value, Low Effort)
 
 ### Pedagogical Enhancements
+
 - [x] **Hints System** - Progressive hints with score penalties ✅
 - [x] **Explanations** - Show rationale after answering ✅
 - [x] **Answer Feedback** - Custom feedback per answer choice ✅
@@ -49,6 +53,7 @@
 - [x] **Points/Scoring** - Custom point values per question ✅
 
 ### New Exam Types
+
 - [x] **Numeric Range** - Accept answers within tolerance ✅
 - [x] **Code Completion** - Fill-in-the-blank for code ✅
 - [ ] **Regex Answer** - Validate answers with regex patterns

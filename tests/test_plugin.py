@@ -344,9 +344,9 @@ def test_hints_system():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
     assert 'data-points="10"' in result
-    assert 'exam-hints' in result
-    assert 'City of Light' in result
-    assert 'Eiffel Tower location' in result
+    assert "exam-hints" in result
+    assert "City of Light" in result
+    assert "Eiffel Tower location" in result
     assert 'data-penalty="10"' in result
     assert 'data-penalty="20"' in result
 
@@ -367,8 +367,8 @@ def test_explanation_on_correct():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'exam-explanation' in result
-    assert 'Addition combines numbers' in result
+    assert "exam-explanation" in result
+    assert "Addition combines numbers" in result
     assert 'data-show="on-correct"' in result
 
 
@@ -388,8 +388,8 @@ def test_explanation_always():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'exam-explanation' in result
-    assert 'This is the explanation' in result
+    assert "exam-explanation" in result
+    assert "This is the explanation" in result
     assert 'data-show="always"' in result
 
 
@@ -411,11 +411,11 @@ def test_answer_feedback():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'Mercury' in result
-    assert 'Venus' in result
-    assert 'Correct! Mercury is closest.' in result
-    assert 'Venus is second.' in result
-    assert 'data-feedback=' in result
+    assert "Mercury" in result
+    assert "Venus" in result
+    assert "Correct! Mercury is closest." in result
+    assert "Venus is second." in result
+    assert "data-feedback=" in result
 
 
 def test_numeric_exam_type():
@@ -485,9 +485,9 @@ def test_code_completion_exam_type():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
     assert 'data-type="code-completion"' in result
-    assert 'code-blank' in result
-    assert 'def add(a, b):' in result
-    assert 'return a' in result
+    assert "code-blank" in result
+    assert "def add(a, b):" in result
+    assert "return a" in result
 
 
 def test_ordering_exam_type():
@@ -509,11 +509,11 @@ def test_ordering_exam_type():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
     assert 'data-type="ordering"' in result
-    assert 'ordering-container' in result
-    assert 'ordering-item' in result
-    assert 'First' in result
-    assert 'Second' in result
-    assert 'Third' in result
+    assert "ordering-container" in result
+    assert "ordering-item" in result
+    assert "First" in result
+    assert "Second" in result
+    assert "Third" in result
     assert 'data-correct-order="0,1,2"' in result
 
 
@@ -536,11 +536,11 @@ def test_rich_media_image():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'exam-media' in result
-    assert '<img' in result
+    assert "exam-media" in result
+    assert "<img" in result
     assert 'src="https://example.com/triangle.png"' in result
     assert 'alt="A shape"' in result
-    assert 'Geometric shape' in result
+    assert "Geometric shape" in result
 
 
 def test_rich_media_video():
@@ -561,10 +561,10 @@ def test_rich_media_video():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'exam-media' in result
-    assert '<video' in result
+    assert "exam-media" in result
+    assert "<video" in result
     assert 'src="https://example.com/video.mp4"' in result
-    assert 'Demo video' in result
+    assert "Demo video" in result
 
 
 def test_time_limit():
@@ -618,10 +618,10 @@ def test_xss_prevention():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
     # Should escape HTML tags
-    assert '<script>' not in result
-    assert '&lt;script&gt;' in result
-    assert '<img src=x' not in result
-    assert '&lt;img' in result
+    assert "<script>" not in result
+    assert "&lt;script&gt;" in result
+    assert "<img src=x" not in result
+    assert "&lt;img" in result
 
 
 def test_invalid_exam_type_rejected():
@@ -643,7 +643,7 @@ def test_invalid_exam_type_rejected():
     assert '<div class="exam"' in result
     assert 'data-type="choice"' in result
     # Invalid type should not appear in output
-    assert 'malicious-type' not in result
+    assert "malicious-type" not in result
 
 
 def test_combined_features():
@@ -674,9 +674,9 @@ def test_combined_features():
     # Check all features are present
     assert 'data-points="20"' in result
     assert 'data-time-limit="60"' in result
-    assert 'exam-hints' in result
+    assert "exam-hints" in result
     assert 'data-penalty="15"' in result
-    assert 'exam-explanation' in result
+    assert "exam-explanation" in result
     assert 'data-show="always"' in result
-    assert 'Great job!' in result
-    assert 'Try again' in result
+    assert "Great job!" in result
+    assert "Try again" in result

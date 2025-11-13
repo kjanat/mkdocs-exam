@@ -483,6 +483,7 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
    - Fallback colors may not work in dark mode
 
 3. **Fixed Units**:
+
    ```css
    padding: 1rem;
    ```
