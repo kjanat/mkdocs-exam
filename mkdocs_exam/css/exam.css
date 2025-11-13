@@ -185,8 +185,13 @@ input[type="radio"].wrong {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* Score */
@@ -198,7 +203,7 @@ input[type="radio"].wrong {
   text-align: center;
 }
 
-.exam-score:has(.exam-score:contains('✓')) {
+.exam-score:has(.exam-score:contains("✓")) {
   background: var(--exam-correct-color);
   color: white;
 }
@@ -276,7 +281,7 @@ input[type="radio"].wrong {
 
 .ordering-item:hover {
   border-color: var(--md-primary-fg-color);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .ordering-item.dragging {

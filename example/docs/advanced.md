@@ -33,7 +33,7 @@ content: |
 
 ```yaml
 type: short-answer
-question: "Who wrote \"1984\"?"
+question: 'Who wrote "1984"?'
 answer-correct:
   - "George Orwell"
 content: |

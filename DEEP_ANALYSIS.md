@@ -11,6 +11,7 @@
 ### Current Test Suite (12 tests)
 
 **Basic Functionality (6 tests)**: ✅
+
 - `test_exam_block_converts_to_html` - Choice questions
 - `test_short_answer_question` - Text input validation
 - `test_fill_question` - Fill-in-the-blank
@@ -19,6 +20,7 @@
 - `test_matching_question` - Dropdown matching
 
 **Advanced Features (5 tests)**: ✅
+
 - `test_multi_document_yaml` - Multi-doc YAML parsing
 - `test_environment_variable_interpolation` - Env var substitution
 - `test_environment_variable_with_default` - Env var defaults
@@ -26,20 +28,23 @@
 - `test_exam_with_exam_fence` - Alternative fence syntax
 
 **Meta Features (1 test)**: ✅
+
 - `test_exam_disabled_leaves_markdown_unchanged` - Disable flag
 
 ### Coverage Estimate: ~70%
 
 **What's Tested**:
+
 - ✅ All 6 exam types (choice, truefalse, short-answer, fill, essay, matching)
 - ✅ YAML parsing (basic + multi-document)
 - ✅ Environment variable interpolation
 - ✅ YAML anchors and aliases
-- ✅ Both fence types (```yaml and ```exam)
+- ✅ Both fence types (`yaml and `exam)
 - ✅ Page-level disable functionality
 - ✅ Multiple correct answers (checkboxes vs radio)
 
 **What's NOT Tested**:
+
 - ❌ Invalid YAML (should raise PluginError)
 - ❌ Missing required fields (question)
 - ❌ Malformed exam data (non-dict, empty content)
@@ -89,7 +94,7 @@
 
 ### Data Flow
 
-```
+````
 Markdown Input
     │
     ▼
@@ -136,7 +141,7 @@ Markdown Input
     │
     ▼
 Final HTML Output
-```
+````
 
 ### Design Patterns Used
 
@@ -144,18 +149,18 @@ Final HTML Output
 2. **Strategy Pattern**: Different rendering for each exam type
 3. **Facade Pattern**: Simple API hides complex YAML/HTML processing
 4. **Dependency Injection**: Resources loaded at module level
-5. **Builder Pattern**: HTML construction in _process_exam_data()
+5. **Builder Pattern**: HTML construction in \_process_exam_data()
 
 ### Separation of Concerns
 
-| Layer | Responsibility | Location |
-|-------|---------------|----------|
-| **Plugin Interface** | MkDocs event hooks | `on_startup`, `on_page_markdown`, `on_page_content` |
-| **Business Logic** | Exam processing | `_process_exam_data()` |
-| **Data Transformation** | Env var interpolation | `interpolate_env_vars()` |
-| **Presentation** | HTML generation | Type-specific blocks (129-173) |
-| **Frontend Logic** | Interactive validation | `exam.js` |
-| **Styling** | Visual presentation | `exam.css` |
+| Layer                   | Responsibility         | Location                                            |
+| ----------------------- | ---------------------- | --------------------------------------------------- |
+| **Plugin Interface**    | MkDocs event hooks     | `on_startup`, `on_page_markdown`, `on_page_content` |
+| **Business Logic**      | Exam processing        | `_process_exam_data()`                              |
+| **Data Transformation** | Env var interpolation  | `interpolate_env_vars()`                            |
+| **Presentation**        | HTML generation        | Type-specific blocks (129-173)                      |
+| **Frontend Logic**      | Interactive validation | `exam.js`                                           |
+| **Styling**             | Visual presentation    | `exam.css`                                          |
 
 ---
 
@@ -199,42 +204,52 @@ Final HTML Output
 ### Weaknesses ⚠️
 
 1. **Regex-Based Parsing** (Line 201):
-   ```python
+
+   ````python
    REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
-   ```
+   ````
+
    - **Issue**: Won't handle nested codeblocks correctly
-   - **Example**: Content with `` ``` `` inside breaks parsing
+   - **Example**: Content with ` ``` ` inside breaks parsing
    - **Risk**: Medium - affects markdown in content field
 
 2. **No Input Sanitization**:
+
    ```python
    html_question = question  # Line 126
    full_answers.append(f'<label for="{input_id}">{ans}</label>')  # Line 148
    ```
+
    - **Issue**: User input directly injected into HTML
    - **Risk**: XSS vulnerability if malicious YAML
    - **Mitigation**: Need HTML escaping
 
 3. **Global State**:
+
    ```python
    style = f'<style type="text/css">{style}</style>'  # Module level
    ```
+
    - **Issue**: Resources loaded once at import time
    - **Risk**: Can't refresh without restart
    - **Impact**: Low - resources rarely change
 
 4. **Hard-Coded Magic Strings**:
+
    ```python
    if q_type == "choice" or q_type == "truefalse":
    ```
+
    - **Issue**: Type checking via string comparison
    - **Better**: Enum or constants
    - **Maintainability**: Medium
 
 5. **Limited Validation**:
+
    ```python
    if not question:  # Only checks for empty question
    ```
+
    - **Missing**: Answer validation, type validation
    - **Risk**: Runtime errors from malformed data
 
@@ -259,6 +274,7 @@ f'<label for="{input_id}">{ans}</label>'  # No escaping
 ```
 
 **Attack Vector**:
+
 ```yaml
 question: "<script>alert('XSS')</script>"
 answer-correct:
@@ -268,6 +284,7 @@ answer-correct:
 **Impact**: Arbitrary JavaScript execution in user browsers
 
 **Mitigation Required**:
+
 ```python
 import html
 html_question = html.escape(question)
@@ -282,11 +299,13 @@ os.environ.get(var_name, default_value)
 ```
 
 **Risk**: Sensitive env vars could be leaked in public docs
+
 - Database passwords
 - API keys
 - Internal URLs
 
 **Mitigation**:
+
 - Whitelist allowed env vars
 - Warn on production builds
 - Document security implications
@@ -300,6 +319,7 @@ docs = list(yaml.safe_load_all(match))
 ```
 
 **Attack**:
+
 ```yaml
 a: &a ["a", "a", "a", "a", "a", "a", "a"]
 b: &b [*a, *a, *a, *a, *a, *a, *a]
@@ -310,6 +330,7 @@ c: &c [*b, *b, *b, *b, *b, *b, *b]
 **Impact**: Memory exhaustion, build failure
 
 **Mitigation**:
+
 - Limit YAML document size
 - Timeout on parsing
 - Resource limits
@@ -318,9 +339,9 @@ c: &c [*b, *b, *b, *b, *b, *b, *b]
 
 **Location**: Line 201
 
-```python
+````python
 REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
-```
+````
 
 **Current**: Non-greedy `.*?` - relatively safe
 
@@ -335,12 +356,14 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 ### Current Performance Profile
 
 **Time Complexity**:
+
 - Regex search: O(n) where n = markdown length
 - YAML parsing: O(m) where m = exam content length
 - Env var interpolation: O(k) where k = number of vars
 - HTML generation: O(p) where p = number of answers
 
 **Space Complexity**:
+
 - Stores full markdown in memory
 - No streaming processing
 - Resources loaded once (good)
@@ -348,16 +371,20 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 ### Performance Issues
 
 1. **Multiple Regex Passes** (Line 202):
+
    ```python
    matches = re.findall(REGEX, markdown, re.DOTALL)
    ```
+
    - Scans entire document even if no exams
    - Could short-circuit on first check
 
 2. **Repeated String Replacement** (Lines 230-236):
+
    ```python
    markdown = re.sub(old_exam_pattern, exam_html, markdown, count=1)
    ```
+
    - For N exams, modifies string N times
    - Could batch replacements
 
@@ -368,15 +395,17 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 ### Optimization Opportunities
 
 1. **Early Exit**:
-   ```python
+
+   ````python
    if '```yaml' not in markdown and '```exam' not in markdown:
        return markdown  # Skip processing
-   ```
+   ````
 
 2. **Compiled Regex**:
-   ```python
+
+   ````python
    EXAM_REGEX = re.compile(r"```(?:exam|yaml)\s*\n(.*?)```", re.DOTALL)
-   ```
+   ````
 
 3. **String Builder**:
    Use list joining instead of repeated concatenation
@@ -391,6 +420,7 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 ### JavaScript (exam.js)
 
 **Strengths**:
+
 - ✅ Event delegation with `querySelectorAll`
 - ✅ Type-based validation logic
 - ✅ Case-insensitive answer checking
@@ -400,15 +430,18 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 **Issues**:
 
 1. **No Error Handling**:
+
    ```javascript
-   const form = exam.querySelector('form')  // Could be null
+   const form = exam.querySelector("form"); // Could be null
    ```
 
 2. **Global Functions** (Lines 55, 66):
+
    ```javascript
    function markFields(selected, correct)
    function resetFieldset(fieldset)
    ```
+
    - Could pollute global namespace
    - Should use IIFE or module pattern
 
@@ -425,29 +458,35 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 ### CSS (exam.css)
 
 **Strengths**:
+
 - ✅ CSS custom properties for theming
-- ✅ Theme integration (--md-* variables)
+- ✅ Theme integration (--md-\* variables)
 - ✅ Focus states for accessibility
 - ✅ Responsive design
 
 **Issues**:
 
 1. **Specificity Wars**:
+
    ```css
    .exam input[type="text"].correct { ... }
    ```
+
    - High specificity makes overriding difficult
 
 2. **No Dark Mode Fallback**:
+
    ```css
    --exam-correct-color: var(--md-accent-fg-color, #00e676);
    ```
+
    - Fallback colors may not work in dark mode
 
 3. **Fixed Units**:
    ```css
    padding: 1rem;
    ```
+
    - Could use responsive units
 
 ---
@@ -457,6 +496,7 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 ### Adding New Exam Types
 
 **Current Process**:
+
 1. Add new type to `q_type` checks (Line 129+)
 2. Implement HTML generation logic
 3. Update JavaScript validation (exam.js)
@@ -466,6 +506,7 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 **Complexity**: HIGH - requires changes in 4 files
 
 **Better Architecture**:
+
 ```python
 class ExamType(ABC):
     @abstractmethod
@@ -493,6 +534,7 @@ EXAM_TYPES = {
 **Currently**: Zero-config plugin
 
 **Missing**:
+
 - Custom validation messages
 - Theme color overrides
 - Default exam type
@@ -500,6 +542,7 @@ EXAM_TYPES = {
 - Enable/disable features
 
 **Example**:
+
 ```yaml
 plugins:
   - mkdocs-exam:
@@ -518,15 +561,17 @@ plugins:
 ### Critical Missing Tests
 
 1. **Error Handling**:
-   ```python
+
+   ````python
    def test_invalid_yaml_raises_plugin_error():
        markdown = "```yaml\ninvalid: yaml: syntax:\n```"
        with pytest.raises(PluginError):
            plugin.on_page_markdown(markdown, DummyPage(), None)
-   ```
+   ````
 
 2. **XSS Prevention**:
-   ```python
+
+   ````python
    def test_xss_in_question_is_escaped():
        markdown = """```yaml
        question: "<script>alert('xss')</script>"
@@ -535,9 +580,10 @@ plugins:
        result = plugin.on_page_markdown(markdown, DummyPage(), None)
        assert '<script>' not in result
        assert '&lt;script&gt;' in result
-   ```
+   ````
 
 3. **Resource Loading Failures**:
+
    ```python
    def test_missing_resources_logs_warning():
        # Mock resource loading failure
@@ -546,7 +592,8 @@ plugins:
    ```
 
 4. **Unicode Handling**:
-   ```python
+
+   ````python
    def test_unicode_in_exam():
        markdown = """```yaml
        question: "What is π?"
@@ -556,9 +603,10 @@ plugins:
        ```"""
        result = plugin.on_page_markdown(markdown, DummyPage(), None)
        assert 'π' in result
-   ```
+   ````
 
 5. **Edge Cases**:
+
    ```python
    def test_empty_answers_list()
    def test_all_fields_empty()
@@ -569,6 +617,7 @@ plugins:
    ```
 
 6. **Integration Tests**:
+
    ```python
    def test_full_mkdocs_build():
        # Actually run mkdocs build on example project
@@ -586,6 +635,7 @@ plugins:
 - No integration tests
 
 **Better Structure**:
+
 ```
 tests/
 ├── unit/
@@ -637,6 +687,7 @@ tests/
 ### Priority 1: CRITICAL (Security)
 
 1. **Add HTML Escaping**:
+
    ```python
    import html
    html_question = html.escape(question)
@@ -644,6 +695,7 @@ tests/
    ```
 
 2. **Add Input Validation**:
+
    ```python
    ALLOWED_TYPES = {'choice', 'truefalse', 'short-answer', 'fill', 'essay', 'matching'}
    if q_type not in ALLOWED_TYPES:
@@ -683,17 +735,17 @@ tests/
 
 ## 11. Metrics Summary
 
-| Metric | Value | Assessment |
-|--------|-------|------------|
-| **Lines of Code** | 782 | Small, manageable |
-| **Test Count** | 12 | Good start, needs 20+ |
-| **Test Coverage** | ~70% | Needs improvement |
-| **Cyclomatic Complexity** | ~8-12 per function | Acceptable |
-| **Dependencies** | 3 (mkdocs, mkdocs-material, pyyaml) | Minimal ✅ |
-| **Security Issues** | 3 (XSS, env vars, YAML bomb) | Needs attention ⚠️ |
-| **MkDocs Compliance** | 100% | Excellent ✅ |
-| **Type Hints Coverage** | 100% | Excellent ✅ |
-| **Documentation** | Good | Could be better |
+| Metric                    | Value                               | Assessment            |
+| ------------------------- | ----------------------------------- | --------------------- |
+| **Lines of Code**         | 782                                 | Small, manageable     |
+| **Test Count**            | 12                                  | Good start, needs 20+ |
+| **Test Coverage**         | ~70%                                | Needs improvement     |
+| **Cyclomatic Complexity** | ~8-12 per function                  | Acceptable            |
+| **Dependencies**          | 3 (mkdocs, mkdocs-material, pyyaml) | Minimal ✅            |
+| **Security Issues**       | 3 (XSS, env vars, YAML bomb)        | Needs attention ⚠️    |
+| **MkDocs Compliance**     | 100%                                | Excellent ✅          |
+| **Type Hints Coverage**   | 100%                                | Excellent ✅          |
+| **Documentation**         | Good                                | Could be better       |
 
 ---
 
@@ -702,6 +754,7 @@ tests/
 ### Overall Assessment: **B+ (Good, with room for improvement)**
 
 **Strengths**:
+
 - ✅ Excellent MkDocs compliance
 - ✅ Modern Python practices (type hints, logging)
 - ✅ Clean architecture
@@ -709,11 +762,13 @@ tests/
 - ✅ Good test coverage for happy paths
 
 **Critical Issues**:
+
 - 🔴 XSS vulnerability requires immediate fix
 - 🟡 Missing error handling tests
 - 🟡 No input validation for untrusted YAML
 
 **Next Steps**:
+
 1. **Fix XSS** (1-2 hours)
 2. **Add input validation** (2-3 hours)
 3. **Write error handling tests** (3-4 hours)

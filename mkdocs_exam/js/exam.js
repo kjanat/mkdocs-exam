@@ -154,7 +154,7 @@ document.querySelectorAll('.exam').forEach((exam) => {
     scoreDiv.className = 'exam-score'
     scoreDiv.textContent = isCorrect
       ? `✓ Correct! Score: ${currentScore}/${points} points`
-      : `✗ Incorrect. Try again!`
+      : '✗ Incorrect. Try again!'
 
     const existingScore = exam.querySelector('.exam-score')
     if (existingScore) {
@@ -192,7 +192,7 @@ function resetFieldset (fieldset) {
   }
 }
 
-function showAnswerFeedback(selectedInputs) {
+function showAnswerFeedback (selectedInputs) {
   selectedInputs.forEach((input) => {
     const feedback = input.dataset.feedback
     if (feedback) {

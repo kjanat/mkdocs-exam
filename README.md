@@ -40,7 +40,7 @@ content: |
 > The questions, answers, and content support full **Markdown** syntax
 
 > [!TIP]
-> You can use either `` ```yaml `` or `` ```exam `` as the codeblock language
+> You can use either ` ```yaml ` or ` ```exam ` as the codeblock language
 
 ### Multiple choice
 
@@ -369,7 +369,7 @@ content: |
 All string fields (question, answers, content) support **full Markdown syntax**:
 
 ````markdown
-```yaml
+````yaml
 question: "What does `git commit` do?"
 answer-correct:
   - "Creates a **new commit** with staged changes"
@@ -386,7 +386,10 @@ content: |
 
   ```bash
   git commit -m "Your message"
-  ```
+````
+
+```
+
 ```
 ````
 

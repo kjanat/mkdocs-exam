@@ -209,12 +209,12 @@ def test_multi_document_yaml():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
     # Should contain both exams
-    assert 'First question?' in result
-    assert 'Second question?' in result
-    assert 'Answer 1' in result
-    assert 'Answer 2' in result
-    assert 'First content' in result
-    assert 'Second content' in result
+    assert "First question?" in result
+    assert "Second question?" in result
+    assert "Answer 1" in result
+    assert "Answer 2" in result
+    assert "First content" in result
+    assert "Second content" in result
     # Should have both exam divs
     assert result.count('<div class="exam"') == 2
 
@@ -222,8 +222,9 @@ def test_multi_document_yaml():
 def test_environment_variable_interpolation():
     """Test that environment variables are interpolated in YAML"""
     import os
-    os.environ['TEST_API_KEY'] = 'secret123'
-    os.environ['TEST_URL'] = 'https://example.com'
+
+    os.environ["TEST_API_KEY"] = "secret123"
+    os.environ["TEST_URL"] = "https://example.com"
 
     markdown = textwrap.dedent(
         """
@@ -239,15 +240,15 @@ def test_environment_variable_interpolation():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'secret123' in result
-    assert 'https://example.com' in result
+    assert "secret123" in result
+    assert "https://example.com" in result
     # Should not contain the ${...} syntax
-    assert '${TEST_API_KEY}' not in result
-    assert '${TEST_URL}' not in result
+    assert "${TEST_API_KEY}" not in result
+    assert "${TEST_URL}" not in result
 
     # Clean up
-    del os.environ['TEST_API_KEY']
-    del os.environ['TEST_URL']
+    del os.environ["TEST_API_KEY"]
+    del os.environ["TEST_URL"]
 
 
 def test_environment_variable_with_default():
@@ -266,9 +267,9 @@ def test_environment_variable_with_default():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'default_value' in result
-    assert 'fallback' in result
-    assert '${NONEXISTENT_VAR' not in result
+    assert "default_value" in result
+    assert "fallback" in result
+    assert "${NONEXISTENT_VAR" not in result
 
 
 def test_yaml_anchors_and_aliases():
@@ -291,9 +292,9 @@ def test_yaml_anchors_and_aliases():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
     # Should contain both correct answers
-    assert 'Option A' in result
-    assert 'Option B' in result
-    assert 'Option C' in result
+    assert "Option A" in result
+    assert "Option B" in result
+    assert "Option C" in result
 
 
 def test_exam_with_exam_fence():
@@ -312,6 +313,6 @@ def test_exam_with_exam_fence():
     plugin = MkDocsExamPlugin()
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
-    assert 'Using exam fence' in result
-    assert 'Yes' in result
+    assert "Using exam fence" in result
+    assert "Yes" in result
     assert '<div class="exam"' in result

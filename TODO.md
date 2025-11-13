@@ -10,6 +10,7 @@
 ## 🎯 Phase 1: Core Enhanced Features (High Value, Low Effort)
 
 ### Pedagogical Enhancements
+
 - [ ] **Hints System** - Progressive hints with score penalties
 - [ ] **Explanations** - Show rationale after answering
 - [ ] **Answer Feedback** - Custom feedback per answer choice
@@ -18,6 +19,7 @@
 - [ ] **Points/Scoring** - Custom point values per question
 
 ### New Exam Types
+
 - [ ] **Numeric Range** - Accept answers within tolerance
 - [ ] **Code Completion** - Fill-in-the-blank for code
 - [ ] **Regex Answer** - Validate answers with regex patterns
@@ -33,12 +35,14 @@
 ## 🔧 Phase 3: Configuration & Customization
 
 ### Plugin Configuration
+
 - [ ] **Global Config Schema** - BasePlugin config class
 - [ ] **Default Settings** - Default exam type, colors, behavior
 - [ ] **Theme Customization** - Custom colors, styles
 - [ ] **Feature Toggles** - Enable/disable features globally
 
 ### Exam-Level Configuration
+
 - [ ] **Difficulty Levels** - Easy/Medium/Hard classification
 - [ ] **Randomization** - Shuffle questions and answers
 - [ ] **Variables** - Dynamic question generation with templates
@@ -73,6 +77,7 @@
 ## 🎨 Phase 7: UI/UX Improvements
 
 ### Frontend Enhancements
+
 - [ ] **Accessibility** - Full ARIA support, keyboard navigation
 - [ ] **Mobile Optimization** - Touch-friendly, responsive
 - [ ] **Dark Mode** - Improved dark theme support
@@ -80,6 +85,7 @@
 - [ ] **Offline Mode** - Service worker for offline exams
 
 ### Visual Improvements
+
 - [ ] **Progress Bars** - Visual exam progress indicators
 - [ ] **Icons** - Question type icons, status indicators
 - [ ] **Markdown Preview** - Live preview in content field
@@ -88,6 +94,7 @@
 ## 🧪 Phase 8: Testing & Quality
 
 ### Test Coverage
+
 - [ ] **Error Handling Tests** - Invalid YAML, missing fields
 - [ ] **Edge Case Tests** - Unicode, special chars, large content
 - [ ] **Integration Tests** - Full MkDocs build tests
@@ -95,6 +102,7 @@
 - [ ] **Performance Tests** - Large exam sets, stress testing
 
 ### Code Quality
+
 - [ ] **Refactor Exam Types** - Strategy pattern, plugin system
 - [ ] **HTML Escaping Everywhere** - Comprehensive XSS prevention
 - [ ] **Type Hints Complete** - Full mypy compliance
@@ -126,30 +134,35 @@
 ## Implementation Order (Recommended)
 
 ### Week 1: Security & Foundation
+
 1. Fix XSS vulnerability (2 hours)
 2. Add input validation (3 hours)
 3. Write security tests (4 hours)
 4. Refactor exam type system (6 hours)
 
 ### Week 2: Core Features
+
 5. Hints system (4 hours)
 6. Explanations (3 hours)
 7. Answer feedback (3 hours)
 8. Rich media support (4 hours)
 
 ### Week 3: New Exam Types
+
 9. Numeric range (3 hours)
 10. Code completion (5 hours)
 11. Ordering/sequencing (6 hours)
 12. Regex validation (2 hours)
 
 ### Week 4: Configuration
+
 13. Plugin config schema (4 hours)
 14. Randomization (3 hours)
 15. Time limits (4 hours)
 16. Points/scoring (3 hours)
 
 ### Month 2+: Advanced Features
+
 Continue with phases 4-10 based on user feedback and priorities.
 
 ---

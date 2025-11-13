@@ -5,12 +5,14 @@ This document verifies that mkdocs-exam complies with official MkDocs plugin dev
 ## ✅ Compliance Checklist
 
 ### Plugin Structure
+
 - [x] Inherits from `BasePlugin`
 - [x] Distributed as separate Python module
 - [x] Entry point correctly registered in `pyproject.toml`
 - [x] Package name follows convention: `mkdocs-exam`
 
 ### Event Hooks
+
 - [x] `on_startup()` - Properly implemented with correct signature
 - [x] `on_page_markdown()` - Core transformation hook with proper signature
 - [x] `on_page_content()` - HTML post-processing with proper signature
@@ -19,12 +21,14 @@ This document verifies that mkdocs-exam complies with official MkDocs plugin dev
 - [x] All methods have proper type hints
 
 ### Error Handling
+
 - [x] Uses `PluginError` for plugin-specific errors
 - [x] Provides custom error messages for YAML parsing failures
 - [x] Catches and wraps exceptions appropriately
 - [x] Resource loading includes fallback handling
 
 ### Logging
+
 - [x] Uses `get_plugin_logger(__name__)` (recommended practice)
 - [x] Logs to `mkdocs.plugins.mkdocs_exam` namespace
 - [x] Uses appropriate log levels:
@@ -33,17 +37,20 @@ This document verifies that mkdocs-exam complies with official MkDocs plugin dev
   - `error()` + `PluginError` for actual errors
 
 ### Type Safety
+
 - [x] Proper imports from `typing` module
 - [x] Type hints on all public methods
 - [x] Uses `Any` for flexible parameters
 - [x] Return types specified
 
 ### Configuration
+
 - [x] No configuration schema required (zero-config plugin)
 - [x] Supports page-level metadata (`exam: disable`)
 - [x] No user-facing configuration options needed
 
 ### Code Quality
+
 - [x] Docstrings on all public methods
 - [x] Clear separation of concerns
 - [x] Resource loading with error handling
@@ -54,21 +61,25 @@ This document verifies that mkdocs-exam complies with official MkDocs plugin dev
 ### Event Methods
 
 #### `on_startup(*, command: str, dirty: bool) -> None`
+
 - Captures build mode for potential future use
 - MkDocs 1.4+ feature
 
 #### `on_page_markdown(markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any) -> str`
+
 - Main transformation hook
-- Parses ```yaml and ```exam codeblocks
+- Parses `yaml and `exam codeblocks
 - Supports multi-document YAML
 - Environment variable interpolation
 - Returns transformed markdown with HTML
 
 #### `on_page_content(html: str, page: Page, config: MkDocsConfig, files: Files, **kwargs: Any) -> str`
+
 - Injects CSS and JavaScript inline
 - Ensures self-contained exam functionality
 
 #### `on_build_error(error: Exception, **kwargs: Any) -> None`
+
 - Logs errors for debugging
 - Allows proper error propagation
 
@@ -101,7 +112,7 @@ raise PluginError("User-friendly error message") from e
   - Multi-document YAML
   - Environment variable interpolation
   - YAML anchors and aliases
-  - Both ```yaml and ```exam fence types
+  - Both `yaml and `exam fence types
 
 ## Dependencies
 

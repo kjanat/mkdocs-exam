@@ -27,6 +27,7 @@ except Exception as e:
     style = ""
     script_tag = ""
     import warnings
+
     warnings.warn(f"Failed to load mkdocs-exam resources: {e}")
 
 # ```yaml
@@ -44,8 +45,15 @@ logger = get_plugin_logger(__name__)
 
 # Allowed exam types (whitelist for validation)
 ALLOWED_EXAM_TYPES = {
-    'choice', 'truefalse', 'short-answer', 'fill', 'essay', 'matching',
-    'numeric', 'code-completion', 'ordering'  # New types we'll implement
+    "choice",
+    "truefalse",
+    "short-answer",
+    "fill",
+    "essay",
+    "matching",
+    "numeric",
+    "code-completion",
+    "ordering",  # New types we'll implement
 }
 
 
@@ -189,9 +197,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             correct_vals = [escape_html(answers[i]) for i in correct_idx] or [escape_html(a) for a in answers]
             correct_attr = "|".join(correct_vals)
             if q_type == "essay":  # use textarea for long-form answers
-                full_answers.append(
-                    f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
-                )
+                full_answers.append(f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>')
             elif q_type == "fill":
                 # Keep original question but escape the correct answer in attribute
                 html_question = escape_html(question).replace(
@@ -218,7 +224,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             full_answers.append(
                 f'<div><input type="number" step="any" name="answer" '
                 f'data-correct="{correct_val}" data-tolerance="{tolerance}" data-unit="{escape_html(unit)}">'
-                f' {escape_html(unit)}</div>'
+                f" {escape_html(unit)}</div>"
             )
         elif q_type == "code-completion":
             # New code completion type
@@ -229,7 +235,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             parts = escape_html(template).split("___")
             code_html = parts[0]
             for i, part in enumerate(parts[1:]):
-                blank_correct = "|".join([escape_html(str(c)) for c in blanks[i].get("correct", [])]) if i < len(blanks) else ""
+                blank_correct = (
+                    "|".join([escape_html(str(c)) for c in blanks[i].get("correct", [])]) if i < len(blanks) else ""
+                )
                 code_html += f'<input type="text" name="answer" correct="{blank_correct}" class="code-blank">'
                 code_html += part
             full_answers.append(f'<div><pre><code class="language-{language}">{code_html}</code></pre></div>')
@@ -240,7 +248,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             items_html = ""
             for i, item in enumerate(items):
                 items_html += f'<div class="ordering-item" data-index="{i}">{escape_html(str(item))}</div>'
-            full_answers.append(f'<div class="ordering-container" data-correct-order="{",".join(map(str, correct_order))}">{items_html}</div>')
+            full_answers.append(
+                f'<div class="ordering-container" data-correct-order="{",".join(map(str, correct_order))}">{items_html}</div>'
+            )
 
         html_answers = "".join(full_answers)
         content_html = "\n".join(content_lines)
@@ -253,17 +263,19 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                 if isinstance(hint, dict):
                     hint_text = escape_html(hint.get("text", ""))
                     hint_penalty = hint.get("penalty", 0)
-                    hints_html += f'<div class="hint" data-penalty="{hint_penalty}"><button class="hint-button">Hint {i+1} (-{hint_penalty}%)</button><div class="hint-text hidden">{hint_text}</div></div>'
+                    hints_html += f'<div class="hint" data-penalty="{hint_penalty}"><button class="hint-button">Hint {i + 1} (-{hint_penalty}%)</button><div class="hint-text hidden">{hint_text}</div></div>'
                 else:
                     hint_text = escape_html(str(hint))
-                    hints_html += f'<div class="hint"><button class="hint-button">Hint {i+1}</button><div class="hint-text hidden">{hint_text}</div></div>'
-            hints_html += '</div>'
+                    hints_html += f'<div class="hint"><button class="hint-button">Hint {i + 1}</button><div class="hint-text hidden">{hint_text}</div></div>'
+            hints_html += "</div>"
 
         # Build explanation HTML
         explanation_html = ""
         if explanation:
             explanation_escaped = escape_html(explanation)
-            explanation_html = f'<div class="exam-explanation hidden" data-show="{show_explanation}">{explanation_escaped}</div>'
+            explanation_html = (
+                f'<div class="exam-explanation hidden" data-show="{show_explanation}">{explanation_escaped}</div>'
+            )
 
         # Build rich media HTML
         media_html = ""
@@ -288,20 +300,22 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
 
         exam_html = (
             f'<div class="exam" {data_attrs}>'
-            f'{media_html}'
-            f'<h3>{html_question}</h3>'
-            f'{hints_html}'
-            f'<form><fieldset>'
+            f"{media_html}"
+            f"<h3>{html_question}</h3>"
+            f"{hints_html}"
+            f"<form><fieldset>"
             f"{html_answers}</fieldset>"
             '<button type="submit" class="exam-button">Submit</button>'
-            f'</form>'
-            f'{explanation_html}'
+            f"</form>"
+            f"{explanation_html}"
             f'<section class="content hidden">{content_html}</section>'
-            f'</div>'
+            f"</div>"
         )
         return exam_html
 
-    def on_page_markdown(self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any) -> str:
+    def on_page_markdown(
+        self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any
+    ) -> str:
         """
         Parse exam blocks in markdown and generate HTML quizzes.
         Supports:
