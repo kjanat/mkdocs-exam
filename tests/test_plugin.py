@@ -185,3 +185,133 @@ def test_exam_disabled_leaves_markdown_unchanged():
     page = DummyPage(meta={"exam": "disable"})
     result = plugin.on_page_markdown(markdown, page, None)
     assert result == markdown
+
+
+def test_multi_document_yaml():
+    """Test that multiple exams can be defined in a single YAML block using ---"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "First question?"
+        answer-correct:
+          - "Answer 1"
+        content: |
+          First content
+        ---
+        question: "Second question?"
+        answer-correct:
+          - "Answer 2"
+        content: |
+          Second content
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    # Should contain both exams
+    assert 'First question?' in result
+    assert 'Second question?' in result
+    assert 'Answer 1' in result
+    assert 'Answer 2' in result
+    assert 'First content' in result
+    assert 'Second content' in result
+    # Should have both exam divs
+    assert result.count('<div class="exam"') == 2
+
+
+def test_environment_variable_interpolation():
+    """Test that environment variables are interpolated in YAML"""
+    import os
+    os.environ['TEST_API_KEY'] = 'secret123'
+    os.environ['TEST_URL'] = 'https://example.com'
+
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "What is the API key?"
+        answer-correct:
+          - "${TEST_API_KEY}"
+        content: |
+          The URL is ${TEST_URL}
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'secret123' in result
+    assert 'https://example.com' in result
+    # Should not contain the ${...} syntax
+    assert '${TEST_API_KEY}' not in result
+    assert '${TEST_URL}' not in result
+
+    # Clean up
+    del os.environ['TEST_API_KEY']
+    del os.environ['TEST_URL']
+
+
+def test_environment_variable_with_default():
+    """Test that environment variables with defaults work"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "What is the value?"
+        answer-correct:
+          - "${NONEXISTENT_VAR:-default_value}"
+        content: |
+          Testing ${ALSO_MISSING:-fallback}
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'default_value' in result
+    assert 'fallback' in result
+    assert '${NONEXISTENT_VAR' not in result
+
+
+def test_yaml_anchors_and_aliases():
+    """Test that YAML anchors and aliases work correctly"""
+    markdown = textwrap.dedent(
+        """
+        ```yaml
+        question: "Select the correct options"
+        answer-correct: &correct_answers
+          - "Option A"
+          - "Option B"
+        answer:
+          - "Option C"
+        content: |
+          Correct answers are referenced
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    # Should contain both correct answers
+    assert 'Option A' in result
+    assert 'Option B' in result
+    assert 'Option C' in result
+
+
+def test_exam_with_exam_fence():
+    """Test that ```exam fence type works in addition to ```yaml"""
+    markdown = textwrap.dedent(
+        """
+        ```exam
+        question: "Using exam fence"
+        answer-correct:
+          - "Yes"
+        content: |
+          This uses ```exam instead of ```yaml
+        ```
+        """
+    )
+    plugin = MkDocsExamPlugin()
+    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+
+    assert 'Using exam fence' in result
+    assert 'Yes' in result
+    assert '<div class="exam"' in result

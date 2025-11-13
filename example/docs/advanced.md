@@ -85,3 +85,50 @@ answer:
 content: |
   Capitals and their countries.
 ```
+
+## Multi-Document YAML
+
+Multiple exams in a single codeblock:
+
+```yaml
+question: "What is 2 + 2?"
+answer-correct:
+  - "4"
+answer:
+  - "3"
+  - "5"
+content: |
+  Basic arithmetic
+---
+question: "What is 5 * 5?"
+answer-correct:
+  - "25"
+answer:
+  - "20"
+  - "30"
+content: |
+  More arithmetic
+```
+
+## Environment Variables
+
+```yaml
+question: "What is the environment?"
+answer-correct:
+  - "${NODE_ENV:-development}"
+content: |
+  Testing in ${NODE_ENV:-development} mode
+```
+
+## YAML Anchors
+
+```yaml
+question: "Select programming languages"
+answer-correct: &languages
+  - "Python"
+  - "JavaScript"
+answer:
+  - "HTML"
+content: |
+  Programming languages are listed above
+```

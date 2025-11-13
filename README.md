@@ -138,6 +138,87 @@ content: |
 ```
 ````
 
+## Advanced Features
+
+### Multi-Document YAML
+
+You can define multiple exams in a single codeblock using YAML's `---` document separator:
+
+````markdown
+```yaml
+question: "First question?"
+answer-correct:
+  - "Answer 1"
+content: |
+  First exam content
+---
+question: "Second question?"
+answer-correct:
+  - "Answer 2"
+content: |
+  Second exam content
+```
+````
+
+### Environment Variable Interpolation
+
+Support for environment variables in YAML using `${VAR}` or `${VAR:-default}` syntax:
+
+````markdown
+```yaml
+question: "What is the API endpoint?"
+answer-correct:
+  - "${API_URL}"
+answer:
+  - "${FALLBACK_URL:-https://example.com}"
+content: |
+  The correct endpoint is ${API_URL:-https://api.example.com}
+```
+````
+
+### YAML Anchors and Aliases
+
+Full support for YAML anchors (`&`) and aliases (`*`) to reuse configuration:
+
+````markdown
+```yaml
+question: "Select all correct options"
+answer-correct: &correct
+  - "Option A"
+  - "Option B"
+answer:
+  - "Option C"
+content: |
+  Reference answers with anchors
+```
+````
+
+### Markdown Support
+
+All string fields (question, answers, content) support **full Markdown syntax**:
+
+````markdown
+```yaml
+question: "What does `git commit` do?"
+answer-correct:
+  - "Creates a **new commit** with staged changes"
+answer:
+  - "*Pushes* changes to remote"
+  - "Merges branches"
+content: |
+  ## Git Basics
+
+  The `git commit` command:
+  - Records changes
+  - Creates a snapshot
+  - Requires a message
+
+  ```bash
+  git commit -m "Your message"
+  ```
+```
+````
+
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
 
 ## Screenshots
