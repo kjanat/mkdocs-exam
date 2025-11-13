@@ -109,12 +109,12 @@ categories:
   - "Control Flow"
   - "Data Structures"
 correct-mapping:
-  0: 0  # for loop -> Control Flow
-  1: 0  # if statement -> Control Flow
-  2: 1  # list -> Data Structures
-  3: 1  # dictionary -> Data Structures
-  4: 0  # while loop -> Control Flow
-  5: 1  # tuple -> Data Structures
+  0: 0 # for loop -> Control Flow
+  1: 0 # if statement -> Control Flow
+  2: 1 # list -> Data Structures
+  3: 1 # dictionary -> Data Structures
+  4: 0 # while loop -> Control Flow
+  5: 1 # tuple -> Data Structures
 points: 20
 content: |
   **Control Flow** structures control the execution order of code.
@@ -140,12 +140,12 @@ categories:
   - "Birds"
   - "Fish"
 correct-mapping:
-  0: 0  # Dog -> Mammals
-  1: 0  # Cat -> Mammals
-  2: 1  # Eagle -> Birds
-  3: 1  # Sparrow -> Birds
-  4: 2  # Salmon -> Fish
-  5: 2  # Tuna -> Fish
+  0: 0 # Dog -> Mammals
+  1: 0 # Cat -> Mammals
+  2: 1 # Eagle -> Birds
+  3: 1 # Sparrow -> Birds
+  4: 2 # Salmon -> Fish
+  5: 2 # Tuna -> Fish
 points: 15
 content: |
   Drag each organism into its correct taxonomic class.
@@ -172,12 +172,12 @@ categories:
   - "Fantasy"
   - "Classic Literature"
 correct-mapping:
-  0: 0  # 1984 -> Science Fiction
-  1: 1  # The Hobbit -> Fantasy
-  2: 2  # Pride and Prejudice -> Classic Literature
-  3: 0  # Dune -> Science Fiction
-  4: 2  # Romeo and Juliet -> Classic Literature
-  5: 1  # Harry Potter -> Fantasy
+  0: 0 # 1984 -> Science Fiction
+  1: 1 # The Hobbit -> Fantasy
+  2: 2 # Pride and Prejudice -> Classic Literature
+  3: 0 # Dune -> Science Fiction
+  4: 2 # Romeo and Juliet -> Classic Literature
+  5: 1 # Harry Potter -> Fantasy
 points: 25
 content: |
   Match each famous book to its literary genre.
@@ -200,12 +200,12 @@ categories:
   - "O(log n) - Logarithmic"
   - "O(n) - Linear"
 correct-mapping:
-  0: 2  # Array (unsorted) -> O(n)
-  1: 0  # Hash Table -> O(1)
-  2: 1  # Binary Search Tree -> O(log n)
-  3: 2  # Linked List -> O(n)
-  4: 1  # Sorted Array -> O(log n)
-  5: 2  # Heap -> O(n) for search
+  0: 2 # Array (unsorted) -> O(n)
+  1: 0 # Hash Table -> O(1)
+  2: 1 # Binary Search Tree -> O(log n)
+  3: 2 # Linked List -> O(n)
+  4: 1 # Sorted Array -> O(log n)
+  5: 2 # Heap -> O(n) for search
 points: 30
 content: |
   **Time Complexity Categories:**
@@ -434,11 +434,11 @@ categories:
   - "O(log n) - Logarithmic"
   - "O(n) - Linear"
 correct-mapping:
-  0: 2  # Array (unsorted) -> O(n)
-  1: 0  # Hash Table -> O(1)
-  2: 1  # Binary Search Tree -> O(log n)
-  3: 2  # Linked List -> O(n)
-  4: 1  # Skip List -> O(log n)
+  0: 2 # Array (unsorted) -> O(n)
+  1: 0 # Hash Table -> O(1)
+  2: 1 # Binary Search Tree -> O(log n)
+  3: 2 # Linked List -> O(n)
+  4: 1 # Skip List -> O(log n)
 hints:
   - text: "Hash tables use direct key-to-value mapping"
     penalty: 10
@@ -538,38 +538,41 @@ plugins:
 # In mkdocs.yml
 plugins:
   - mkdocs-exam:
-      enabled: true           # Enable/disable plugin globally
-      default_type: choice    # Default exam type if not specified
-      default_points: 1       # Default points per question
-      show_answers: false     # Show correct answers after submission
+      enabled: true # Enable/disable plugin globally
+      default_type: choice # Default exam type if not specified
+      default_points: 1 # Default points per question
+      show_answers: false # Show correct answers after submission
       randomize_answers: false # Shuffle answer order (not implemented yet)
-      theme: default          # Theme name for custom styling
+      theme: default # Theme name for custom styling
 ```
 
 ### Configuration Use Cases
 
 **For Testing/Development:**
+
 ```yaml
 plugins:
   - mkdocs-exam:
       enabled: true
-      show_answers: true     # Show answers for quick testing
+      show_answers: true # Show answers for quick testing
 ```
 
 **For Production:**
+
 ```yaml
 plugins:
   - mkdocs-exam:
       enabled: true
-      show_answers: false    # Hide answers in production
-      default_points: 5      # Higher point values
+      show_answers: false # Hide answers in production
+      default_points: 5 # Higher point values
 ```
 
 **Disable Plugin:**
+
 ```yaml
 plugins:
   - mkdocs-exam:
-      enabled: false         # Disable all exam processing
+      enabled: false # Disable all exam processing
 ```
 
 ## Best Practices

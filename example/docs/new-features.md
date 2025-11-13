@@ -407,12 +407,12 @@ categories:
   - "Control Flow"
   - "Data Structures"
 correct-mapping:
-  0: 0  # for loop -> Control Flow
-  1: 0  # if statement -> Control Flow
-  2: 1  # list -> Data Structures
-  3: 1  # dictionary -> Data Structures
-  4: 0  # while loop -> Control Flow
-  5: 1  # tuple -> Data Structures
+  0: 0 # for loop -> Control Flow
+  1: 0 # if statement -> Control Flow
+  2: 1 # list -> Data Structures
+  3: 1 # dictionary -> Data Structures
+  4: 0 # while loop -> Control Flow
+  5: 1 # tuple -> Data Structures
 points: 20
 content: |
   **Control Flow** structures control the execution order of code.
@@ -436,12 +436,12 @@ categories:
   - "Birds"
   - "Fish"
 correct-mapping:
-  0: 0  # Dog -> Mammals
-  1: 0  # Cat -> Mammals
-  2: 1  # Eagle -> Birds
-  3: 1  # Sparrow -> Birds
-  4: 2  # Salmon -> Fish
-  5: 2  # Tuna -> Fish
+  0: 0 # Dog -> Mammals
+  1: 0 # Cat -> Mammals
+  2: 1 # Eagle -> Birds
+  3: 1 # Sparrow -> Birds
+  4: 2 # Salmon -> Fish
+  5: 2 # Tuna -> Fish
 points: 15
 content: |
   Drag each organism into its correct taxonomic class.
@@ -593,12 +593,12 @@ plugins:
 # In mkdocs.yml
 plugins:
   - mkdocs-exam:
-      enabled: true           # Enable/disable plugin globally
-      default_type: choice    # Default exam type if not specified
-      default_points: 1       # Default points per question
-      show_answers: false     # Show correct answers after submission
+      enabled: true # Enable/disable plugin globally
+      default_type: choice # Default exam type if not specified
+      default_points: 1 # Default points per question
+      show_answers: false # Show correct answers after submission
       randomize_answers: false # Shuffle answer order
-      theme: default          # Theme name for custom styling
+      theme: default # Theme name for custom styling
 ```
 
 ### Advanced Multi-Feature Example
@@ -618,10 +618,10 @@ categories:
   - "O(log n) - Logarithmic"
   - "O(n) - Linear"
 correct-mapping:
-  0: 2  # Array (unsorted) -> O(n)
-  1: 0  # Hash Table -> O(1)
-  2: 1  # Binary Search Tree -> O(log n)
-  3: 2  # Linked List -> O(n)
+  0: 2 # Array (unsorted) -> O(n)
+  1: 0 # Hash Table -> O(1)
+  2: 1 # Binary Search Tree -> O(log n)
+  3: 2 # Linked List -> O(n)
 hints:
   - text: "Hash tables use direct key-to-value mapping"
     penalty: 10

@@ -707,9 +707,9 @@ def test_partial_credit_choice():
     assert 'data-type="choice"' in result
     assert 'data-points="10"' in result
     assert 'data-weight="0.5"' in result
-    assert 'Apple' in result
-    assert 'Banana' in result
-    assert 'Carrot' in result
+    assert "Apple" in result
+    assert "Banana" in result
+    assert "Carrot" in result
 
 
 def test_categorization_exam_type():
@@ -739,15 +739,15 @@ def test_categorization_exam_type():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
     assert 'data-type="categorization"' in result
-    assert 'categorization-container' in result
-    assert 'categorization-item' in result
-    assert 'categorization-category' in result
-    assert 'Dog' in result
-    assert 'Cat' in result
-    assert 'Apple' in result
-    assert 'Banana' in result
-    assert 'Animals' in result
-    assert 'Fruits' in result
+    assert "categorization-container" in result
+    assert "categorization-item" in result
+    assert "categorization-category" in result
+    assert "Dog" in result
+    assert "Cat" in result
+    assert "Apple" in result
+    assert "Banana" in result
+    assert "Animals" in result
+    assert "Fruits" in result
     assert 'data-correct-category="0"' in result
     assert 'data-correct-category="1"' in result
 
@@ -778,14 +778,14 @@ def test_hotspot_exam_type():
     result = plugin.on_page_markdown(markdown, DummyPage(), None)
 
     assert 'data-type="hotspot"' in result
-    assert 'hotspot-container' in result
-    assert 'hotspot-image-wrapper' in result
-    assert 'hotspot-region' in result
-    assert 'https://example.com/map.png' in result
-    assert 'left:10%' in result
-    assert 'top:20%' in result
-    assert 'width:30%' in result
-    assert 'height:40%' in result
+    assert "hotspot-container" in result
+    assert "hotspot-image-wrapper" in result
+    assert "hotspot-region" in result
+    assert "https://example.com/map.png" in result
+    assert "left:10%" in result
+    assert "top:20%" in result
+    assert "width:30%" in result
+    assert "height:40%" in result
 
 
 def test_plugin_configuration():
@@ -793,14 +793,14 @@ def test_plugin_configuration():
     plugin = MkDocsExamPlugin()
 
     # Verify config_scheme is defined
-    assert hasattr(plugin, 'config_scheme')
+    assert hasattr(plugin, "config_scheme")
     assert isinstance(plugin.config_scheme, tuple)
 
     # Check expected config options
     config_names = [item[0] for item in plugin.config_scheme]
-    assert 'enabled' in config_names
-    assert 'default_type' in config_names
-    assert 'default_points' in config_names
-    assert 'show_answers' in config_names
-    assert 'randomize_answers' in config_names
-    assert 'theme' in config_names
+    assert "enabled" in config_names
+    assert "default_type" in config_names
+    assert "default_points" in config_names
+    assert "show_answers" in config_names
+    assert "randomize_answers" in config_names
+    assert "theme" in config_names

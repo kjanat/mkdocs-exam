@@ -350,10 +350,10 @@ categories:
   - "Animals"
   - "Fruits"
 correct-mapping:
-  0: 0  # Dog -> Animals
-  1: 0  # Cat -> Animals
-  2: 1  # Apple -> Fruits
-  3: 1  # Banana -> Fruits
+  0: 0 # Dog -> Animals
+  1: 0 # Cat -> Animals
+  2: 1 # Apple -> Fruits
+  3: 1 # Banana -> Fruits
 points: 10
 content: |
   Drag each item to its correct category.
