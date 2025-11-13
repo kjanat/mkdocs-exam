@@ -1,10 +1,36 @@
 // ==================== LocalStorage Persistence ====================
 
+/**
+ * @typedef {Object} ExamState
+ * @property {string} type - The exam type (choice, categorization, hotspot, etc.)
+ * @property {number[]} hintsUsed - Array of hint indices that have been revealed
+ * @property {number|null} timeRemaining - Remaining time in seconds (null if no timer)
+ * @property {string[]} [selectedAnswers] - For choice/truefalse: array of selected answer values
+ * @property {Object.<string, string|null>} [categorizationState] - For categorization: item index -> category index mapping
+ * @property {string[]} [hotspotClicked] - For hotspot: array of clicked region indices
+ * @property {string[]} [orderingOrder] - For ordering: array of item indices in current order
+ * @property {string} [numericValue] - For numeric: the entered number value
+ * @property {string[]} [codeBlankValues] - For code-completion: array of blank input values
+ * @property {string[]} [matchingSelections] - For matching: array of dropdown selection values
+ * @property {string[]} [textInputValues] - For text/essay: array of text input values
+ */
+
+/**
+ * @typedef {Object} StoredExamData
+ * @property {number} timestamp - Unix timestamp when state was saved
+ * @property {ExamState} state - The exam state object
+ */
+
+/** @type {string} - Prefix for localStorage keys */
 const STORAGE_PREFIX = 'mkdocs-exam-state:'
+
+/** @type {number} - Hours before saved state expires */
 const EXPIRY_HOURS = 24
 
 /**
- * Generate unique storage key for an exam
+ * Generate unique storage key for an exam based on page path and exam index
+ * @param {number} examIndex - Zero-based index of exam on the page
+ * @returns {string} Unique storage key
  */
 function getStorageKey (examIndex) {
   const path = window.location.pathname
@@ -12,10 +38,14 @@ function getStorageKey (examIndex) {
 }
 
 /**
- * Save exam state to localStorage
+ * Save exam state to localStorage with timestamp
+ * @param {number} examIndex - Zero-based index of exam on the page
+ * @param {ExamState} state - The exam state to save
+ * @returns {void}
  */
 function saveExamState (examIndex, state) {
   try {
+    /** @type {StoredExamData} */
     const data = {
       timestamp: Date.now(),
       state
@@ -28,7 +58,8 @@ function saveExamState (examIndex, state) {
 
 /**
  * Load exam state from localStorage
- * Returns null if expired or not found
+ * @param {number} examIndex - Zero-based index of exam on the page
+ * @returns {ExamState|null} Saved exam state, or null if expired/not found
  */
 function loadExamState (examIndex) {
   try {
@@ -36,6 +67,7 @@ function loadExamState (examIndex) {
     const json = localStorage.getItem(key)
     if (!json) return null
 
+    /** @type {StoredExamData} */
     const data = JSON.parse(json)
     const age = Date.now() - data.timestamp
     const maxAge = EXPIRY_HOURS * 60 * 60 * 1000
@@ -54,6 +86,8 @@ function loadExamState (examIndex) {
 
 /**
  * Clear exam state from localStorage
+ * @param {number} examIndex - Zero-based index of exam on the page
+ * @returns {void}
  */
 function clearExamState (examIndex) {
   try {
@@ -478,6 +512,12 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
   })
 })
 
+/**
+ * Mark selected answer fields as correct or wrong
+ * @param {NodeListOf<HTMLInputElement>} selected - Selected input elements
+ * @param {boolean} correct - Whether the overall answer is correct (unused, kept for compatibility)
+ * @returns {void}
+ */
 function markFields (selected, correct) {
   resetFieldset(selected[0].closest('fieldset'))
   for (let i = 0; i < selected.length; i++) {
@@ -489,6 +529,11 @@ function markFields (selected, correct) {
   }
 }
 
+/**
+ * Reset fieldset by removing correct/wrong classes from all children
+ * @param {HTMLFieldSetElement} fieldset - The fieldset element to reset
+ * @returns {void}
+ */
 function resetFieldset (fieldset) {
   const fieldsetChildren = fieldset.children
   for (let i = 0; i < fieldsetChildren.length; i++) {
@@ -502,6 +547,11 @@ function resetFieldset (fieldset) {
   }
 }
 
+/**
+ * Show feedback messages for selected answer inputs
+ * @param {NodeListOf<HTMLInputElement>|HTMLInputElement[]} selectedInputs - Selected input elements with feedback
+ * @returns {void}
+ */
 function showAnswerFeedback (selectedInputs) {
   selectedInputs.forEach((input) => {
     const feedback = input.dataset.feedback

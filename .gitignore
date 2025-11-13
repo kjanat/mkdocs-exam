@@ -188,3 +188,7 @@ artifact.tar
 .mypy_cache/
 .specstory/
 .vscode/
+
+# Node.js / npm
+node_modules/
+package-lock.json

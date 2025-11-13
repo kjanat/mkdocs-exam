@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    // Type checking options
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+
+    // Module resolution
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Target environment
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+
+    // JSDoc validation (without full type checking)
+    "maxNodeModuleJsDepth": 0
+  },
+  "include": [
+    "mkdocs_exam/js/**/*.js",
+    "mkdocs_exam/js/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "**/*.spec.js",
+    "**/*.test.js"
+  ]
+}

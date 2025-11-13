@@ -1,0 +1,27 @@
+{
+  "name": "mkdocs-exam",
+  "version": "0.1.0",
+  "description": "MkDocs plugin to create interactive training exams in markdown",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "lint:types": "tsc --noEmit --pretty"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kjanat/mkdocs-exam.git"
+  },
+  "keywords": [
+    "mkdocs",
+    "plugin",
+    "exam",
+    "quiz",
+    "education"
+  ],
+  "author": "kjanat",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
