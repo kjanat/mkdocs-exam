@@ -14,8 +14,10 @@ dev_addr: localhost:8008
 
 nav:
   - Home: index.md
-  - Disabled Exam: disable.md
   - Advanced: advanced.md
+  - Phase 1 Features: new-features.md
+  - Phase 2 Features: phase2-features.md
+  - Disabled Exam: disable.md
 
 theme:
   name: material

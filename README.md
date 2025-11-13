@@ -309,6 +309,106 @@ content: |
 ```
 ````
 
+## Advanced Exam Types (Phase 2)
+
+### Multi-Select with Partial Credit
+
+Award partial credit for partially correct answers with weighted scoring:
+
+````markdown
+```yaml
+question: "Select all fruits (each worth 50% of total points):"
+answer-correct:
+  - value: "Apple"
+    weight: 0.5
+  - value: "Banana"
+    weight: 0.5
+answer:
+  - value: "Carrot"
+    weight: 0.5
+partial-credit: true
+points: 10
+content: |
+  Partial credit is awarded based on the weights of correctly selected answers.
+```
+````
+
+### Categorization (Drag and Drop)
+
+Drag items into the correct categories:
+
+````markdown
+```yaml
+type: categorization
+question: "Categorize these items into Animals and Fruits:"
+items:
+  - "Dog"
+  - "Cat"
+  - "Apple"
+  - "Banana"
+categories:
+  - "Animals"
+  - "Fruits"
+correct-mapping:
+  0: 0  # Dog -> Animals
+  1: 0  # Cat -> Animals
+  2: 1  # Apple -> Fruits
+  3: 1  # Banana -> Fruits
+points: 10
+content: |
+  Drag each item to its correct category.
+```
+````
+
+### Hotspot/Image Map
+
+Click on correct regions of an image:
+
+````markdown
+```yaml
+type: hotspot
+question: "Click on all the European countries on this map:"
+image: "https://example.com/world-map.png"
+regions:
+  - x: 20
+    y: 15
+    width: 10
+    height: 8
+    correct: true
+    label: "France"
+  - x: 25
+    y: 18
+    width: 8
+    height: 6
+    correct: true
+    label: "Spain"
+  - x: 50
+    y: 40
+    width: 12
+    height: 10
+    correct: false
+    label: "Australia"
+points: 15
+content: |
+  Regions are positioned using percentages (x, y, width, height).
+```
+````
+
+### Plugin Configuration
+
+Configure global settings in `mkdocs.yml`:
+
+```yaml
+plugins:
+  - mkdocs-exam:
+      enabled: true
+      default_type: choice
+      default_points: 1
+      show_answers: false
+      randomize_answers: false
+      theme: default
+```
+
 ## Advanced Features
 
 ### Multi-Document YAML

@@ -804,4 +804,3 @@ def test_plugin_configuration():
     assert 'show_answers' in config_names
     assert 'randomize_answers' in config_names
     assert 'theme' in config_names
->>>>>>> 8df5024 (Add Phase 2 advanced features: partial credit, categorization, hotspot, and plugin config)
