@@ -2,23 +2,44 @@
   "compilerOptions": {
     // Type checking options
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "noEmit": true,
     "skipLibCheck": true,
+
+    // Strict type checking (enabled!)
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    // Additional checks
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
 
     // Module resolution
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
 
     // Target environment
     "target": "ES2020",
     "lib": ["ES2020", "DOM"],
     "module": "ESNext",
 
-    // JSDoc validation (without full type checking)
-    "maxNodeModuleJsDepth": 0
+    // Additional safety
+    "exactOptionalPropertyTypes": false,
+    "useUnknownInCatchVariables": true
   },
   "include": ["mkdocs_exam/js/**/*.js", "mkdocs_exam/js/**/*.d.ts"],
   "exclude": ["node_modules", "dist", "build", "**/*.spec.js", "**/*.test.js"]

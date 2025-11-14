@@ -1,22 +1,69 @@
+// ==================== Type Guards ====================
+
+/**
+ * Type guard to check if an element is an HTMLElement
+ * @param {Element | null} element - The element to check
+ * @returns {element is HTMLElement}
+ */
+function isHTMLElement (element) {
+  return element !== null && element instanceof HTMLElement
+}
+
+/**
+ * Type guard to check if an element is an HTMLInputElement
+ * @param {Element | null} element - The element to check
+ * @returns {element is HTMLInputElement}
+ */
+function isHTMLInputElement (element) {
+  return element !== null && element instanceof HTMLInputElement
+}
+
+/**
+ * Type guard to check if an element is an HTMLButtonElement
+ * @param {Element | null} element - The element to check
+ * @returns {element is HTMLButtonElement}
+ */
+function isHTMLButtonElement (element) {
+  return element !== null && element instanceof HTMLButtonElement
+}
+
+/**
+ * Type guard to check if an element is an HTMLSelectElement
+ * @param {Element | null} element - The element to check
+ * @returns {element is HTMLSelectElement}
+ */
+function isHTMLSelectElement (element) {
+  return element !== null && element instanceof HTMLSelectElement
+}
+
+/**
+ * Type guard to check if an element is an HTMLFieldSetElement
+ * @param {Element | null} element - The element to check
+ * @returns {element is HTMLFieldSetElement}
+ */
+function isHTMLFieldSetElement (element) {
+  return element !== null && element instanceof HTMLFieldSetElement
+}
+
 // ==================== LocalStorage Persistence ====================
 
 /**
- * @typedef {Object} ExamState
+ * @typedef {object} ExamState
  * @property {string} type - The exam type (choice, categorization, hotspot, etc.)
  * @property {number[]} hintsUsed - Array of hint indices that have been revealed
- * @property {number|null} timeRemaining - Remaining time in seconds (null if no timer)
- * @property {string[]} [selectedAnswers] - For choice/truefalse: array of selected answer values
- * @property {Object.<string, string|null>} [categorizationState] - For categorization: item index -> category index mapping
- * @property {string[]} [hotspotClicked] - For hotspot: array of clicked region indices
- * @property {string[]} [orderingOrder] - For ordering: array of item indices in current order
- * @property {string} [numericValue] - For numeric: the entered number value
- * @property {string[]} [codeBlankValues] - For code-completion: array of blank input values
- * @property {string[]} [matchingSelections] - For matching: array of dropdown selection values
- * @property {string[]} [textInputValues] - For text/essay: array of text input values
+ * @property {number | null} timeRemaining - Remaining time in seconds (null if no timer)
+ * @property {string[] | undefined} selectedAnswers - For choice/truefalse: array of selected answer values
+ * @property {Record<string, string | null> | undefined} categorizationState - For categorization: item index -> category index mapping
+ * @property {string[] | undefined} hotspotClicked - For hotspot: array of clicked region indices
+ * @property {string[] | undefined} orderingOrder - For ordering: array of item indices in current order
+ * @property {string | undefined} numericValue - For numeric: the entered number value
+ * @property {string[] | undefined} codeBlankValues - For code-completion: array of blank input values
+ * @property {string[] | undefined} matchingSelections - For matching: array of dropdown selection values
+ * @property {string[] | undefined} textInputValues - For text/essay: array of text input values
  */
 
 /**
- * @typedef {Object} StoredExamData
+ * @typedef {object} StoredExamData
  * @property {number} timestamp - Unix timestamp when state was saved
  * @property {ExamState} state - The exam state object
  */
@@ -101,13 +148,32 @@ function clearExamState (examIndex) {
 
 // Initialize all exams on the page
 document.querySelectorAll('.exam').forEach((exam, examIndex) => {
+  // Ensure exam is an HTMLElement
+  if (!isHTMLElement(exam)) {
+    console.warn('Exam element is not an HTMLElement:', exam)
+    return
+  }
+
+  // Get form and fieldset with null checks
   const form = exam.querySelector('form')
+  if (!form) {
+    console.warn('Exam form not found for exam:', exam)
+    return
+  }
+
   const fieldset = form.querySelector('fieldset')
+  if (!fieldset) {
+    console.warn('Exam fieldset not found for exam:', exam)
+    return
+  }
+
+  // Safely access exam data attributes
   const type = exam.dataset.type || 'choice'
-  const points = parseInt(exam.dataset.points) || 1
-  const timeLimit = parseInt(exam.dataset.timeLimit)
+  const points = parseInt(exam.dataset.points || '1', 10) || 1
+  const timeLimit = exam.dataset.timeLimit ? parseInt(exam.dataset.timeLimit, 10) : undefined
 
   let currentScore = points
+  /** @type {ReturnType<typeof setInterval> | null} */
   let timerInterval = null
   let hintsUsed = 0
 
