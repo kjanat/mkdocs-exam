@@ -1,6 +1,5 @@
 """MkDocs Exam Plugin - Create interactive training exams in markdown."""
 
-import html
 import os
 import re
 from importlib import resources as impresources
@@ -15,6 +14,23 @@ from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
 
 from . import css, js
+from .html_builders import (
+    build_exam_wrapper,
+    build_explanation_html,
+    build_hints_html,
+    build_media_html,
+    escape_html,
+)
+from .processors import (
+    process_categorization_answers,
+    process_choice_truefalse_answers,
+    process_code_completion_answers,
+    process_hotspot_answers,
+    process_matching_answers,
+    process_numeric_answers,
+    process_ordering_answers,
+    process_short_answer_fill_essay_answers,
+)
 
 # Read bundled CSS and JS and wrap them for inline injection
 try:
@@ -62,11 +78,6 @@ ALLOWED_EXAM_TYPES = {
     "categorization",  # Drag items into categories
     "hotspot",  # Click regions on images
 }
-
-
-def escape_html(text: str) -> str:
-    """Escape HTML to prevent XSS attacks."""
-    return html.escape(str(text), quote=True)
 
 
 def interpolate_env_vars(value: Any) -> Any:
@@ -123,11 +134,10 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         # Interpolate environment variables
         exam_data = interpolate_env_vars(exam_data)
 
-        # Extract exam properties from YAML
+        # Extract and validate exam properties
         q_type = exam_data.get("type", "choice").lower()
         question = exam_data.get("question", "")
 
-        # Validate exam type
         if q_type not in ALLOWED_EXAM_TYPES:
             logger.warning(f"[{page_path}] Exam #{exam_id}: Invalid type '{q_type}'. Using 'choice'.")
             q_type = "choice"
@@ -139,16 +149,63 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         # Extract optional fields
         hints = exam_data.get("hints", [])
         explanation = exam_data.get("explanation", "")
-        show_explanation = exam_data.get("show-explanation", "on-correct")  # always, on-correct, on-wrong, never
+        show_explanation = exam_data.get("show-explanation", "on-correct")
         points = exam_data.get("points", 1)
-        time_limit = exam_data.get("time-limit")  # seconds
-        partial_credit = exam_data.get("partial-credit", False)  # Enable weighted scoring
-
+        time_limit = exam_data.get("time-limit")
+        partial_credit = exam_data.get("partial-credit", False)
         content_lines = exam_data.get("content", "").strip().splitlines()
 
-        # Process answers
+        # Process answers and extract correct indices
+        answers, correct_idx, answer_feedbacks, answer_weights = self._parse_answers(exam_data)
+
+        # Generate answers HTML based on exam type
+        html_question = escape_html(question)
+        full_answers, final_question = self._generate_answers_html(
+            q_type=q_type,
+            answers=answers,
+            correct_idx=correct_idx,
+            answer_feedbacks=answer_feedbacks,
+            answer_weights=answer_weights,
+            exam_id=exam_id,
+            partial_credit=partial_credit,
+            exam_data=exam_data,
+            question=html_question,
+        )
+
+        # Build component HTML sections
+        html_answers = "".join(full_answers)
+        content_html = "\n".join(content_lines)
+        hints_html = build_hints_html(hints)
+        explanation_html = build_explanation_html(explanation, show_explanation)
+        media_html = build_media_html(exam_data["media"]) if "media" in exam_data else ""
+
+        # Build and return complete exam HTML
+        return build_exam_wrapper(
+            question=final_question,
+            exam_type=q_type,
+            points=points,
+            time_limit=time_limit,
+            media_html=media_html,
+            hints_html=hints_html,
+            answers_html=html_answers,
+            explanation_html=explanation_html,
+            content_html=content_html,
+        )
+
+    def _parse_answers(self, exam_data: dict) -> tuple[list[str], list[int], list[str], list[float]]:
+        """Parse and extract answer data from exam configuration.
+
+        Args:
+            exam_data: Full exam data dictionary
+
+        Returns:
+            Tuple of (answers, correct_idx, answer_feedbacks, answer_weights)
+
+        """
         answers: list[str] = []
         correct_idx: list[int] = []
+        answer_feedbacks: list[str] = []
+        answer_weights: list[float] = []
 
         # Get answer-correct field
         answer_correct = exam_data.get("answer-correct", [])
@@ -171,212 +228,69 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
 
         answers.extend(str(ans) for ans in answer_list)
 
-        # Escape HTML in question for security
-        html_question = escape_html(question)
-        full_answers: list[str] = []
-
         # Process answers with feedback and weight support
-        answer_feedbacks: list[str] = []
-        answer_weights: list[float] = []
         for ans in answer_correct + answer_list:
             if isinstance(ans, dict):
-                # Answer with feedback/weight: {value: "...", feedback: "...", weight: 0.5}
                 answer_feedbacks.append(ans.get("feedback", ""))
                 answer_weights.append(ans.get("weight", 1.0))
             else:
                 answer_feedbacks.append("")
                 answer_weights.append(1.0)
 
+        return answers, correct_idx, answer_feedbacks, answer_weights
+
+    def _generate_answers_html(  # noqa: PLR0911, PLR0913, PLR0917
+        self,
+        q_type: str,
+        answers: list[str],
+        correct_idx: list[int],
+        answer_feedbacks: list[str],
+        answer_weights: list[float],
+        exam_id: int,
+        partial_credit: bool,
+        exam_data: dict,
+        question: str,
+    ) -> tuple[list[str], str]:
+        """Generate HTML for exam answers based on type.
+
+        Args:
+            q_type: Exam type (choice, truefalse, etc.)
+            answers: List of answer strings
+            correct_idx: Indices of correct answers
+            answer_feedbacks: List of feedback strings
+            answer_weights: List of answer weights
+            exam_id: Exam identifier
+            partial_credit: Whether to enable partial credit
+            exam_data: Full exam data dictionary
+            question: Question text (may be modified for fill type)
+
+        Returns:
+            Tuple of (list of HTML strings for answers, final question text)
+
+        """
         if q_type in {"choice", "truefalse"}:
-            if q_type == "truefalse":
-                if not answers:
-                    answers = ["True", "False"]
-                    if not correct_idx:
-                        correct_idx = [0]
-                elif len(answers) == 1:
-                    if answers[0].strip().lower() in {"true", "yes"}:
-                        answers.append("False")
-                    else:
-                        answers.append("True")
-            as_checkboxes = len(correct_idx) > 1
-            for i, ans in enumerate(answers):
-                is_correct = i in correct_idx
-                input_id = f"exam-{exam_id}-{i}"
-                input_type = "checkbox" if as_checkboxes else "radio"
-                correct = "correct" if is_correct else ""
-                # Escape answer text for security
-                ans_escaped = escape_html(ans)
-                feedback = escape_html(answer_feedbacks[i]) if i < len(answer_feedbacks) else ""
-                feedback_attr = f' data-feedback="{feedback}"' if feedback else ""
-                # Add weight for partial credit support
-                weight = answer_weights[i] if i < len(answer_weights) else 1.0
-                weight_attr = f' data-weight="{weight}"' if partial_credit else ""
-                full_answers.append(
-                    f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}{feedback_attr}{weight_attr}>'
-                    f'<label for="{input_id}">{ans_escaped}</label></div>'
-                )
+            return (
+                process_choice_truefalse_answers(
+                    q_type, answers, correct_idx, answer_feedbacks, answer_weights, exam_id, partial_credit
+                ),
+                question,
+            )
         elif q_type in {"short-answer", "fill", "essay"}:
-            correct_vals = [escape_html(answers[i]) for i in correct_idx] or [escape_html(a) for a in answers]
-            correct_attr = "|".join(correct_vals)
-            if q_type == "essay":  # use textarea for long-form answers
-                full_answers.append(f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>')
-            elif q_type == "fill":
-                # Keep original question but escape the correct answer in attribute
-                html_question = escape_html(question).replace(
-                    "___", f'<input type="text" name="answer" correct="{correct_attr}">'
-                )
-            else:
-                full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
+            return process_short_answer_fill_essay_answers(q_type, answers, correct_idx, question)
         elif q_type == "matching":
-            pairs = [ans.split("|") for ans in answers]
-            left = [escape_html(p[0].strip()) for p in pairs]
-            right = [escape_html(p[1].strip()) for p in pairs]
-            options = "".join(f"<option>{r}</option>" for r in right)
-            for i, left_item in enumerate(left):
-                full_answers.append(
-                    f"<div><label>{left_item} "
-                    f'<select name="answer" correct="{right[i]}">{options}</select>'
-                    "</label></div>"
-                )
+            return process_matching_answers(answers), question
         elif q_type == "numeric":
-            # New numeric range type
-            tolerance = exam_data.get("tolerance", 0.01)
-            correct_val = exam_data.get("answer-correct", [0])[0] if exam_data.get("answer-correct") else 0
-            unit = exam_data.get("unit", "")
-            full_answers.append(
-                f'<div><input type="number" step="any" name="answer" '
-                f'data-correct="{correct_val}" data-tolerance="{tolerance}" data-unit="{escape_html(unit)}">'
-                f" {escape_html(unit)}</div>"
-            )
+            return process_numeric_answers(exam_data), question
         elif q_type == "code-completion":
-            # New code completion type
-            template = exam_data.get("template", "")
-            language = exam_data.get("language", "python")
-            blanks = exam_data.get("blanks", [])
-            # Split template by ___ and create inputs
-            parts = escape_html(template).split("___")
-            code_html = parts[0]
-            for i, part in enumerate(parts[1:]):
-                blank_correct = (
-                    "|".join([escape_html(str(c)) for c in blanks[i].get("correct", [])]) if i < len(blanks) else ""
-                )
-                code_html += f'<input type="text" name="answer" correct="{blank_correct}" class="code-blank">'
-                code_html += part
-            full_answers.append(f'<div><pre><code class="language-{language}">{code_html}</code></pre></div>')
+            return process_code_completion_answers(exam_data), question
         elif q_type == "ordering":
-            # Ordering/sequencing type
-            items = exam_data.get("items", [])
-            correct_order = exam_data.get("correct-order", list(range(len(items))))
-            items_html = ""
-            for i, item in enumerate(items):
-                items_html += f'<div class="ordering-item" data-index="{i}">{escape_html(str(item))}</div>'
-            full_answers.append(
-                f'<div class="ordering-container" data-correct-order="{",".join(map(str, correct_order))}">{items_html}</div>'
-            )
+            return process_ordering_answers(exam_data), question
         elif q_type == "categorization":
-            # Categorization type - drag items into categories
-            items = exam_data.get("items", [])
-            categories = exam_data.get("categories", [])
-            correct_mapping = exam_data.get("correct-mapping", {})  # {item_index: category_index}
-
-            # Build categories HTML
-            categories_html = '<div class="categorization-container">'
-            categories_html += '<div class="categorization-items">'
-            for i, item in enumerate(items):
-                correct_cat = correct_mapping.get(str(i), correct_mapping.get(i, 0))
-                item_escaped = escape_html(str(item))
-                categories_html += f'<div class="categorization-item" data-item-index="{i}" data-correct-category="{correct_cat}" draggable="true">{item_escaped}</div>'
-            categories_html += "</div>"
-            categories_html += '<div class="categorization-categories">'
-            for i, category in enumerate(categories):
-                cat_escaped = escape_html(str(category))
-                categories_html += f'<div class="categorization-category" data-category-index="{i}"><h4>{cat_escaped}</h4><div class="category-drop-zone"></div></div>'
-            categories_html += "</div>"
-            categories_html += "</div>"
-            full_answers.append(categories_html)
+            return process_categorization_answers(exam_data), question
         elif q_type == "hotspot":
-            # Hotspot/image map type - click regions on an image
-            image_src = escape_html(exam_data.get("image", ""))
-            regions = exam_data.get("regions", [])
+            return process_hotspot_answers(exam_data), question
 
-            # Build hotspot HTML
-            hotspot_html = '<div class="hotspot-container">'
-            hotspot_html += f'<div class="hotspot-image-wrapper"><img src="{image_src}" class="hotspot-image" alt="Hotspot question">'
-            # Add clickable regions as overlays
-            for i, region in enumerate(regions):
-                x = region.get("x", 0)
-                y = region.get("y", 0)
-                width = region.get("width", 50)
-                height = region.get("height", 50)
-                is_correct = region.get("correct", False)
-                correct_attr = "correct" if is_correct else ""
-                hotspot_html += (
-                    f'<div class="hotspot-region" data-region-index="{i}" {correct_attr} '
-                    f'style="left:{x}%;top:{y}%;width:{width}%;height:{height}%;"></div>'
-                )
-            hotspot_html += "</div></div>"
-            full_answers.append(hotspot_html)
-
-        html_answers = "".join(full_answers)
-        content_html = "\n".join(content_lines)
-
-        # Build hints HTML
-        hints_html = ""
-        if hints:
-            hints_html = '<div class="exam-hints hidden">'
-            for i, hint in enumerate(hints):
-                if isinstance(hint, dict):
-                    hint_text = escape_html(hint.get("text", ""))
-                    hint_penalty = hint.get("penalty", 0)
-                    hints_html += f'<div class="hint" data-penalty="{hint_penalty}"><button class="hint-button">Hint {i + 1} (-{hint_penalty}%)</button><div class="hint-text hidden">{hint_text}</div></div>'
-                else:
-                    hint_text = escape_html(str(hint))
-                    hints_html += f'<div class="hint"><button class="hint-button">Hint {i + 1}</button><div class="hint-text hidden">{hint_text}</div></div>'
-            hints_html += "</div>"
-
-        # Build explanation HTML
-        explanation_html = ""
-        if explanation:
-            explanation_escaped = escape_html(explanation)
-            explanation_html = (
-                f'<div class="exam-explanation hidden" data-show="{show_explanation}">{explanation_escaped}</div>'
-            )
-
-        # Build rich media HTML
-        media_html = ""
-        if "media" in exam_data:
-            media = exam_data["media"]
-            media_type = media.get("type", "image")
-            media_src = escape_html(media.get("src", ""))
-            media_alt = escape_html(media.get("alt", ""))
-            media_caption = escape_html(media.get("caption", ""))
-
-            if media_type == "image":
-                media_html = f'<figure class="exam-media"><img src="{media_src}" alt="{media_alt}"><figcaption>{media_caption}</figcaption></figure>'
-            elif media_type == "video":
-                media_html = f'<figure class="exam-media"><video controls src="{media_src}"></video><figcaption>{media_caption}</figcaption></figure>'
-            elif media_type == "audio":
-                media_html = f'<figure class="exam-media"><audio controls src="{media_src}"></audio><figcaption>{media_caption}</figcaption></figure>'
-
-        # Build data attributes
-        data_attrs = f'data-type="{q_type}" data-points="{points}"'
-        if time_limit:
-            data_attrs += f' data-time-limit="{time_limit}"'
-
-        exam_html = (
-            f'<div class="exam" {data_attrs}>'
-            f"{media_html}"
-            f"<h3>{html_question}</h3>"
-            f"{hints_html}"
-            f"<form><fieldset>"
-            f"{html_answers}</fieldset>"
-            '<button type="submit" class="exam-button">Submit</button>'
-            f"</form>"
-            f"{explanation_html}"
-            f'<section class="content hidden">{content_html}</section>'
-            f"</div>"
-        )
-        return exam_html
+        return [], question
 
     def on_page_markdown(
         self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any
