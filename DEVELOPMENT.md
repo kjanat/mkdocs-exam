@@ -28,9 +28,14 @@ uv pip install -e ".[dev]"
 ### JavaScript/TypeScript Setup
 
 ```bash
-# Install npm dependencies (for type checking)
+# Install dependencies using bun (fast package manager)
+bun install
+
+# Alternative: using npm
 npm install
 ```
+
+**Note:** This project uses [bun](https://bun.sh) for faster package management and script execution. The `bun.lockb` file is committed for reproducible builds.
 
 ## Type Checking with JSDoc
 
@@ -42,11 +47,12 @@ This project uses **JSDoc comments** for JavaScript documentation and **TypeScri
 - **Type Safety**: TypeScript validates types based on JSDoc annotations
 - **No Build Step**: JavaScript runs directly in browsers, no compilation needed
 - **IDE Support**: Modern editors provide autocomplete and type hints
+- **Fast Type Checking**: Uses TypeScript Native Preview (Go implementation) for faster checks
 
 ### Running Type Checks
 
 ```bash
-# Run type check once
+# Run type check once (using fast native TypeScript)
 npm run typecheck
 
 # Run type check in watch mode (continuous)
@@ -54,7 +60,12 @@ npm run typecheck:watch
 
 # Type check with pretty output
 npm run lint:types
+
+# Legacy type check using standard TypeScript (slower)
+npm run typecheck:legacy
 ```
+
+**Performance:** The project uses `@typescript/native-preview` (TypeScript Native Port) which is significantly faster than the standard TypeScript compiler. This is especially noticeable on larger codebases or in watch mode.
 
 ### Writing JSDoc Comments
 

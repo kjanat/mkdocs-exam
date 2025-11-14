@@ -4,9 +4,10 @@
   "description": "MkDocs plugin to create interactive training exams in markdown",
   "private": true,
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "typecheck:watch": "tsc --noEmit --watch",
-    "lint:types": "tsc --noEmit --pretty"
+    "typecheck": "tsgo --noEmit",
+    "typecheck:watch": "tsgo --noEmit --watch",
+    "lint:types": "tsgo --noEmit --pretty",
+    "typecheck:legacy": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   "author": "kjanat",
   "license": "MIT",
   "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20251113.1",
     "typescript": "^5.3.0"
   }
 }
