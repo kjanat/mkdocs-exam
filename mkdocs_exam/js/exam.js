@@ -266,75 +266,126 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
   }
 
   // Function to capture current exam state
+  /**
+   * @returns {ExamState}
+   */
   function getCurrentState () {
+    /** @type {ExamState} */
     const state = {
       type,
       hintsUsed: [],
-      timeRemaining: null
+      timeRemaining: null,
+      selectedAnswers: undefined,
+      categorizationState: undefined,
+      hotspotClicked: undefined,
+      orderingOrder: undefined,
+      numericValue: undefined,
+      codeBlankValues: undefined,
+      matchingSelections: undefined,
+      textInputValues: undefined
     }
 
     // Capture hint state
     const hintContainer = exam.querySelector('.exam-hints')
-    if (hintContainer) {
+    if (hintContainer && isHTMLElement(hintContainer)) {
       const hintButtons = hintContainer.querySelectorAll('.hint-button')
       hintButtons.forEach((btn, index) => {
-        if (btn.disabled) {
+        if (isHTMLButtonElement(btn) && btn.disabled) {
           state.hintsUsed.push(index)
         }
       })
     }
 
     // Capture time remaining (from closure)
-    if (timerInterval) {
+    if (timerInterval !== null) {
       const timerDiv = exam.querySelector('.exam-timer')
-      if (timerDiv) {
+      if (timerDiv && isHTMLElement(timerDiv) && timerDiv.textContent) {
         const match = timerDiv.textContent.match(/(\d+)s/)
-        if (match) {
-          state.timeRemaining = parseInt(match[1])
+        if (match && match[1]) {
+          state.timeRemaining = parseInt(match[1], 10)
         }
       }
+    }
+
+    // Null checks for form and fieldset
+    if (!form || !fieldset) {
+      return state
     }
 
     // Capture type-specific state
     if (type === 'choice' || type === 'truefalse') {
       const selected = form.querySelectorAll('input[name="answer"]:checked')
-      state.selectedAnswers = Array.from(selected).map(input => input.value)
+      state.selectedAnswers = Array.from(selected).map(input => {
+        if (isHTMLInputElement(input)) {
+          return input.value
+        }
+        return ''
+      })
     } else if (type === 'categorization') {
-      state.categorizationState = {}
+      /** @type {Record<string, string | null>} */
+      const categorizationState = {}
       const container = fieldset.querySelector('.categorization-container')
-      if (container) {
+      if (container && isHTMLElement(container)) {
         const items = container.querySelectorAll('.categorization-item')
         items.forEach((item) => {
+          if (!isHTMLElement(item)) return
           const itemIndex = item.dataset.itemIndex
+          if (!itemIndex) return
           const currentParent = item.closest('.categorization-category')
-          const categoryIndex = currentParent ? currentParent.dataset.categoryIndex : null
-          state.categorizationState[itemIndex] = categoryIndex
+          const categoryIndex = (currentParent && isHTMLElement(currentParent)) ? currentParent.dataset.categoryIndex : null
+          categorizationState[itemIndex] = categoryIndex || null
         })
       }
+      state.categorizationState = categorizationState
     } else if (type === 'hotspot') {
       const clickedRegions = fieldset.querySelectorAll('.hotspot-region.clicked')
-      state.hotspotClicked = Array.from(clickedRegions).map(r => r.dataset.regionIndex)
+      state.hotspotClicked = Array.from(clickedRegions).map(r => {
+        if (isHTMLElement(r)) {
+          return r.dataset.regionIndex || ''
+        }
+        return ''
+      })
     } else if (type === 'ordering') {
       const container = fieldset.querySelector('.ordering-container')
-      if (container) {
+      if (container && isHTMLElement(container)) {
         const items = Array.from(container.querySelectorAll('.ordering-item'))
-        state.orderingOrder = items.map(item => item.dataset.index)
+        state.orderingOrder = items.map(item => {
+          if (isHTMLElement(item)) {
+            return item.dataset.index || ''
+          }
+          return ''
+        })
       }
     } else if (type === 'numeric') {
       const input = fieldset.querySelector('input[type="number"]')
-      if (input) {
+      if (input && isHTMLInputElement(input)) {
         state.numericValue = input.value
       }
     } else if (type === 'code-completion') {
       const inputs = fieldset.querySelectorAll('input.code-blank')
-      state.codeBlankValues = Array.from(inputs).map(input => input.value)
+      state.codeBlankValues = Array.from(inputs).map(input => {
+        if (isHTMLInputElement(input)) {
+          return input.value
+        }
+        return ''
+      })
     } else if (type === 'matching') {
       const selects = fieldset.querySelectorAll('select[name="answer"]')
-      state.matchingSelections = Array.from(selects).map(select => select.value)
+      state.matchingSelections = Array.from(selects).map(select => {
+        if (isHTMLSelectElement(select)) {
+          return select.value
+        }
+        return ''
+      })
     } else {
       // short-answer, fill, essay
       const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
-      state.textInputValues = Array.from(inputs).map(input => input.value)
+      state.textInputValues = Array.from(inputs).map(input => {
+        if (isHTMLInputElement(input) || input instanceof HTMLTextAreaElement) {
+          return input.value
+        }
+        return ''
+      })
     }
 
     return state
@@ -347,7 +398,7 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
       if (savedState.selectedAnswers) {
         savedState.selectedAnswers.forEach((value) => {
           const input = form.querySelector(`input[name="answer"][value="${value}"]`)
-          if (input) {
+          if (input && isHTMLInputElement(input)) {
             input.checked = true
           }
         })
@@ -356,14 +407,15 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     // Restore categorization
     else if (type === 'categorization' && savedState.categorizationState) {
       const container = fieldset.querySelector('.categorization-container')
-      if (container) {
+      if (container && isHTMLElement(container)) {
         Object.keys(savedState.categorizationState).forEach((itemIndex) => {
+          if (!savedState.categorizationState) return
           const categoryIndex = savedState.categorizationState[itemIndex]
           const item = container.querySelector(`.categorization-item[data-item-index="${itemIndex}"]`)
           const category = container.querySelector(`.categorization-category[data-category-index="${categoryIndex}"]`)
-          if (item && category) {
+          if (item && isHTMLElement(item) && category && isHTMLElement(category)) {
             const dropZone = category.querySelector('.category-drop-zone')
-            if (dropZone) {
+            if (dropZone && isHTMLElement(dropZone)) {
               dropZone.appendChild(item)
             }
           }
@@ -374,7 +426,7 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     else if (type === 'hotspot' && savedState.hotspotClicked) {
       savedState.hotspotClicked.forEach((regionIndex) => {
         const region = fieldset.querySelector(`.hotspot-region[data-region-index="${regionIndex}"]`)
-        if (region) {
+        if (region && isHTMLElement(region)) {
           region.classList.add('clicked')
           if (region.hasAttribute('correct')) {
             region.classList.add('correct')
@@ -387,10 +439,15 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     // Restore ordering
     else if (type === 'ordering' && savedState.orderingOrder) {
       const container = fieldset.querySelector('.ordering-container')
-      if (container) {
+      if (container && isHTMLElement(container)) {
+        /** @type {Record<string, HTMLElement>} */
         const itemsMap = {}
         container.querySelectorAll('.ordering-item').forEach((item) => {
-          itemsMap[item.dataset.index] = item
+          if (!isHTMLElement(item)) return
+          const index = item.dataset.index
+          if (index) {
+            itemsMap[index] = item
+          }
         })
         container.innerHTML = ''
         savedState.orderingOrder.forEach((index) => {
@@ -403,7 +460,7 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     // Restore numeric
     else if (type === 'numeric' && savedState.numericValue !== undefined) {
       const input = fieldset.querySelector('input[type="number"]')
-      if (input) {
+      if (input && isHTMLInputElement(input)) {
         input.value = savedState.numericValue
       }
     }
@@ -411,8 +468,9 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     else if (type === 'code-completion' && savedState.codeBlankValues) {
       const inputs = fieldset.querySelectorAll('input.code-blank')
       savedState.codeBlankValues.forEach((value, index) => {
-        if (inputs[index]) {
-          inputs[index].value = value
+        const input = inputs[index]
+        if (input && isHTMLInputElement(input)) {
+          input.value = value
         }
       })
     }
@@ -420,8 +478,9 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     else if (type === 'matching' && savedState.matchingSelections) {
       const selects = fieldset.querySelectorAll('select[name="answer"]')
       savedState.matchingSelections.forEach((value, index) => {
-        if (selects[index]) {
-          selects[index].value = value
+        const select = selects[index]
+        if (select && isHTMLSelectElement(select)) {
+          select.value = value
         }
       })
     }
@@ -429,8 +488,9 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     else if (savedState.textInputValues) {
       const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
       savedState.textInputValues.forEach((value, index) => {
-        if (inputs[index]) {
-          inputs[index].value = value
+        const input = inputs[index]
+        if (input && (isHTMLInputElement(input) || input instanceof HTMLTextAreaElement)) {
+          input.value = value
         }
       })
     }
@@ -442,10 +502,14 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
   // Add event listeners to save state on input changes
   form.querySelectorAll('input, textarea, select').forEach((input) => {
     input.addEventListener('change', () => {
-      exam._saveState()
+      if (exam._saveState) {
+        exam._saveState()
+      }
     })
     input.addEventListener('input', () => {
-      exam._saveState()
+      if (exam._saveState) {
+        exam._saveState()
+      }
     })
   })
 
@@ -453,7 +517,7 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
   form.addEventListener('submit', (event) => {
     event.preventDefault()
 
-    if (timerInterval) {
+    if (timerInterval !== null) {
       clearInterval(timerInterval)
     }
 
@@ -464,18 +528,25 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
       const correct = fieldset.querySelectorAll('input[name="answer"][correct]')
       isCorrect = selected.length === correct.length
       for (let i = 0; i < selected.length; i++) {
-        if (!selected[i].hasAttribute('correct')) {
+        const input = selected[i]
+        if (input && !input.hasAttribute('correct')) {
           isCorrect = false
           break
         }
       }
-      markFields(selected, isCorrect)
-      // Show answer feedback
-      showAnswerFeedback(selected)
+      // Convert NodeListOf<Element> to array of HTMLInputElement
+      /** @type {HTMLInputElement[]} */
+      const selectedInputs = Array.from(selected).filter(isHTMLInputElement)
+      if (selectedInputs.length > 0) {
+        markFields(selectedInputs, isCorrect)
+        // Show answer feedback
+        showAnswerFeedback(selectedInputs)
+      }
     } else if (type === 'matching') {
       const selects = fieldset.querySelectorAll('select[name="answer"]')
       isCorrect = true
       selects.forEach((sel) => {
+        if (!isHTMLSelectElement(sel)) return
         const expected = sel.getAttribute('correct')
         const ok = sel.value === expected
         if (!ok) {
@@ -485,15 +556,20 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
       })
     } else if (type === 'numeric') {
       const input = fieldset.querySelector('input[type="number"]')
-      const userValue = parseFloat(input.value)
-      const correctValue = parseFloat(input.dataset.correct)
-      const tolerance = parseFloat(input.dataset.tolerance) || 0.01
-      isCorrect = Math.abs(userValue - correctValue) <= tolerance
-      input.classList.add(isCorrect ? 'correct' : 'wrong')
+      if (input && isHTMLInputElement(input)) {
+        const correctAttr = input.dataset.correct
+        const toleranceAttr = input.dataset.tolerance
+        const userValue = parseFloat(input.value)
+        const correctValue = correctAttr ? parseFloat(correctAttr) : 0
+        const tolerance = toleranceAttr ? parseFloat(toleranceAttr) : 0.01
+        isCorrect = Math.abs(userValue - correctValue) <= tolerance
+        input.classList.add(isCorrect ? 'correct' : 'wrong')
+      }
     } else if (type === 'code-completion') {
       const inputs = fieldset.querySelectorAll('input.code-blank')
       isCorrect = true
       inputs.forEach((input) => {
+        if (!isHTMLInputElement(input)) return
         const expected = (input.getAttribute('correct') || '').split('|')
         const val = input.value.trim()
         const ok = expected.map(e => e.trim()).includes(val)
@@ -504,24 +580,37 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
       })
     } else if (type === 'ordering') {
       const container = fieldset.querySelector('.ordering-container')
-      const items = Array.from(container.querySelectorAll('.ordering-item'))
-      const userOrder = items.map(item => parseInt(item.dataset.index))
-      const correctOrder = container.dataset.correctOrder.split(',').map(x => parseInt(x))
-      isCorrect = JSON.stringify(userOrder) === JSON.stringify(correctOrder)
-      container.classList.add(isCorrect ? 'correct' : 'wrong')
+      if (container && isHTMLElement(container)) {
+        const items = Array.from(container.querySelectorAll('.ordering-item'))
+        const userOrder = items.map(item => {
+          if (isHTMLElement(item) && item.dataset.index) {
+            return parseInt(item.dataset.index, 10)
+          }
+          return 0
+        })
+        const correctOrderAttr = container.dataset.correctOrder
+        if (correctOrderAttr) {
+          const correctOrder = correctOrderAttr.split(',').map((x) => parseInt(x, 10))
+          isCorrect = JSON.stringify(userOrder) === JSON.stringify(correctOrder)
+        }
+        container.classList.add(isCorrect ? 'correct' : 'wrong')
+      }
     } else if (type === 'categorization') {
       const container = fieldset.querySelector('.categorization-container')
-      const items = container.querySelectorAll('.categorization-item')
-      isCorrect = true
-      items.forEach((item) => {
-        const correctCat = item.dataset.correctCategory
-        const currentParent = item.closest('.categorization-category')
-        const currentCat = currentParent ? currentParent.dataset.categoryIndex : null
-        if (correctCat !== currentCat) {
-          isCorrect = false
-        }
-      })
-      container.classList.add(isCorrect ? 'correct' : 'wrong')
+      if (container && isHTMLElement(container)) {
+        const items = container.querySelectorAll('.categorization-item')
+        isCorrect = true
+        items.forEach((item) => {
+          if (!isHTMLElement(item)) return
+          const correctCat = item.dataset.correctCategory
+          const currentParent = item.closest('.categorization-category')
+          const currentCat = (currentParent && isHTMLElement(currentParent)) ? currentParent.dataset.categoryIndex : null
+          if (correctCat !== currentCat) {
+            isCorrect = false
+          }
+        })
+        container.classList.add(isCorrect ? 'correct' : 'wrong')
+      }
     } else if (type === 'hotspot') {
       const clickedRegions = fieldset.querySelectorAll('.hotspot-region.clicked')
       const correctRegions = fieldset.querySelectorAll('.hotspot-region[correct]')
@@ -542,27 +631,34 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
       resetFieldset(fieldset)
       isCorrect = true
       for (let i = 0; i < inputs.length; i++) {
-        const expected = (inputs[i].getAttribute('correct') || '').split('|')
-        const val = inputs[i].value.trim().toLowerCase()
+        const input = inputs[i]
+        if (!input) continue
+        const expected = (input.getAttribute('correct') || '').split('|')
+        let val = ''
+        if (isHTMLInputElement(input) || input instanceof HTMLTextAreaElement) {
+          val = input.value.trim().toLowerCase()
+        }
         const ok = expected.map((e) => e.trim().toLowerCase()).includes(val)
         if (!ok) {
           isCorrect = false
         }
-        inputs[i].classList.add(ok ? 'correct' : 'wrong')
+        input.classList.add(ok ? 'correct' : 'wrong')
       }
     }
 
     // Show/hide content based on correctness
     const section = exam.querySelector('section.content')
-    if (isCorrect) {
-      section.classList.remove('hidden')
-    } else {
-      section.classList.add('hidden')
+    if (section && isHTMLElement(section)) {
+      if (isCorrect) {
+        section.classList.remove('hidden')
+      } else {
+        section.classList.add('hidden')
+      }
     }
 
     // Show explanation based on setting
     const explanation = exam.querySelector('.exam-explanation')
-    if (explanation) {
+    if (explanation && isHTMLElement(explanation)) {
       const showWhen = explanation.dataset.show || 'on-correct'
       if (showWhen === 'always' ||
           (showWhen === 'on-correct' && isCorrect) ||
@@ -586,7 +682,10 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     }
 
     // Disable submit button
-    form.querySelector('button[type="submit"]').disabled = true
+    const submitBtn = form.querySelector('button[type="submit"]')
+    if (submitBtn && isHTMLButtonElement(submitBtn)) {
+      submitBtn.disabled = true
+    }
 
     // Clear saved state on successful submit
     clearExamState(examIndex)
@@ -595,17 +694,27 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
 
 /**
  * Mark selected answer fields as correct or wrong
- * @param {NodeListOf<HTMLInputElement>} selected - Selected input elements
- * @param {boolean} correct - Whether the overall answer is correct (unused, kept for compatibility)
+ * @param {HTMLInputElement[]} selected - Selected input elements
+ * @param {boolean} _correct - Whether the overall answer is correct (unused, kept for compatibility)
  * @returns {void}
  */
-function markFields (selected, correct) {
-  resetFieldset(selected[0].closest('fieldset'))
+function markFields (selected, _correct) {
+  if (selected.length === 0) return
+  const firstInput = selected[0]
+  if (!firstInput) return
+  const fieldset = firstInput.closest('fieldset')
+  if (fieldset && isHTMLFieldSetElement(fieldset)) {
+    resetFieldset(fieldset)
+  }
   for (let i = 0; i < selected.length; i++) {
-    if (!selected[i].hasAttribute('correct')) {
-      selected[i].parentElement.classList.add('wrong')
+    const input = selected[i]
+    if (!input) continue
+    const parent = input.parentElement
+    if (!parent) continue
+    if (!input.hasAttribute('correct')) {
+      parent.classList.add('wrong')
     } else {
-      selected[i].parentElement.classList.add('correct')
+      parent.classList.add('correct')
     }
   }
 }
@@ -618,9 +727,11 @@ function markFields (selected, correct) {
 function resetFieldset (fieldset) {
   const fieldsetChildren = fieldset.children
   for (let i = 0; i < fieldsetChildren.length; i++) {
-    fieldsetChildren[i].classList.remove('wrong')
-    fieldsetChildren[i].classList.remove('correct')
-    const input = fieldsetChildren[i].querySelector('input, textarea, select')
+    const child = fieldsetChildren[i]
+    if (!child) continue
+    child.classList.remove('wrong')
+    child.classList.remove('correct')
+    const input = child.querySelector('input, textarea, select')
     if (input) {
       input.classList.remove('wrong')
       input.classList.remove('correct')
@@ -630,7 +741,7 @@ function resetFieldset (fieldset) {
 
 /**
  * Show feedback messages for selected answer inputs
- * @param {NodeListOf<HTMLInputElement>|HTMLInputElement[]} selectedInputs - Selected input elements with feedback
+ * @param {HTMLInputElement[]} selectedInputs - Selected input elements with feedback
  * @returns {void}
  */
 function showAnswerFeedback (selectedInputs) {
@@ -640,32 +751,38 @@ function showAnswerFeedback (selectedInputs) {
       const feedbackDiv = document.createElement('div')
       feedbackDiv.className = 'answer-feedback'
       feedbackDiv.textContent = feedback
-      input.parentElement.appendChild(feedbackDiv)
+      const parent = input.parentElement
+      if (parent) {
+        parent.appendChild(feedbackDiv)
+      }
     }
   })
 }
 
 // Add drag-and-drop support for ordering questions
 document.querySelectorAll('.ordering-container').forEach((container) => {
+  if (!isHTMLElement(container)) return
+
+  /** @type {HTMLElement | null} */
   let draggedItem = null
 
-  // Find exam index for state persistence
+  // Find exam element for state persistence
   const examElement = container.closest('.exam')
-  const allExams = Array.from(document.querySelectorAll('.exam'))
-  const examIndex = allExams.indexOf(examElement)
+  if (!examElement || !isHTMLElement(examElement)) return
 
   container.querySelectorAll('.ordering-item').forEach((item) => {
+    if (!isHTMLElement(item)) return
     item.draggable = true
 
-    item.addEventListener('dragstart', (e) => {
+    item.addEventListener('dragstart', () => {
       draggedItem = item
       item.classList.add('dragging')
     })
 
-    item.addEventListener('dragend', (e) => {
+    item.addEventListener('dragend', () => {
       item.classList.remove('dragging')
       // Save state after drag ends
-      if (examElement && examElement._saveState) {
+      if (examElement._saveState) {
         examElement._saveState()
       }
     })
@@ -676,15 +793,18 @@ document.querySelectorAll('.ordering-container').forEach((container) => {
 
     item.addEventListener('drop', (e) => {
       e.preventDefault()
-      if (draggedItem !== item) {
+      if (draggedItem && draggedItem !== item) {
         const allItems = Array.from(container.children)
         const draggedIndex = allItems.indexOf(draggedItem)
         const targetIndex = allItems.indexOf(item)
 
-        if (draggedIndex < targetIndex) {
-          item.parentNode.insertBefore(draggedItem, item.nextSibling)
-        } else {
-          item.parentNode.insertBefore(draggedItem, item)
+        const parent = item.parentNode
+        if (parent) {
+          if (draggedIndex < targetIndex) {
+            parent.insertBefore(draggedItem, item.nextSibling)
+          } else {
+            parent.insertBefore(draggedItem, item)
+          }
         }
       }
     })
@@ -693,35 +813,42 @@ document.querySelectorAll('.ordering-container').forEach((container) => {
 
 // Add drag-and-drop support for categorization questions
 document.querySelectorAll('.categorization-container').forEach((container) => {
+  if (!isHTMLElement(container)) return
+
+  /** @type {HTMLElement | null} */
   let draggedItem = null
 
   // Find exam element for state persistence
   const examElement = container.closest('.exam')
+  if (!examElement || !isHTMLElement(examElement)) return
 
   container.querySelectorAll('.categorization-item').forEach((item) => {
+    if (!isHTMLElement(item)) return
     item.draggable = true
 
-    item.addEventListener('dragstart', (e) => {
+    item.addEventListener('dragstart', () => {
       draggedItem = item
       item.classList.add('dragging')
     })
 
-    item.addEventListener('dragend', (e) => {
+    item.addEventListener('dragend', () => {
       item.classList.remove('dragging')
       // Save state after drag ends
-      if (examElement && examElement._saveState) {
+      if (examElement._saveState) {
         examElement._saveState()
       }
     })
   })
 
   container.querySelectorAll('.category-drop-zone').forEach((dropZone) => {
+    if (!isHTMLElement(dropZone)) return
+
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault()
       dropZone.classList.add('drag-over')
     })
 
-    dropZone.addEventListener('dragleave', (e) => {
+    dropZone.addEventListener('dragleave', () => {
       dropZone.classList.remove('drag-over')
     })
 
@@ -731,7 +858,7 @@ document.querySelectorAll('.categorization-container').forEach((container) => {
       if (draggedItem) {
         dropZone.appendChild(draggedItem)
         // Save state after drop
-        if (examElement && examElement._saveState) {
+        if (examElement._saveState) {
           examElement._saveState()
         }
       }
@@ -741,11 +868,16 @@ document.querySelectorAll('.categorization-container').forEach((container) => {
 
 // Add click handling for hotspot questions
 document.querySelectorAll('.hotspot-container').forEach((container) => {
+  if (!isHTMLElement(container)) return
+
   // Find exam element for state persistence
   const examElement = container.closest('.exam')
+  if (!examElement || !isHTMLElement(examElement)) return
 
   container.querySelectorAll('.hotspot-region').forEach((region) => {
-    region.addEventListener('click', (e) => {
+    if (!isHTMLElement(region)) return
+
+    region.addEventListener('click', () => {
       region.classList.toggle('clicked')
       if (region.classList.contains('clicked')) {
         if (region.hasAttribute('correct')) {
@@ -758,7 +890,7 @@ document.querySelectorAll('.hotspot-container').forEach((container) => {
       }
 
       // Save state after click
-      if (examElement && examElement._saveState) {
+      if (examElement._saveState) {
         examElement._saveState()
       }
     })
@@ -767,14 +899,14 @@ document.querySelectorAll('.hotspot-container').forEach((container) => {
 
 // Add partial credit calculation for choice questions
 document.querySelectorAll('.exam[data-type="choice"]').forEach((exam) => {
+  if (!isHTMLElement(exam)) return
   const partialCredit = exam.dataset.partialCredit === 'true'
   if (!partialCredit) return
 
   const form = exam.querySelector('form')
   if (!form) return
 
-  const originalSubmitHandler = form.onsubmit
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', () => {
     const selected = form.querySelectorAll('input[name="answer"]:checked')
     const correct = form.querySelectorAll('input[name="answer"][correct]')
 
@@ -783,12 +915,16 @@ document.querySelectorAll('.exam[data-type="choice"]').forEach((exam) => {
 
     // Calculate points based on weights
     correct.forEach((input) => {
-      const weight = parseFloat(input.dataset.weight) || 1.0
+      if (!isHTMLInputElement(input)) return
+      const weightAttr = input.dataset.weight
+      const weight = weightAttr ? parseFloat(weightAttr) : 1.0
       totalPoints += weight
     })
 
     selected.forEach((input) => {
-      const weight = parseFloat(input.dataset.weight) || 1.0
+      if (!isHTMLInputElement(input)) return
+      const weightAttr = input.dataset.weight
+      const weight = weightAttr ? parseFloat(weightAttr) : 1.0
       if (input.hasAttribute('correct')) {
         earnedPoints += weight
       } else {
