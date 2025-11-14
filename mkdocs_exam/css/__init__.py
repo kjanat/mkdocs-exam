@@ -1,1 +1,1 @@
-# CSS resources package
+"""CSS resources package for mkdocs-exam plugin."""

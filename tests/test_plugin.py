@@ -1,10 +1,17 @@
+"""Tests for the mkdocs-exam plugin."""
+
+import os
 import textwrap
+from typing import Any, cast
 
 from mkdocs_exam.plugin import MkDocsExamPlugin
 
 
 class DummyPage:
-    def __init__(self, meta=None):
+    """Mock page object for testing."""
+
+    def __init__(self, meta: dict[str, Any] | None = None) -> None:
+        """Initialize dummy page with optional metadata."""
         self.meta = meta or {}
 
 
@@ -24,7 +31,7 @@ def test_exam_block_converts_to_html():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
     expected = (
         "\n"
         '<div class="exam" data-type="choice" data-points="1"><h3>Are you ready?</h3><form><fieldset>'
@@ -51,7 +58,7 @@ def test_short_answer_question():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
     expected = (
         "\n"
         '<div class="exam" data-type="short-answer" data-points="1"><h3>What color is the sky?</h3><form><fieldset>'
@@ -76,7 +83,7 @@ def test_fill_question():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
     expected = (
         "\n"
         '<div class="exam" data-type="fill" data-points="1"><h3>2 + 2 = <input type="text" name="answer" correct="4"></h3><form><fieldset>'
@@ -100,7 +107,7 @@ def test_true_false_default_answers():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
     expected = (
         "\n"
         '<div class="exam" data-type="truefalse" data-points="1"><h3>The Earth orbits the Sun.</h3><form><fieldset>'
@@ -126,7 +133,7 @@ def test_essay_question():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
     expected = (
         "\n"
         '<div class="exam" data-type="essay" data-points="1"><h3>Explain the theory of relativity in one paragraph.</h3><form><fieldset>'
@@ -153,7 +160,7 @@ def test_matching_question():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
     expected = (
         "\n"
         '<div class="exam" data-type="matching" data-points="1"><h3>Match the capitals to countries</h3><form><fieldset>'
@@ -183,12 +190,12 @@ def test_exam_disabled_leaves_markdown_unchanged():
     )
     plugin = MkDocsExamPlugin()
     page = DummyPage(meta={"exam": "disable"})
-    result = plugin.on_page_markdown(markdown, page, None)
+    result = plugin.on_page_markdown(markdown, cast(Any, page), cast(Any, None))
     assert result == markdown
 
 
 def test_multi_document_yaml():
-    """Test that multiple exams can be defined in a single YAML block using ---"""
+    """Test that multiple exams can be defined in a single YAML block using ---."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -207,7 +214,7 @@ def test_multi_document_yaml():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
     # Should contain both exams
     assert "First question?" in result
     assert "Second question?" in result
@@ -220,9 +227,7 @@ def test_multi_document_yaml():
 
 
 def test_environment_variable_interpolation():
-    """Test that environment variables are interpolated in YAML"""
-    import os
-
+    """Test that environment variables are interpolated in YAML."""
     os.environ["TEST_API_KEY"] = "secret123"
     os.environ["TEST_URL"] = "https://example.com"
 
@@ -238,7 +243,7 @@ def test_environment_variable_interpolation():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "secret123" in result
     assert "https://example.com" in result
@@ -252,7 +257,7 @@ def test_environment_variable_interpolation():
 
 
 def test_environment_variable_with_default():
-    """Test that environment variables with defaults work"""
+    """Test that environment variables with defaults work."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -265,7 +270,7 @@ def test_environment_variable_with_default():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "default_value" in result
     assert "fallback" in result
@@ -273,7 +278,7 @@ def test_environment_variable_with_default():
 
 
 def test_yaml_anchors_and_aliases():
-    """Test that YAML anchors and aliases work correctly"""
+    """Test that YAML anchors and aliases work correctly."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -289,7 +294,7 @@ def test_yaml_anchors_and_aliases():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     # Should contain both correct answers
     assert "Option A" in result
@@ -298,7 +303,7 @@ def test_yaml_anchors_and_aliases():
 
 
 def test_exam_with_exam_fence():
-    """Test that ```exam fence type works in addition to ```yaml"""
+    """Test that ```exam fence type works in addition to ```yaml."""
     markdown = textwrap.dedent(
         """
         ```exam
@@ -311,7 +316,7 @@ def test_exam_with_exam_fence():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "Using exam fence" in result
     assert "Yes" in result
@@ -324,7 +329,7 @@ def test_exam_with_exam_fence():
 
 
 def test_hints_system():
-    """Test hints with score penalties"""
+    """Test hints with score penalties."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -341,7 +346,7 @@ def test_hints_system():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-points="10"' in result
     assert "exam-hints" in result
@@ -352,7 +357,7 @@ def test_hints_system():
 
 
 def test_explanation_on_correct():
-    """Test explanation shown only on correct answer"""
+    """Test explanation shown only on correct answer."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -365,7 +370,7 @@ def test_explanation_on_correct():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "exam-explanation" in result
     assert "Addition combines numbers" in result
@@ -373,7 +378,7 @@ def test_explanation_on_correct():
 
 
 def test_explanation_always():
-    """Test explanation always shown"""
+    """Test explanation always shown."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -386,7 +391,7 @@ def test_explanation_always():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "exam-explanation" in result
     assert "This is the explanation" in result
@@ -394,7 +399,7 @@ def test_explanation_always():
 
 
 def test_answer_feedback():
-    """Test answer-specific feedback"""
+    """Test answer-specific feedback."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -409,7 +414,7 @@ def test_answer_feedback():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "Mercury" in result
     assert "Venus" in result
@@ -419,7 +424,7 @@ def test_answer_feedback():
 
 
 def test_numeric_exam_type():
-    """Test numeric answer with tolerance"""
+    """Test numeric answer with tolerance."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -434,7 +439,7 @@ def test_numeric_exam_type():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-type="numeric"' in result
     assert 'type="number"' in result
@@ -444,7 +449,7 @@ def test_numeric_exam_type():
 
 
 def test_numeric_with_unit():
-    """Test numeric answer with unit"""
+    """Test numeric answer with unit."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -458,7 +463,7 @@ def test_numeric_with_unit():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-type="numeric"' in result
     assert 'data-correct="1000"' in result
@@ -466,7 +471,7 @@ def test_numeric_with_unit():
 
 
 def test_code_completion_exam_type():
-    """Test code completion with blanks"""
+    """Test code completion with blanks."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -482,7 +487,7 @@ def test_code_completion_exam_type():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-type="code-completion"' in result
     assert "code-blank" in result
@@ -491,7 +496,7 @@ def test_code_completion_exam_type():
 
 
 def test_ordering_exam_type():
-    """Test ordering/sequencing questions"""
+    """Test ordering/sequencing questions."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -506,7 +511,7 @@ def test_ordering_exam_type():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-type="ordering"' in result
     assert "ordering-container" in result
@@ -518,7 +523,7 @@ def test_ordering_exam_type():
 
 
 def test_rich_media_image():
-    """Test image media support"""
+    """Test image media support."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -534,7 +539,7 @@ def test_rich_media_image():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "exam-media" in result
     assert "<img" in result
@@ -544,7 +549,7 @@ def test_rich_media_image():
 
 
 def test_rich_media_video():
-    """Test video media support"""
+    """Test video media support."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -559,7 +564,7 @@ def test_rich_media_video():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert "exam-media" in result
     assert "<video" in result
@@ -568,7 +573,7 @@ def test_rich_media_video():
 
 
 def test_time_limit():
-    """Test time limit with countdown"""
+    """Test time limit with countdown."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -580,13 +585,13 @@ def test_time_limit():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-time-limit="30"' in result
 
 
 def test_custom_points():
-    """Test custom point values"""
+    """Test custom point values."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -598,13 +603,13 @@ def test_custom_points():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-points="25"' in result
 
 
 def test_xss_prevention():
-    """Test that HTML is escaped to prevent XSS"""
+    """Test that HTML is escaped to prevent XSS."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -615,7 +620,7 @@ def test_xss_prevention():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     # Should escape HTML tags
     assert "<script>" not in result
@@ -625,7 +630,7 @@ def test_xss_prevention():
 
 
 def test_invalid_exam_type_rejected():
-    """Test that invalid exam types are rejected and default to choice"""
+    """Test that invalid exam types are rejected and default to choice."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -637,7 +642,7 @@ def test_invalid_exam_type_rejected():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     # Should log warning and default to 'choice' type
     assert '<div class="exam"' in result
@@ -647,7 +652,7 @@ def test_invalid_exam_type_rejected():
 
 
 def test_combined_features():
-    """Test multiple features together"""
+    """Test multiple features together."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -669,7 +674,7 @@ def test_combined_features():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     # Check all features are present
     assert 'data-points="20"' in result
@@ -683,7 +688,7 @@ def test_combined_features():
 
 
 def test_partial_credit_choice():
-    """Test partial credit with weighted answers"""
+    """Test partial credit with weighted answers."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -702,7 +707,7 @@ def test_partial_credit_choice():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-type="choice"' in result
     assert 'data-points="10"' in result
@@ -713,7 +718,7 @@ def test_partial_credit_choice():
 
 
 def test_categorization_exam_type():
-    """Test categorization drag-and-drop"""
+    """Test categorization drag-and-drop."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -736,7 +741,7 @@ def test_categorization_exam_type():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-type="categorization"' in result
     assert "categorization-container" in result
@@ -753,7 +758,7 @@ def test_categorization_exam_type():
 
 
 def test_hotspot_exam_type():
-    """Test hotspot/image map questions"""
+    """Test hotspot/image map questions."""
     markdown = textwrap.dedent(
         """
         ```yaml
@@ -775,7 +780,7 @@ def test_hotspot_exam_type():
         """
     )
     plugin = MkDocsExamPlugin()
-    result = plugin.on_page_markdown(markdown, DummyPage(), None)
+    result = plugin.on_page_markdown(markdown, cast(Any, DummyPage()), cast(Any, None))
 
     assert 'data-type="hotspot"' in result
     assert "hotspot-container" in result
@@ -789,7 +794,7 @@ def test_hotspot_exam_type():
 
 
 def test_plugin_configuration():
-    """Test plugin configuration schema"""
+    """Test plugin configuration schema."""
     plugin = MkDocsExamPlugin()
 
     # Verify config_scheme is defined

@@ -1,1 +1,1 @@
-# JavaScript resources package
+"""JavaScript resources package for mkdocs-exam plugin."""

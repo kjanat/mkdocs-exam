@@ -1,16 +1,20 @@
+"""MkDocs Exam Plugin - Create interactive training exams in markdown."""
+
+import html
+import os
+import re
+from importlib import resources as impresources
+from typing import Any
+
+import yaml
+from mkdocs.config import config_options
 from mkdocs.config.defaults import MkDocsConfig
+from mkdocs.exceptions import PluginError
 from mkdocs.plugins import BasePlugin, get_plugin_logger
 from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
-from mkdocs.exceptions import PluginError
-from mkdocs.config import config_options
-from importlib import resources as impresources
-from typing import Any
+
 from . import css, js
-import re
-import yaml
-import os
-import html
 
 # Read bundled CSS and JS and wrap them for inline injection
 try:
@@ -66,15 +70,15 @@ def escape_html(text: str) -> str:
 
 
 def interpolate_env_vars(value: Any) -> Any:
-    """
-    Recursively interpolate environment variables in strings.
-    Supports formats: ${VAR}, ${VAR:-default}
+    """Recursively interpolate environment variables in strings.
+
+    Supports formats: ${VAR}, ${VAR:-default}.
     """
     if isinstance(value, str):
         # Match ${VAR} or ${VAR:-default}
         def replacer(match: re.Match) -> str:
             var_name = match.group(1)
-            default_value = match.group(2) if match.group(2) else ""
+            default_value = match.group(2) or ""
             return os.environ.get(var_name, default_value)
 
         return re.sub(r"\$\{([^:}]+)(?::[-]?([^}]*))?\}", replacer, value)
@@ -107,8 +111,8 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         self.dirty = dirty
 
     def _process_exam_data(self, exam_data: dict, exam_id: int, page_path: str) -> str:
-        """
-        Process a single exam data dictionary and return HTML.
+        """Process a single exam data dictionary and return HTML.
+
         Supports environment variable interpolation and YAML anchors.
         """
         # Validate exam data
@@ -165,8 +169,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             answers.append(str(ans))
             correct_idx.append(len(answers) - 1)
 
-        for ans in answer_list:
-            answers.append(str(ans))
+        answers.extend(str(ans) for ans in answer_list)
 
         # Escape HTML in question for security
         html_question = escape_html(question)
@@ -184,7 +187,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                 answer_feedbacks.append("")
                 answer_weights.append(1.0)
 
-        if q_type == "choice" or q_type == "truefalse":
+        if q_type in {"choice", "truefalse"}:
             if q_type == "truefalse":
                 if not answers:
                     answers = ["True", "False"]
@@ -378,14 +381,14 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
     def on_page_markdown(
         self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any
     ) -> str:
-        """
-        Parse exam blocks in markdown and generate HTML quizzes.
+        """Parse exam blocks in markdown and generate HTML quizzes.
+
         Supports:
         - Both ```exam and ```yaml codeblocks
         - Multi-document YAML (multiple exams separated by ---)
         - Environment variable interpolation (${VAR} or ${VAR:-default})
         - YAML anchors and aliases
-        - Full markdown support in all string fields
+        - Full markdown support in all string fields.
         """
         if "exam" in page.meta and page.meta["exam"] == "disable":
             return markdown
@@ -393,8 +396,8 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         page_path = page.file.src_path if hasattr(page, "file") and page.file else "unknown"
 
         # Look for ```exam or ```yaml codeblocks
-        REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
-        matches = re.findall(REGEX, markdown, re.DOTALL)
+        regex = r"```(?:exam|yaml)\s*\n(.*?)```"
+        matches = re.findall(regex, markdown, re.DOTALL)
         exam_id = 0
 
         for match in matches:
@@ -431,12 +434,12 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                     markdown = re.sub(old_exam_pattern, combined_html, markdown, count=1)
 
             except yaml.YAMLError as e:
-                error_msg = f"YAML parsing error in {page_path}: {str(e)}"
-                logger.error(error_msg)
+                error_msg = f"YAML parsing error in {page_path}: {e!s}"
+                logger.exception(error_msg)
                 raise PluginError(error_msg) from e
             except Exception as e:
-                error_msg = f"Unexpected error processing exam in {page_path}: {str(e)}"
-                logger.error(error_msg)
+                error_msg = f"Unexpected error processing exam in {page_path}: {e!s}"
+                logger.exception(error_msg)
                 raise PluginError(error_msg) from e
 
         return markdown
@@ -448,11 +451,10 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         return html
 
     def on_build_error(self, error: Exception, **kwargs: Any) -> None:
-        """
-        Handle build errors gracefully.
+        """Handle build errors gracefully.
+
         This event is called when an error occurs during the build process.
         """
         # Log the error for debugging
         logger.debug(f"Build error encountered: {error}")
         # Allow error to propagate - we don't suppress it
-        return None
