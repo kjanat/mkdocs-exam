@@ -2,12 +2,11 @@
 
 ## Installation
 
-This plugin hasn't landed on PyPI yet. Clone the repository and install it in editable mode with **uv**:
+This plugin hasn't landed on PyPI yet.
+Install it with **uv**:
 
 ```bash
-git clone https://github.com/kjanat/mkdocs-exam.git
-cd mkdocs-exam
-uv pip install -e .
+uv add mkdocs-exam git+https://github.com/kjanat/mkdocs-exam
 ```
 
 ## Create your first exam
@@ -16,7 +15,8 @@ Add the following to your `mkdocs.yml`:
 
 ```yaml
 plugins:
-  - mkdocs-exam
+    - search
+    - mkdocs-exam
 ```
 
 ### Single choice

@@ -4,47 +4,12 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
-updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Amsterdam"
-    groups:
-      production-dependencies:
-        patterns:
-          - "*"
-        exclude-patterns:
-          - "*eslint*"
-          - "*prettier*"
-          - "*jest*"
-          - "*test*"
-      development-dependencies:
-        patterns:
-          - "*eslint*"
-          - "*prettier*"
-          - "*jest*"
-          - "*test*"
-          - "*dev*"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "deps"
-      prefix-development: "deps-dev"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "automated"
 
-  - package-ecosystem: "pip"
-    directory: "/"
+multi-ecosystem-groups:
+  py--uv:
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Amsterdam"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 1
     commit-message:
       prefix: "deps"
       include: "scope"
@@ -53,34 +18,21 @@ updates:
       - "python"
       - "automated"
 
-  # - package-ecosystem: 'uv'
-  #   directory: '/'
-  #   schedule:
-  #     interval: 'weekly'
-  #     day: 'monday'
-  #     time: '09:00'
-  #     timezone: 'Europe/Amsterdam'
-  #   open-pull-requests-limit: 5
-  #   commit-message:
-  #     prefix: 'deps'
-  #     include: 'scope'
-  #   labels:
-  #     - 'dependencies'
-  #     - 'python'
-  #     - 'automated'
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "py--uv"
+  - package-ecosystem: "pip"
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "py--uv"
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Amsterdam"
-    open-pull-requests-limit: 3
+    schedule: { interval: "monthly" }
+    open-pull-requests-limit: 1
     commit-message:
       prefix: "ci"
       include: "scope"
-    labels:
-      - "github-actions"
-      - "ci/cd"
-      - "automated"
+    labels: ["github-actions", "ci/cd", "automated"]

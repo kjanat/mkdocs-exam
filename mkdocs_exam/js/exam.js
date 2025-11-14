@@ -1,3 +1,12 @@
+/**
+ * Interactive exam/quiz functionality for MkDocs
+ * Handles form submission, answer validation, and visual feedback
+ */
+
+/**
+ * Initialize all exam blocks on the page
+ * Attaches submit handlers to validate answers and show feedback
+ */
 document.querySelectorAll('.exam').forEach((exam) => {
   const form = exam.querySelector('form')
   const fieldset = form.querySelector('fieldset')
@@ -8,7 +17,9 @@ document.querySelectorAll('.exam').forEach((exam) => {
 
     if (type === 'choice' || type === 'truefalse') {
       const selected = form.querySelectorAll('input[name="answer"]:checked')
-      const correct = fieldset.querySelectorAll('input[name="answer"][correct]')
+      const correct = fieldset.querySelectorAll(
+        'input[name="answer"][correct]'
+      )
       isCorrect = selected.length === correct.length
       for (let i = 0; i < selected.length; i++) {
         if (!selected[i].hasAttribute('correct')) {
@@ -29,7 +40,9 @@ document.querySelectorAll('.exam').forEach((exam) => {
         sel.classList.add(ok ? 'correct' : 'wrong')
       })
     } else {
-      const inputs = fieldset.querySelectorAll('input[type="text"][name="answer"], textarea[name="answer"]')
+      const inputs = fieldset.querySelectorAll(
+        'input[type="text"][name="answer"], textarea[name="answer"]'
+      )
       resetFieldset(fieldset)
       isCorrect = true
       for (let i = 0; i < inputs.length; i++) {
@@ -52,7 +65,12 @@ document.querySelectorAll('.exam').forEach((exam) => {
   })
 })
 
-function markFields (selected, correct) {
+/**
+ * Mark selected radio/checkbox fields as correct or wrong
+ * @param {NodeListOf<HTMLInputElement>} selected - The selected input elements
+ * @param {boolean} _correct - Whether all selections are correct (unused, kept for API compatibility)
+ */
+function markFields (selected, _correct) {
   resetFieldset(selected[0].closest('fieldset'))
   for (let i = 0; i < selected.length; i++) {
     if (!selected[i].hasAttribute('correct')) {
@@ -63,6 +81,10 @@ function markFields (selected, correct) {
   }
 }
 
+/**
+ * Remove correct/wrong styling from all fields in a fieldset
+ * @param {HTMLFieldSetElement} fieldset - The fieldset to reset
+ */
 function resetFieldset (fieldset) {
   const fieldsetChildren = fieldset.children
   for (let i = 0; i < fieldsetChildren.length; i++) {

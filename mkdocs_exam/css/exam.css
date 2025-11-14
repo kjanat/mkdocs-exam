@@ -42,14 +42,6 @@ form button:focus {
   outline-offset: 2px;
 }
 
-.wrong label {
-  color: var(--exam-wrong-color);
-}
-
-.correct label {
-  color: var(--exam-correct-color);
-}
-
 fieldset {
   border: none;
   display: flex;
@@ -67,6 +59,14 @@ fieldset input:focus {
 
 fieldset label {
   margin: 0 10px;
+}
+
+.wrong label {
+  color: var(--exam-wrong-color);
+}
+
+.correct label {
+  color: var(--exam-correct-color);
 }
 
 label.correct {

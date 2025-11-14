@@ -36,25 +36,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v5
+        with: { fetch-depth: 0 }
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         id: setup-uv
         with:
           activate-environment: true
-          enable-cache: true
-          version: "latest"
           working-directory: example
 
-      - name: Do something if the cache was restored
-        if: steps.setup-uv.outputs.cache-hit == 'true'
-        run: echo "Cache was restored"
-
       - name: Install python dependencies
-        run: uv pip install -e ..
+        run: uv sync
 
       - name: Setup build environment
         run: |
@@ -85,7 +78,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: example/site/
 

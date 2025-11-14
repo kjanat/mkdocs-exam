@@ -1,0 +1,19 @@
+{
+  "name": "mkdocs-exam",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "2.3.5",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "check": "biome check --write",
+    "typecheck": "bunx tsgo --noEmit"
+  }
+}

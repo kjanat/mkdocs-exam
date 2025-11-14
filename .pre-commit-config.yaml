@@ -1,4 +1,29 @@
+ci:
+  skip: [ty]
+
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # ---- Formatting / Cleanup ----
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+      # ---- File / Content Validation ----
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-xml
+      # - id: check-yaml
+      - id: destroyed-symlinks
+      # - id: name-tests-test  # Skip: pytest uses test_*.py convention
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: "v4.0.0-alpha.8"
     hooks:
@@ -13,10 +38,24 @@ repos:
       - id: standard
         types: [javascript]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.13
+    # Ruff version.
+    rev: v0.14.5
     hooks:
       # Run the linter.
       - id: ruff-check
         args: [--fix]
       # Run the formatter.
       - id: ruff-format
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.9.9
+    hooks:
+      - id: uv-lock
+      - id: uv-export
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty check
+        entry: uv run ty check .
+        language: system
+        pass_filenames: false

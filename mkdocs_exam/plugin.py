@@ -39,7 +39,14 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         """Configure the plugin on startup."""
         self.dirty = dirty
 
-    def on_page_markdown(self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None) -> str:  # type: ignore[override]
+    def on_page_markdown(  # type: ignore[override]
+        self,
+        markdown: str,
+        page: Page,
+        config: MkDocsConfig,
+        files: Files | None = None,
+        **kwargs,  # type: ignore[no-untyped-def]
+    ) -> str:
         """Parse exam blocks in markdown and generate the HTML quiz."""
 
         if "exam" in page.meta and page.meta["exam"] == "disable":
@@ -47,7 +54,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
 
         # Extract code fences to protect them from processing
         # Match ``` or ~~~ fences with same closing delimiter
-        code_fence_pattern = r'(```|~~~)([^\n]*\n)(.*?)\1'
+        code_fence_pattern = r"(```|~~~)([^\n]*\n)(.*?)\1"
         code_fences = []
         code_fence_placeholders = {}
 
@@ -121,7 +128,8 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                     )
                 elif q_type == "fill":
                     html_question = question.replace(
-                        "___", f'<input type="text" name="answer" correct="{correct_attr}">'
+                        "___",
+                        f'<input type="text" name="answer" correct="{correct_attr}">',
                     )
                 else:
                     full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
