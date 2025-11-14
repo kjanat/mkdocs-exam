@@ -182,7 +182,7 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
 
   // Initialize hints
   const hintsContainer = exam.querySelector('.exam-hints')
-  if (hintsContainer) {
+  if (hintsContainer && isHTMLElement(hintsContainer)) {
     hintsContainer.classList.remove('hidden')
     const hintButtons = hintsContainer.querySelectorAll('.hint-button')
 
@@ -190,10 +190,14 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     if (savedState && savedState.hintsUsed) {
       savedState.hintsUsed.forEach((hintIndex) => {
         const btn = hintButtons[hintIndex]
-        if (btn) {
+        if (btn && isHTMLButtonElement(btn)) {
           const hint = btn.parentElement
+          if (!hint || !isHTMLElement(hint)) return
+
           const hintText = hint.querySelector('.hint-text')
-          const penalty = parseInt(hint.dataset.penalty) || 0
+          if (!hintText || !isHTMLElement(hintText)) return
+
+          const penalty = hint.dataset.penalty ? parseInt(hint.dataset.penalty, 10) : 0
 
           hintText.classList.remove('hidden')
           currentScore = Math.max(0, currentScore - (points * penalty / 100))
@@ -205,10 +209,16 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
     }
 
     hintButtons.forEach((btn, index) => {
+      if (!isHTMLButtonElement(btn)) return
+
       btn.addEventListener('click', () => {
         const hint = btn.parentElement
+        if (!hint || !isHTMLElement(hint)) return
+
         const hintText = hint.querySelector('.hint-text')
-        const penalty = parseInt(hint.dataset.penalty) || 0
+        if (!hintText || !isHTMLElement(hintText)) return
+
+        const penalty = hint.dataset.penalty ? parseInt(hint.dataset.penalty, 10) : 0
 
         if (hintText.classList.contains('hidden')) {
           hintText.classList.remove('hidden')
@@ -225,7 +235,7 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
   }
 
   // Initialize time limit
-  if (timeLimit) {
+  if (timeLimit !== undefined && timeLimit > 0) {
     // Restore time remaining or use full time limit
     let timeRemaining = (savedState && savedState.timeRemaining) ? savedState.timeRemaining : timeLimit
     const timerDiv = document.createElement('div')
@@ -240,9 +250,14 @@ document.querySelectorAll('.exam').forEach((exam, examIndex) => {
         timerDiv.classList.add('warning')
       }
       if (timeRemaining <= 0) {
-        clearInterval(timerInterval)
-        form.querySelector('button[type="submit"]').click()
-        form.querySelector('button[type="submit"]').disabled = true
+        if (timerInterval !== null) {
+          clearInterval(timerInterval)
+        }
+        const submitBtn = form.querySelector('button[type="submit"]')
+        if (submitBtn && isHTMLButtonElement(submitBtn)) {
+          submitBtn.click()
+          submitBtn.disabled = true
+        }
       }
 
       // Save time remaining every second
