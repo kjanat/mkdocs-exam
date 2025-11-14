@@ -188,3 +188,8 @@ artifact.tar
 .mypy_cache/
 .specstory/
 .vscode/
+
+# Node.js / Bun
+node_modules/
+package-lock.json
+# Keep bun.lockb in version control for reproducible builds

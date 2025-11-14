@@ -2,29 +2,29 @@
 
 ## Single choice
 
-<exam>
-
-question: Are you ready?
-answer-correct: Yes!
-answer: No!
-answer: Maybe!
-content:
-
-<h2>Provide some additional content</h2>
-</exam>
+```yaml
+question: "Are you ready?"
+answer-correct:
+  - "Yes!"
+answer:
+  - "No!"
+  - "Maybe!"
+content: |
+  ## Provide some additional content
+```
 
 ## Multiple choice
 
-<exam>
-
-question: Are you ready?
-answer-correct: Yes!
-answer: No!
-answer-correct: Maybe!
-content:
-
-<h2>Provide some additional content</h2>
-</exam>
+```yaml
+question: "Are you ready?"
+answer-correct:
+  - "Yes!"
+  - "Maybe!"
+answer:
+  - "No!"
+content: |
+  ## Provide some additional content
+```
 
 ## Disable for a page
 
