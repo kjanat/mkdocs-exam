@@ -3,6 +3,8 @@
 import html
 from typing import Any
 
+from .exam_config import ExamMetadata
+
 
 def escape_html(text: str) -> str:
     """Escape HTML to prevent XSS attacks."""
@@ -77,48 +79,30 @@ def build_media_html(media: dict[str, Any]) -> str:
     return ""
 
 
-def build_exam_wrapper(  # noqa: PLR0913, PLR0917
-    question: str,
-    exam_type: str,
-    points: int,
-    time_limit: int | None,
-    media_html: str,
-    hints_html: str,
-    answers_html: str,
-    explanation_html: str,
-    content_html: str,
-) -> str:
+def build_exam_wrapper(metadata: ExamMetadata) -> str:
     """Build complete exam HTML wrapper.
 
     Args:
-        question: Exam question (already escaped)
-        exam_type: Type of exam (choice, truefalse, etc.)
-        points: Point value
-        time_limit: Optional time limit in seconds
-        media_html: Pre-built media HTML
-        hints_html: Pre-built hints HTML
-        answers_html: Pre-built answers HTML
-        explanation_html: Pre-built explanation HTML
-        content_html: Additional content HTML
+        metadata: Exam metadata configuration
 
     Returns:
         Complete exam HTML
 
     """
-    data_attrs = f'data-type="{exam_type}" data-points="{points}"'
-    if time_limit:
-        data_attrs += f' data-time-limit="{time_limit}"'
+    data_attrs = f'data-type="{metadata.exam_type}" data-points="{metadata.points}"'
+    if metadata.time_limit:
+        data_attrs += f' data-time-limit="{metadata.time_limit}"'
 
     return (
         f'<div class="exam" {data_attrs}>'
-        f"{media_html}"
-        f"<h3>{question}</h3>"
-        f"{hints_html}"
+        f"{metadata.media_html}"
+        f"<h3>{metadata.question}</h3>"
+        f"{metadata.hints_html}"
         f"<form><fieldset>"
-        f"{answers_html}</fieldset>"
+        f"{metadata.answers_html}</fieldset>"
         '<button type="submit" class="exam-button">Submit</button>'
         f"</form>"
-        f"{explanation_html}"
-        f'<section class="content hidden">{content_html}</section>'
+        f"{metadata.explanation_html}"
+        f'<section class="content hidden">{metadata.content_html}</section>'
         f"</div>"
     )

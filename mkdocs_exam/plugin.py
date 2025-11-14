@@ -14,6 +14,7 @@ from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
 
 from . import css, js
+from .exam_config import AnswerConfig, ExamMetadata
 from .html_builders import (
     build_exam_wrapper,
     build_explanation_html,
@@ -31,6 +32,22 @@ from .processors import (
     process_ordering_answers,
     process_short_answer_fill_essay_answers,
 )
+
+# Processor registry mapping exam types to their handlers
+# Handlers return tuple of (answers_html, final_question)
+PROCESSOR_REGISTRY: dict[str, Any] = {
+    "choice": lambda config: (process_choice_truefalse_answers(config), config.question),
+    "truefalse": lambda config: (process_choice_truefalse_answers(config), config.question),
+    "short-answer": process_short_answer_fill_essay_answers,
+    "fill": process_short_answer_fill_essay_answers,
+    "essay": process_short_answer_fill_essay_answers,
+    "matching": lambda config: (process_matching_answers(config), config.question),
+    "numeric": lambda config: (process_numeric_answers(config), config.question),
+    "code-completion": lambda config: (process_code_completion_answers(config), config.question),
+    "ordering": lambda config: (process_ordering_answers(config), config.question),
+    "categorization": lambda config: (process_categorization_answers(config), config.question),
+    "hotspot": lambda config: (process_hotspot_answers(config), config.question),
+}
 
 # Read bundled CSS and JS and wrap them for inline injection
 try:
@@ -160,8 +177,8 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
 
         # Generate answers HTML based on exam type
         html_question = escape_html(question)
-        full_answers, final_question = self._generate_answers_html(
-            q_type=q_type,
+        config = AnswerConfig(
+            exam_type=q_type,
             answers=answers,
             correct_idx=correct_idx,
             answer_feedbacks=answer_feedbacks,
@@ -172,6 +189,8 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             question=html_question,
         )
 
+        full_answers, final_question = self._generate_answers_html(config)
+
         # Build component HTML sections
         html_answers = "".join(full_answers)
         content_html = "\n".join(content_lines)
@@ -180,7 +199,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         media_html = build_media_html(exam_data["media"]) if "media" in exam_data else ""
 
         # Build and return complete exam HTML
-        return build_exam_wrapper(
+        metadata = ExamMetadata(
             question=final_question,
             exam_type=q_type,
             points=points,
@@ -191,6 +210,8 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
             explanation_html=explanation_html,
             content_html=content_html,
         )
+
+        return build_exam_wrapper(metadata)
 
     def _parse_answers(self, exam_data: dict) -> tuple[list[str], list[int], list[str], list[float]]:
         """Parse and extract answer data from exam configuration.
@@ -239,58 +260,22 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
 
         return answers, correct_idx, answer_feedbacks, answer_weights
 
-    def _generate_answers_html(  # noqa: PLR0911, PLR0913, PLR0917
-        self,
-        q_type: str,
-        answers: list[str],
-        correct_idx: list[int],
-        answer_feedbacks: list[str],
-        answer_weights: list[float],
-        exam_id: int,
-        partial_credit: bool,
-        exam_data: dict,
-        question: str,
-    ) -> tuple[list[str], str]:
+    def _generate_answers_html(self, config: AnswerConfig) -> tuple[list[str], str]:
         """Generate HTML for exam answers based on type.
 
         Args:
-            q_type: Exam type (choice, truefalse, etc.)
-            answers: List of answer strings
-            correct_idx: Indices of correct answers
-            answer_feedbacks: List of feedback strings
-            answer_weights: List of answer weights
-            exam_id: Exam identifier
-            partial_credit: Whether to enable partial credit
-            exam_data: Full exam data dictionary
-            question: Question text (may be modified for fill type)
+            config: Answer configuration
 
         Returns:
             Tuple of (list of HTML strings for answers, final question text)
 
         """
-        if q_type in {"choice", "truefalse"}:
-            return (
-                process_choice_truefalse_answers(
-                    q_type, answers, correct_idx, answer_feedbacks, answer_weights, exam_id, partial_credit
-                ),
-                question,
-            )
-        elif q_type in {"short-answer", "fill", "essay"}:
-            return process_short_answer_fill_essay_answers(q_type, answers, correct_idx, question)
-        elif q_type == "matching":
-            return process_matching_answers(answers), question
-        elif q_type == "numeric":
-            return process_numeric_answers(exam_data), question
-        elif q_type == "code-completion":
-            return process_code_completion_answers(exam_data), question
-        elif q_type == "ordering":
-            return process_ordering_answers(exam_data), question
-        elif q_type == "categorization":
-            return process_categorization_answers(exam_data), question
-        elif q_type == "hotspot":
-            return process_hotspot_answers(exam_data), question
+        processor = PROCESSOR_REGISTRY.get(config.exam_type)
+        if processor:
+            return processor(config)
 
-        return [], question
+        # Fallback for unknown exam types
+        return [], config.question
 
     def on_page_markdown(
         self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any

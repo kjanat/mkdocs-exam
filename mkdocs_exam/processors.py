@@ -1,36 +1,25 @@
 """Exam type processors for mkdocs-exam plugin."""
 
-from typing import Any
 
+from .exam_config import AnswerConfig
 from .html_builders import escape_html
 
 
-def process_choice_truefalse_answers(  # noqa: PLR0913, PLR0917
-    exam_type: str,
-    answers: list[str],
-    correct_idx: list[int],
-    answer_feedbacks: list[str],
-    answer_weights: list[float],
-    exam_id: int,
-    partial_credit: bool,
-) -> list[str]:
+def process_choice_truefalse_answers(config: AnswerConfig) -> list[str]:
     """Process choice or truefalse exam answers.
 
     Args:
-        exam_type: Type of exam (choice or truefalse)
-        answers: List of answer strings
-        correct_idx: Indices of correct answers
-        answer_feedbacks: List of feedback strings
-        answer_weights: List of answer weights
-        exam_id: Exam identifier
-        partial_credit: Whether to enable partial credit
+        config: Answer configuration
 
     Returns:
         List of HTML strings for each answer
 
     """
+    answers = config.answers
+    correct_idx = config.correct_idx
+
     # Auto-populate truefalse answers
-    if exam_type == "truefalse":
+    if config.exam_type == "truefalse":
         if not answers:
             answers = ["True", "False"]
             if not correct_idx:
@@ -46,14 +35,14 @@ def process_choice_truefalse_answers(  # noqa: PLR0913, PLR0917
 
     for i, ans in enumerate(answers):
         is_correct = i in correct_idx
-        input_id = f"exam-{exam_id}-{i}"
+        input_id = f"exam-{config.exam_id}-{i}"
         input_type = "checkbox" if as_checkboxes else "radio"
         correct = "correct" if is_correct else ""
         ans_escaped = escape_html(ans)
-        feedback = escape_html(answer_feedbacks[i]) if i < len(answer_feedbacks) else ""
+        feedback = escape_html(config.answer_feedbacks[i]) if i < len(config.answer_feedbacks) else ""
         feedback_attr = f' data-feedback="{feedback}"' if feedback else ""
-        weight = answer_weights[i] if i < len(answer_weights) else 1.0
-        weight_attr = f' data-weight="{weight}"' if partial_credit else ""
+        weight = config.answer_weights[i] if i < len(config.answer_weights) else 1.0
+        weight_attr = f' data-weight="{weight}"' if config.partial_credit else ""
         full_answers.append(
             f'<div><input type="{input_type}" name="answer" value="{i}" id="{input_id}" {correct}{feedback_attr}{weight_attr}>'
             f'<label for="{input_id}">{ans_escaped}</label></div>'
@@ -62,31 +51,26 @@ def process_choice_truefalse_answers(  # noqa: PLR0913, PLR0917
     return full_answers
 
 
-def process_short_answer_fill_essay_answers(
-    exam_type: str,
-    answers: list[str],
-    correct_idx: list[int],
-    question: str,
-) -> tuple[list[str], str]:
+def process_short_answer_fill_essay_answers(config: AnswerConfig) -> tuple[list[str], str]:
     """Process short-answer, fill, or essay exam answers.
 
     Args:
-        exam_type: Type of exam (short-answer, fill, essay)
-        answers: List of answer strings
-        correct_idx: Indices of correct answers
-        question: Question text (may be modified for fill type)
+        config: Answer configuration
 
     Returns:
         Tuple of (list of HTML answer strings, possibly modified question)
 
     """
-    correct_vals = [escape_html(answers[i]) for i in correct_idx] or [escape_html(a) for a in answers]
+    correct_vals = [escape_html(config.answers[i]) for i in config.correct_idx] or [
+        escape_html(a) for a in config.answers
+    ]
     correct_attr = "|".join(correct_vals)
     full_answers = []
+    question = config.question
 
-    if exam_type == "essay":
+    if config.exam_type == "essay":
         full_answers.append(f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>')
-    elif exam_type == "fill":
+    elif config.exam_type == "fill":
         # Modify question to include input field
         question = escape_html(question).replace("___", f'<input type="text" name="answer" correct="{correct_attr}">')
     else:  # short-answer
@@ -95,17 +79,17 @@ def process_short_answer_fill_essay_answers(
     return full_answers, question
 
 
-def process_matching_answers(answers: list[str]) -> list[str]:
+def process_matching_answers(config: AnswerConfig) -> list[str]:
     """Process matching exam answers.
 
     Args:
-        answers: List of "left|right" paired strings
+        config: Answer configuration
 
     Returns:
         List of HTML strings for matching pairs
 
     """
-    pairs = [ans.split("|") for ans in answers]
+    pairs = [ans.split("|") for ans in config.answers]
     left = [escape_html(p[0].strip()) for p in pairs]
     right = [escape_html(p[1].strip()) for p in pairs]
     options = "".join(f"<option>{r}</option>" for r in right)
@@ -121,19 +105,19 @@ def process_matching_answers(answers: list[str]) -> list[str]:
     return full_answers
 
 
-def process_numeric_answers(exam_data: dict[str, Any]) -> list[str]:
+def process_numeric_answers(config: AnswerConfig) -> list[str]:
     """Process numeric range exam answers.
 
     Args:
-        exam_data: Full exam data dict
+        config: Answer configuration
 
     Returns:
         List with single HTML string for numeric input
 
     """
-    tolerance = exam_data.get("tolerance", 0.01)
-    correct_val = exam_data.get("answer-correct", [0])[0] if exam_data.get("answer-correct") else 0
-    unit = exam_data.get("unit", "")
+    tolerance = config.exam_data.get("tolerance", 0.01)
+    correct_val = config.exam_data.get("answer-correct", [0])[0] if config.exam_data.get("answer-correct") else 0
+    unit = config.exam_data.get("unit", "")
 
     return [
         f'<div><input type="number" step="any" name="answer" '
@@ -142,19 +126,19 @@ def process_numeric_answers(exam_data: dict[str, Any]) -> list[str]:
     ]
 
 
-def process_code_completion_answers(exam_data: dict[str, Any]) -> list[str]:
+def process_code_completion_answers(config: AnswerConfig) -> list[str]:
     """Process code completion exam answers.
 
     Args:
-        exam_data: Full exam data dict
+        config: Answer configuration
 
     Returns:
         List with single HTML string for code completion
 
     """
-    template = exam_data.get("template", "")
-    language = exam_data.get("language", "python")
-    blanks = exam_data.get("blanks", [])
+    template = config.exam_data.get("template", "")
+    language = config.exam_data.get("language", "python")
+    blanks = config.exam_data.get("blanks", [])
 
     # Split template by ___ and create inputs
     parts = escape_html(template).split("___")
@@ -169,18 +153,18 @@ def process_code_completion_answers(exam_data: dict[str, Any]) -> list[str]:
     return [f'<div><pre><code class="language-{language}">{code_html}</code></pre></div>']
 
 
-def process_ordering_answers(exam_data: dict[str, Any]) -> list[str]:
+def process_ordering_answers(config: AnswerConfig) -> list[str]:
     """Process ordering/sequencing exam answers.
 
     Args:
-        exam_data: Full exam data dict
+        config: Answer configuration
 
     Returns:
         List with single HTML string for ordering interface
 
     """
-    items = exam_data.get("items", [])
-    correct_order = exam_data.get("correct-order", list(range(len(items))))
+    items = config.exam_data.get("items", [])
+    correct_order = config.exam_data.get("correct-order", list(range(len(items))))
     items_html = ""
 
     for i, item in enumerate(items):
@@ -189,19 +173,19 @@ def process_ordering_answers(exam_data: dict[str, Any]) -> list[str]:
     return [f'<div class="ordering-container" data-correct-order="{",".join(map(str, correct_order))}">{items_html}</div>']
 
 
-def process_categorization_answers(exam_data: dict[str, Any]) -> list[str]:
+def process_categorization_answers(config: AnswerConfig) -> list[str]:
     """Process categorization exam answers (drag items into categories).
 
     Args:
-        exam_data: Full exam data dict
+        config: Answer configuration
 
     Returns:
         List with single HTML string for categorization interface
 
     """
-    items = exam_data.get("items", [])
-    categories = exam_data.get("categories", [])
-    correct_mapping = exam_data.get("correct-mapping", {})
+    items = config.exam_data.get("items", [])
+    categories = config.exam_data.get("categories", [])
+    correct_mapping = config.exam_data.get("correct-mapping", {})
 
     # Build categories HTML
     categories_html = '<div class="categorization-container">'
@@ -221,18 +205,18 @@ def process_categorization_answers(exam_data: dict[str, Any]) -> list[str]:
     return [categories_html]
 
 
-def process_hotspot_answers(exam_data: dict[str, Any]) -> list[str]:
+def process_hotspot_answers(config: AnswerConfig) -> list[str]:
     """Process hotspot/image map exam answers (click regions on image).
 
     Args:
-        exam_data: Full exam data dict
+        config: Answer configuration
 
     Returns:
         List with single HTML string for hotspot interface
 
     """
-    image_src = escape_html(exam_data.get("image", ""))
-    regions = exam_data.get("regions", [])
+    image_src = escape_html(config.exam_data.get("image", ""))
+    regions = config.exam_data.get("regions", [])
 
     # Build hotspot HTML
     hotspot_html = '<div class="hotspot-container">'
