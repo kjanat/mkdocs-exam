@@ -24,19 +24,9 @@ build-backend = "uv_build"
 [tool.ruff]
 line-length = 120
 
-# [tool.setuptools.packages.find]
-# include = ["mkdocs_exam"]
-# exclude = ["example*", "assets*", "build*"]
-
 [tool.uv.build-backend]
 module-name = "mkdocs_exam"
 module-root = ""
-# [build-system]
-# requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
-
-# [tool.setuptools.package-data]
-# "mkdocs_exam" = ["css/*", "js/*"]
 
 [[tool.uv.index]]
 name = "pypi"
