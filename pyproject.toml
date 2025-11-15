@@ -1,3 +1,5 @@
+#:tombi schema.strict = false
+
 [project]
 name = "mkdocs-exam"
 version = "0.1.0"
@@ -10,7 +12,6 @@ authors = [
 ]
 dependencies = [
   "mkdocs",
-  "mkdocs-material",
   "pyyaml",
 ]
 
@@ -22,14 +23,29 @@ homepage = "https://github.com/kjanat/mkdocs-exam"
 
 [dependency-groups]
 dev = [
+  "bandit[toml]",
   "pre-commit",
   "pytest",
+  "pytest-cov",
   "ruff",
+  "safety",
+  "sphinx",
+  "sphinx-autodoc-typehints",
+  "sphinx-rtd-theme",
 ]
 
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "build", "dist"]
+skips = ["B101"] # Skip assert_used check for tests
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "--cov=mkdocs_exam --cov-report=term-missing --cov-report=html"
 
 [tool.ruff]
 line-length = 120

@@ -72,3 +72,25 @@ class ExamPluginConfig(Config):
     )
 
     strict_validation = config_options.Type(bool, default=False)
+
+    def validate(self) -> tuple[list[str], list[str]]:
+        """Validate configuration values.
+
+        Returns:
+            Tuple of (warnings, errors) where warnings are non-fatal and errors stop the build
+
+        """
+        warnings, errors = super().validate()
+
+        # Validate default_points is positive
+        if self.default_points < 1:
+            errors.append("default_points must be at least 1")
+
+        # Validate default_points is reasonable (warn if > 100)
+        if self.default_points > 100:
+            warnings.append(
+                f"default_points is {self.default_points}, which seems unusually high. "
+                "Consider using a smaller value."
+            )
+
+        return warnings, errors

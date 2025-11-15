@@ -59,6 +59,12 @@ repos:
     rev: 0.9.9
     hooks:
       - id: uv-lock
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.0
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
   - repo: local
     hooks:
       - id: dprint
@@ -71,6 +77,11 @@ repos:
         entry: uv run ty check mkdocs_exam
         language: system
         pass_filenames: false
+      - id: stylelint
+        name: stylelint
+        entry: bunx stylelint --fix
+        language: system
+        types: [css]
       - id: local-biome-check
         name: biome check
         entry: bunx @biomejs/biome check --write --files-ignore-unknown=true --no-errors-on-unmatched

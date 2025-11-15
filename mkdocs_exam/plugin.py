@@ -3,7 +3,7 @@
 import os
 import re
 from importlib import resources as impresources
-from typing import Any
+from typing import Any, TypeVar, overload
 
 import yaml
 from mkdocs.config.defaults import MkDocsConfig
@@ -107,6 +107,24 @@ ALLOWED_EXAM_TYPES = {
     "categorization",  # Drag items into categories
     "hotspot",  # Click regions on images
 }
+
+T = TypeVar("T")
+
+
+@overload
+def interpolate_env_vars(value: str) -> str: ...
+
+
+@overload
+def interpolate_env_vars(value: dict[str, T]) -> dict[str, Any]: ...  # noqa: UP047
+
+
+@overload
+def interpolate_env_vars(value: list[T]) -> list[Any]: ...  # noqa: UP047
+
+
+@overload
+def interpolate_env_vars(value: T) -> T: ...  # noqa: UP047
 
 
 def interpolate_env_vars(value: Any) -> Any:
