@@ -361,6 +361,47 @@ class MkDocsExamPlugin(BasePlugin[ExamPluginConfig]):
         # Fallback for unknown exam types
         return [], config.question
 
+    def _extract_exam_blocks(self, markdown: str) -> list[tuple[str, str, str]]:
+        r"""Extract exam/yaml code blocks from markdown, handling nested blocks.
+
+        Returns:
+            List of tuples: (fence_type, content, full_block)
+            - fence_type: "yaml" or "exam"
+            - content: the YAML content inside the block
+            - full_block: the complete ```yaml\n...\n``` block
+
+        """
+        blocks = []
+        lines = markdown.split("\n")
+        i = 0
+
+        while i < len(lines):
+            line = lines[i]
+
+            # Check if this line starts an exam or yaml block
+            if line.startswith("```yaml") or line.startswith("```exam"):
+                fence_type = "yaml" if line.startswith("```yaml") else "exam"
+                start_index = i
+                i += 1
+                content_lines = []
+
+                # Collect all lines until we find the closing fence
+                # A closing fence is ``` at the start of a line
+                while i < len(lines):
+                    if lines[i].startswith("```") and lines[i].strip() == "```":
+                        # Found the closing fence
+                        content = "\n".join(content_lines)
+                        full_block = "\n".join(lines[start_index : i + 1])
+                        blocks.append((fence_type, content, full_block))
+                        break
+                    else:
+                        content_lines.append(lines[i])
+                    i += 1
+
+            i += 1
+
+        return blocks
+
     def on_page_markdown(
         self,
         markdown: str,
@@ -385,16 +426,15 @@ class MkDocsExamPlugin(BasePlugin[ExamPluginConfig]):
             page.file.src_path if hasattr(page, "file") and page.file else "unknown"
         )
 
-        # Look for ```exam or ```yaml codeblocks
-        regex = r"```(?:exam|yaml)\s*\n(.*?)```"
-        matches = re.findall(regex, markdown, re.DOTALL)
+        # Extract exam/yaml blocks (handles nested code blocks properly)
+        blocks = self._extract_exam_blocks(markdown)
         exam_id = 0
 
-        for match in matches:
+        for fence_type, content, full_block in blocks:
             # Try to parse YAML content (supports multi-document YAML)
             try:
                 # yaml.safe_load_all returns a generator for multi-document YAML
-                docs = list(yaml.safe_load_all(match))
+                docs = list(yaml.safe_load_all(content))
 
                 # Filter out None documents (empty sections)
                 docs = [doc for doc in docs if doc is not None]
@@ -416,17 +456,8 @@ class MkDocsExamPlugin(BasePlugin[ExamPluginConfig]):
                 combined_html = "\n".join(exam_htmls)
 
                 # Replace the original block with the generated HTML
-                old_exam_pattern = re.escape(f"```yaml\n{match}```")
-                if re.search(old_exam_pattern, markdown):
-                    markdown = re.sub(
-                        old_exam_pattern, combined_html, markdown, count=1
-                    )
-                else:
-                    # Try with ```exam
-                    old_exam_pattern = re.escape(f"```exam\n{match}```")
-                    markdown = re.sub(
-                        old_exam_pattern, combined_html, markdown, count=1
-                    )
+                # Use full_block which includes the complete fence markers
+                markdown = markdown.replace(full_block, combined_html, 1)
 
             except yaml.YAMLError as e:
                 error_msg = f"YAML parsing error in {page_path}: {e!s}"

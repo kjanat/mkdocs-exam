@@ -209,20 +209,20 @@ All checks passed!
 
 ## 📈 Impact Summary
 
-| Area                  | Before                    | After                                   | Impact |
-| --------------------- | ------------------------- | --------------------------------------- | ------ |
-| **Compatibility**     | Locked to mkdocs-material | Works with any theme                    | High   |
-| **CI/CD**             | Docs deploy only          | Full test automation                    | High   |
-| **Testing**           | 31 unit tests (84%)       | 75 unit + 9 integration + 7 JS (97%)    | High   |
-| **Security**          | Manual review             | Automated scanning (Bandit)             | High   |
-| **Documentation**     | README only               | Full Sphinx API docs                    | Medium |
-| **CSS Quality**       | Manual review             | Automated linting (stylelint)           | Medium |
-| **JS Quality**        | No tests                  | 7 test suites (Vitest)                  | Medium |
-| **Type Safety**       | Good                      | Excellent (overloads)                   | Medium |
-| **Bundle Size**       | Unminified                | Minified (40% smaller)                  | Medium |
-| **Config Validation** | Runtime only              | Early + custom validators               | Medium |
-| **Test Coverage**     | 84%                       | 97% 🎯                                  | High   |
-| **MkDocs Alignment**  | 8.5/10                    | 9.5/10                                  | High   |
+| Area                  | Before                    | After                                | Impact |
+| --------------------- | ------------------------- | ------------------------------------ | ------ |
+| **Compatibility**     | Locked to mkdocs-material | Works with any theme                 | High   |
+| **CI/CD**             | Docs deploy only          | Full test automation                 | High   |
+| **Testing**           | 31 unit tests (84%)       | 75 unit + 9 integration + 7 JS (97%) | High   |
+| **Security**          | Manual review             | Automated scanning (Bandit)          | High   |
+| **Documentation**     | README only               | Full Sphinx API docs                 | Medium |
+| **CSS Quality**       | Manual review             | Automated linting (stylelint)        | Medium |
+| **JS Quality**        | No tests                  | 7 test suites (Vitest)               | Medium |
+| **Type Safety**       | Good                      | Excellent (overloads)                | Medium |
+| **Bundle Size**       | Unminified                | Minified (40% smaller)               | Medium |
+| **Config Validation** | Runtime only              | Early + custom validators            | Medium |
+| **Test Coverage**     | 84%                       | 97% 🎯                               | High   |
+| **MkDocs Alignment**  | 8.5/10                    | 9.5/10                               | High   |
 
 ---
 

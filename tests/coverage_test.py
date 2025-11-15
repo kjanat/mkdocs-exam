@@ -3,7 +3,7 @@
 import os
 import textwrap
 from typing import Any, cast
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from mkdocs.config.defaults import MkDocsConfig
@@ -17,7 +17,9 @@ from mkdocs_exam.plugin import MkDocsExamPlugin
 class DummyPage:
     """Mock page object for testing."""
 
-    def __init__(self, meta: dict[str, Any] | None = None, src_path: str = "test.md") -> None:
+    def __init__(
+        self, meta: dict[str, Any] | None = None, src_path: str = "test.md"
+    ) -> None:
         """Initialize dummy page with optional metadata."""
         self.meta = meta or {}
         self.file = Mock(src_path=src_path)
@@ -28,7 +30,7 @@ def test_config_validate_default_points_negative():
     config = ExamPluginConfig()
     config.default_points = -5
 
-    warnings, errors = config.validate()
+    _warnings, errors = config.validate()
 
     assert len(errors) > 0
     assert "default_points must be at least 1" in errors[0]
@@ -39,7 +41,7 @@ def test_config_validate_default_points_zero():
     config = ExamPluginConfig()
     config.default_points = 0
 
-    warnings, errors = config.validate()
+    _warnings, errors = config.validate()
 
     assert len(errors) > 0
     assert "default_points must be at least 1" in errors[0]
@@ -50,7 +52,7 @@ def test_config_validate_default_points_large():
     config = ExamPluginConfig()
     config.default_points = 150
 
-    warnings, errors = config.validate()
+    warnings, _errors = config.validate()
 
     assert len(warnings) > 0
     assert "unusually high" in warnings[0]
@@ -227,8 +229,8 @@ def test_html_builders_hints_with_penalty():
 
     assert "Hint 1" in html
     assert "Hint 2" in html
-    assert "data-penalty=\"10\"" in html
-    assert "data-penalty=\"20\"" in html
+    assert 'data-penalty="10"' in html
+    assert 'data-penalty="20"' in html
     assert "(-10%)" in html
     assert "(-20%)" in html
 
@@ -273,7 +275,7 @@ def test_html_builders_media_unknown_type():
 
     html = build_media_html(media)
 
-    assert html == ""
+    assert not html
 
 
 def test_environment_variable_interpolation_in_dict():
