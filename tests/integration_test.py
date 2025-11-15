@@ -330,7 +330,7 @@ def test_exam_disabled_via_metadata(temp_mkdocs_project):
     index_md = docs_dir / "index.md"
     index_md.write_text(
         textwrap.dedent(
-            """
+            """\
             ---
             exam: disable
             ---
