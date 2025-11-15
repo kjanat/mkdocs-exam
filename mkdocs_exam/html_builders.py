@@ -37,7 +37,9 @@ def build_hints_html(hints: list[Any]) -> str:
     return hints_html
 
 
-def build_explanation_html(explanation: str, show_explanation: str = "on-correct") -> str:
+def build_explanation_html(
+    explanation: str, show_explanation: str = "on-correct"
+) -> str:
     """Build HTML for exam explanation section.
 
     Args:

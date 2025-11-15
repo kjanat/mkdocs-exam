@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# https://taskfile.dev
+---
+version: "3"
+
+includes:
+  website:
+    taskfile: ./website
+    dir: ./website
+    aliases: [docs]
+
+env:
+  TASKFILE_DIR: "{{.TASKFILE_DIR}}"
+  TASKFILE: "{{.TASKFILE}}"
+  TASK_EXE: "{{.TASK_EXE}}"
+
+tasks:
+  default:
+    desc: "Lists all tasks (from: {{.TASKFILE_DIR}})"
+    cmds:
+      - task: format
+      - task: lint:python
+      - task: lint:javascript
+    silent: true
+
+  help:
+    desc: "Shows this help"
+    cmds:
+      - "{{.TASK_EXE}} --taskfile {{.TASKFILE}} --list"
+    silent: true
+
+  format:
+    desc: "Formats all files"
+    aliases: [fmt, f]
+    cmds:
+      - dprint fmt
+      - uv run ruff format src/ tests/
+
+  lint:python:
+    internal: false
+    cmds:
+      - uv run ruff check src/ tests/ --fix
+      - task: lint:type:py
+
+  lint:javascript:
+    internal: false
+    cmds:
+      - biome check src/
+      - task: lint:type:js
+
+  lint:type:
+    desc: "Typechecks"
+    aliases: [typecheck, t]
+    cmds:
+      - task: lint:type:py
+      - task: lint:type:js
+
+  lint:type:py:
+    internal: true
+    desc: "Typechecks"
+    cmd: uv run ty check
+
+  lint:type:js:
+    internal: true
+    desc: "Typechecks"
+    cmd: bunx tsgo --noEmit
+
+  test:
+    desc: "Runs all tests"
+    cmds:
+      - uv run test

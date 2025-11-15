@@ -36,16 +36,28 @@ from .processors import (
 # Processor registry mapping exam types to their handlers
 # Handlers return tuple of (answers_html, final_question)
 PROCESSOR_REGISTRY: dict[str, Any] = {
-    "choice": lambda config: (process_choice_truefalse_answers(config), config.question),
-    "truefalse": lambda config: (process_choice_truefalse_answers(config), config.question),
+    "choice": lambda config: (
+        process_choice_truefalse_answers(config),
+        config.question,
+    ),
+    "truefalse": lambda config: (
+        process_choice_truefalse_answers(config),
+        config.question,
+    ),
     "short-answer": process_short_answer_fill_essay_answers,
     "fill": process_short_answer_fill_essay_answers,
     "essay": process_short_answer_fill_essay_answers,
     "matching": lambda config: (process_matching_answers(config), config.question),
     "numeric": lambda config: (process_numeric_answers(config), config.question),
-    "code-completion": lambda config: (process_code_completion_answers(config), config.question),
+    "code-completion": lambda config: (
+        process_code_completion_answers(config),
+        config.question,
+    ),
     "ordering": lambda config: (process_ordering_answers(config), config.question),
-    "categorization": lambda config: (process_categorization_answers(config), config.question),
+    "categorization": lambda config: (
+        process_categorization_answers(config),
+        config.question,
+    ),
     "hotspot": lambda config: (process_hotspot_answers(config), config.question),
 }
 
@@ -145,7 +157,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         """
         # Validate exam data
         if not isinstance(exam_data, dict):
-            logger.warning(f"[{page_path}] Invalid exam data: expected dict, got {type(exam_data)}")
+            logger.warning(
+                f"[{page_path}] Invalid exam data: expected dict, got {type(exam_data)}"
+            )
             return ""
 
         # Interpolate environment variables
@@ -156,7 +170,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         question = exam_data.get("question", "")
 
         if q_type not in ALLOWED_EXAM_TYPES:
-            logger.warning(f"[{page_path}] Exam #{exam_id}: Invalid type '{q_type}'. Using 'choice'.")
+            logger.warning(
+                f"[{page_path}] Exam #{exam_id}: Invalid type '{q_type}'. Using 'choice'."
+            )
             q_type = "choice"
 
         if not question:
@@ -173,7 +189,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         content_lines = exam_data.get("content", "").strip().splitlines()
 
         # Process answers and extract correct indices
-        answers, correct_idx, answer_feedbacks, answer_weights = self._parse_answers(exam_data)
+        answers, correct_idx, answer_feedbacks, answer_weights = self._parse_answers(
+            exam_data
+        )
 
         # Generate answers HTML based on exam type
         html_question = escape_html(question)
@@ -196,7 +214,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         content_html = "\n".join(content_lines)
         hints_html = build_hints_html(hints)
         explanation_html = build_explanation_html(explanation, show_explanation)
-        media_html = build_media_html(exam_data["media"]) if "media" in exam_data else ""
+        media_html = (
+            build_media_html(exam_data["media"]) if "media" in exam_data else ""
+        )
 
         # Build and return complete exam HTML
         metadata = ExamMetadata(
@@ -213,7 +233,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
 
         return build_exam_wrapper(metadata)
 
-    def _parse_answers(self, exam_data: dict) -> tuple[list[str], list[int], list[str], list[float]]:
+    def _parse_answers(
+        self, exam_data: dict
+    ) -> tuple[list[str], list[int], list[str], list[float]]:
         """Parse and extract answer data from exam configuration.
 
         Args:
@@ -278,7 +300,12 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         return [], config.question
 
     def on_page_markdown(
-        self, markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any
+        self,
+        markdown: str,
+        page: Page,
+        config: MkDocsConfig,
+        files: Files | None = None,
+        **kwargs: Any,
     ) -> str:
         """Parse exam blocks in markdown and generate HTML quizzes.
 
@@ -292,7 +319,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         if "exam" in page.meta and page.meta["exam"] == "disable":
             return markdown
 
-        page_path = page.file.src_path if hasattr(page, "file") and page.file else "unknown"
+        page_path = (
+            page.file.src_path if hasattr(page, "file") and page.file else "unknown"
+        )
 
         # Look for ```exam or ```yaml codeblocks
         regex = r"```(?:exam|yaml)\s*\n(.*?)```"
@@ -326,11 +355,15 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                 # Replace the original block with the generated HTML
                 old_exam_pattern = re.escape(f"```yaml\n{match}```")
                 if re.search(old_exam_pattern, markdown):
-                    markdown = re.sub(old_exam_pattern, combined_html, markdown, count=1)
+                    markdown = re.sub(
+                        old_exam_pattern, combined_html, markdown, count=1
+                    )
                 else:
                     # Try with ```exam
                     old_exam_pattern = re.escape(f"```exam\n{match}```")
-                    markdown = re.sub(old_exam_pattern, combined_html, markdown, count=1)
+                    markdown = re.sub(
+                        old_exam_pattern, combined_html, markdown, count=1
+                    )
 
             except yaml.YAMLError as e:
                 error_msg = f"YAML parsing error in {page_path}: {e!s}"
@@ -343,7 +376,9 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
 
         return markdown
 
-    def on_page_content(self, html: str, page: Page, config: MkDocsConfig, files: Files, **kwargs: Any) -> str:
+    def on_page_content(
+        self, html: str, page: Page, config: MkDocsConfig, files: Files, **kwargs: Any
+    ) -> str:
         """Append inline resources to the rendered HTML page."""
         # Inject CSS and JavaScript so the quiz works without extra files
         html = html + style + script_tag

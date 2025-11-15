@@ -203,10 +203,8 @@ input[type="radio"].wrong {
   text-align: center;
 }
 
-.exam-score:has(.exam-score:contains("✓")) {
-  background: var(--exam-correct-color);
-  color: white;
-}
+/* Note: :contains() is not standard CSS, removed invalid selector
+   If needed, add .exam-score-correct class via JavaScript instead */
 
 /* Answer Feedback */
 .answer-feedback {

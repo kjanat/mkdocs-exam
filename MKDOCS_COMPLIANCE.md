@@ -68,7 +68,7 @@ This document verifies that mkdocs-exam complies with official MkDocs plugin dev
 #### `on_page_markdown(markdown: str, page: Page, config: MkDocsConfig, files: Files | None = None, **kwargs: Any) -> str`
 
 - Main transformation hook
-- Parses `yaml and `exam codeblocks
+- Parses `yaml and`exam codeblocks
 - Supports multi-document YAML
 - Environment variable interpolation
 - Returns transformed markdown with HTML
@@ -112,7 +112,7 @@ raise PluginError("User-friendly error message") from e
   - Multi-document YAML
   - Environment variable interpolation
   - YAML anchors and aliases
-  - Both `yaml and `exam fence types
+  - Both `yaml and`exam fence types
 
 ## Dependencies
 

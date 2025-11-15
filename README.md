@@ -40,7 +40,7 @@ content: |
 > The questions, answers, and content support full **Markdown** syntax
 
 > [!TIP]
-> You can use either ` ```yaml ` or ` ```exam ` as the codeblock language
+> You can use either `` ```yaml `` or `` ```exam `` as the codeblock language
 
 ### Multiple choice
 
@@ -518,11 +518,9 @@ content: |
 `````
 
 ```
-
 ```
 
 ````
-
 ## [Demo](https://kjanat.github.io/mkdocs-exam/)
 
 ## Screenshots

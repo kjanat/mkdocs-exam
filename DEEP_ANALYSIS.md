@@ -39,7 +39,7 @@
 - ✅ YAML parsing (basic + multi-document)
 - ✅ Environment variable interpolation
 - ✅ YAML anchors and aliases
-- ✅ Both fence types (`yaml and `exam)
+- ✅ Both fence types (`yaml and`exam)
 - ✅ Page-level disable functionality
 - ✅ Multiple correct answers (checkboxes vs radio)
 
@@ -210,7 +210,7 @@ Final HTML Output
    ````
 
    - **Issue**: Won't handle nested codeblocks correctly
-   - **Example**: Content with ` ``` ` inside breaks parsing
+   - **Example**: Content with `` ``` `` inside breaks parsing
    - **Risk**: Medium - affects markdown in content field
 
 2. **No Input Sanitization**:
@@ -287,6 +287,7 @@ answer-correct:
 
 ```python
 import html
+
 html_question = html.escape(question)
 ```
 
@@ -397,7 +398,7 @@ REGEX = r"```(?:exam|yaml)\s*\n(.*?)```"
 1. **Early Exit**:
 
    ````python
-   if '```yaml' not in markdown and '```exam' not in markdown:
+   if "```yaml" not in markdown and "```exam" not in markdown:
        return markdown  # Skip processing
    ````
 
@@ -579,8 +580,8 @@ plugins:
        answer-correct: ["test"]
        ```"""
        result = plugin.on_page_markdown(markdown, DummyPage(), None)
-       assert '<script>' not in result
-       assert '&lt;script&gt;' in result
+       assert "<script>" not in result
+       assert "&lt;script&gt;" in result
    ````
 
 3. **Resource Loading Failures**:
@@ -603,7 +604,7 @@ plugins:
          Mathematical constant π ≈ 3.14159
        ```"""
        result = plugin.on_page_markdown(markdown, DummyPage(), None)
-       assert 'π' in result
+       assert "π" in result
    ````
 
 5. **Edge Cases**:
@@ -691,6 +692,7 @@ tests/
 
    ```python
    import html
+
    html_question = html.escape(question)
    ans_escaped = html.escape(str(ans))
    ```
@@ -698,7 +700,7 @@ tests/
 2. **Add Input Validation**:
 
    ```python
-   ALLOWED_TYPES = {'choice', 'truefalse', 'short-answer', 'fill', 'essay', 'matching'}
+   ALLOWED_TYPES = {"choice", "truefalse", "short-answer", "fill", "essay", "matching"}
    if q_type not in ALLOWED_TYPES:
        raise PluginError(f"Invalid exam type: {q_type}")
    ```
@@ -743,7 +745,7 @@ tests/
 | **Test Coverage**         | ~70%                                | Needs improvement     |
 | **Cyclomatic Complexity** | ~8-12 per function                  | Acceptable            |
 | **Dependencies**          | 3 (mkdocs, mkdocs-material, pyyaml) | Minimal ✅            |
-| **Security Issues**       | 3 (XSS, env vars, YAML bomb)        | Needs attention ⚠️    |
+| **Security Issues**       | 3 (XSS, env vars, YAML bomb)        | Needs attention ⚠️     |
 | **MkDocs Compliance**     | 100%                                | Excellent ✅          |
 | **Type Hints Coverage**   | 100%                                | Excellent ✅          |
 | **Documentation**         | Good                                | Could be better       |

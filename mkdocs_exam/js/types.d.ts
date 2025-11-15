@@ -42,19 +42,27 @@ declare function isHTMLElement(element: Element | null): element is HTMLElement;
 /**
  * Type guard to check if an element is an HTMLInputElement
  */
-declare function isHTMLInputElement(element: Element | null): element is HTMLInputElement;
+declare function isHTMLInputElement(
+  element: Element | null,
+): element is HTMLInputElement;
 
 /**
  * Type guard to check if an element is an HTMLButtonElement
  */
-declare function isHTMLButtonElement(element: Element | null): element is HTMLButtonElement;
+declare function isHTMLButtonElement(
+  element: Element | null,
+): element is HTMLButtonElement;
 
 /**
  * Type guard to check if an element is an HTMLSelectElement
  */
-declare function isHTMLSelectElement(element: Element | null): element is HTMLSelectElement;
+declare function isHTMLSelectElement(
+  element: Element | null,
+): element is HTMLSelectElement;
 
 /**
  * Type guard to check if an element is an HTMLFieldSetElement
  */
-declare function isHTMLFieldSetElement(element: Element | null): element is HTMLFieldSetElement;
+declare function isHTMLFieldSetElement(
+  element: Element | null,
+): element is HTMLFieldSetElement;

@@ -1,6 +1,5 @@
 """Exam type processors for mkdocs-exam plugin."""
 
-
 from .exam_config import AnswerConfig
 from .html_builders import escape_html
 
@@ -39,7 +38,11 @@ def process_choice_truefalse_answers(config: AnswerConfig) -> list[str]:
         input_type = "checkbox" if as_checkboxes else "radio"
         correct = "correct" if is_correct else ""
         ans_escaped = escape_html(ans)
-        feedback = escape_html(config.answer_feedbacks[i]) if i < len(config.answer_feedbacks) else ""
+        feedback = (
+            escape_html(config.answer_feedbacks[i])
+            if i < len(config.answer_feedbacks)
+            else ""
+        )
         feedback_attr = f' data-feedback="{feedback}"' if feedback else ""
         weight = config.answer_weights[i] if i < len(config.answer_weights) else 1.0
         weight_attr = f' data-weight="{weight}"' if config.partial_credit else ""
@@ -51,7 +54,9 @@ def process_choice_truefalse_answers(config: AnswerConfig) -> list[str]:
     return full_answers
 
 
-def process_short_answer_fill_essay_answers(config: AnswerConfig) -> tuple[list[str], str]:
+def process_short_answer_fill_essay_answers(
+    config: AnswerConfig,
+) -> tuple[list[str], str]:
     """Process short-answer, fill, or essay exam answers.
 
     Args:
@@ -69,12 +74,18 @@ def process_short_answer_fill_essay_answers(config: AnswerConfig) -> tuple[list[
     question = config.question
 
     if config.exam_type == "essay":
-        full_answers.append(f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>')
+        full_answers.append(
+            f'<div><textarea name="answer" rows="4" correct="{correct_attr}"></textarea></div>'
+        )
     elif config.exam_type == "fill":
         # Modify question to include input field
-        question = escape_html(question).replace("___", f'<input type="text" name="answer" correct="{correct_attr}">')
+        question = escape_html(question).replace(
+            "___", f'<input type="text" name="answer" correct="{correct_attr}">'
+        )
     else:  # short-answer
-        full_answers.append(f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>')
+        full_answers.append(
+            f'<div><input type="text" name="answer" correct="{correct_attr}" ></div>'
+        )
 
     return full_answers, question
 
@@ -116,7 +127,11 @@ def process_numeric_answers(config: AnswerConfig) -> list[str]:
 
     """
     tolerance = config.exam_data.get("tolerance", 0.01)
-    correct_val = config.exam_data.get("answer-correct", [0])[0] if config.exam_data.get("answer-correct") else 0
+    correct_val = (
+        config.exam_data.get("answer-correct", [0])[0]
+        if config.exam_data.get("answer-correct")
+        else 0
+    )
     unit = config.exam_data.get("unit", "")
 
     return [
@@ -145,12 +160,16 @@ def process_code_completion_answers(config: AnswerConfig) -> list[str]:
     code_html = parts[0]
     for i, part in enumerate(parts[1:]):
         blank_correct = (
-            "|".join([escape_html(str(c)) for c in blanks[i].get("correct", [])]) if i < len(blanks) else ""
+            "|".join([escape_html(str(c)) for c in blanks[i].get("correct", [])])
+            if i < len(blanks)
+            else ""
         )
         code_html += f'<input type="text" name="answer" correct="{blank_correct}" class="code-blank">'
         code_html += part
 
-    return [f'<div><pre><code class="language-{language}">{code_html}</code></pre></div>']
+    return [
+        f'<div><pre><code class="language-{language}">{code_html}</code></pre></div>'
+    ]
 
 
 def process_ordering_answers(config: AnswerConfig) -> list[str]:
@@ -170,7 +189,9 @@ def process_ordering_answers(config: AnswerConfig) -> list[str]:
     for i, item in enumerate(items):
         items_html += f'<div class="ordering-item" data-index="{i}">{escape_html(str(item))}</div>'
 
-    return [f'<div class="ordering-container" data-correct-order="{",".join(map(str, correct_order))}">{items_html}</div>']
+    return [
+        f'<div class="ordering-container" data-correct-order="{",".join(map(str, correct_order))}">{items_html}</div>'
+    ]
 
 
 def process_categorization_answers(config: AnswerConfig) -> list[str]:
