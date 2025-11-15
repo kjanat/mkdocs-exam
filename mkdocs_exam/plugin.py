@@ -6,7 +6,6 @@ from importlib import resources as impresources
 from typing import Any
 
 import yaml
-from mkdocs.config import config_options
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.exceptions import PluginError
 from mkdocs.plugins import BasePlugin, get_plugin_logger
@@ -14,7 +13,7 @@ from mkdocs.structure.files import Files
 from mkdocs.structure.pages import Page
 
 from . import css, js
-from .exam_config import AnswerConfig, ExamMetadata
+from .exam_config import AnswerConfig, ExamMetadata, ExamPluginConfig
 from .html_builders import (
     build_exam_wrapper,
     build_explanation_html,
@@ -32,6 +31,9 @@ from .processors import (
     process_ordering_answers,
     process_short_answer_fill_essay_answers,
 )
+
+# Initialize logger early for error reporting
+logger = get_plugin_logger(__name__)
 
 # Processor registry mapping exam types to their handlers
 # Handlers return tuple of (answers_html, final_question)
@@ -73,12 +75,12 @@ try:
         script_content = f.read()
     script_tag = f'<script type="text/javascript" defer>{script_content}</script>'
 except Exception as e:
-    # Use a fallback if resources can't be loaded
-    style = ""
-    script_tag = ""
-    import warnings
-
-    warnings.warn(f"Failed to load mkdocs-exam resources: {e}")
+    # Critical error: plugin cannot function without resources
+    logger.exception("Failed to load mkdocs-exam CSS/JS resources")
+    raise PluginError(  # noqa: TRY003
+        f"Failed to load required plugin resources. "
+        f"This indicates an installation problem. Error: {e}"
+    ) from e
 
 # ```yaml
 # question: "Are you ready?"
@@ -90,8 +92,6 @@ except Exception as e:
 # content: |
 #   ## Provide some additional content
 # ```
-
-logger = get_plugin_logger(__name__)
 
 # Allowed exam types (whitelist for validation)
 ALLOWED_EXAM_TYPES = {
@@ -129,26 +129,55 @@ def interpolate_env_vars(value: Any) -> Any:
     return value
 
 
-class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
+class MkDocsExamPlugin(BasePlugin[ExamPluginConfig]):
     """Convert custom ``<exam>`` blocks into interactive HTML quizzes with full YAML support."""
 
-    config_scheme = (
-        ("enabled", config_options.Type(bool, default=True)),
-        ("default_type", config_options.Type(str, default="choice")),
-        ("default_points", config_options.Type(int, default=1)),
-        ("show_answers", config_options.Type(bool, default=False)),
-        ("randomize_answers", config_options.Type(bool, default=False)),
-        ("theme", config_options.Type(str, default="default")),
-    )
-
     def __init__(self) -> None:
-        """Initialize default state for the plugin."""
-        self.enabled = True
+        """Initialize plugin state."""
+        super().__init__()
         self.dirty = False
+        self.total_exams_processed = 0
 
     def on_startup(self, *, command: str, dirty: bool) -> None:
         """Configure the plugin on startup."""
         self.dirty = dirty
+
+    def _get_strict_validation(self) -> bool:
+        """Get strict_validation config with fallback for backward compatibility.
+
+        Returns:
+            False by default (graceful fallback), True if strict_validation is enabled
+
+        """
+        return getattr(self.config, "strict_validation", False)
+
+    def on_config(self, config: MkDocsConfig, **kwargs: Any) -> MkDocsConfig:
+        """Validate plugin configuration and MkDocs config compatibility.
+
+        This event is called once after config is loaded, before any build process.
+        Perfect for validating configuration and failing fast.
+        """
+        # Check theme compatibility (warning only, not blocking)
+        if config.theme.name not in {"material", "readthedocs", "mkdocs"}:
+            logger.warning(
+                f"mkdocs-exam is optimized for Material, ReadTheDocs, or MkDocs theme. "
+                f"Current theme '{config.theme.name}' may have styling issues."
+            )
+
+        # Validate default_points is positive
+        default_points = getattr(self.config, "default_points", 1)
+        if default_points < 1:
+            raise PluginError("default_points must be at least 1")  # noqa: TRY003
+
+        # Validate default_type is in allowed list
+        default_type = getattr(self.config, "default_type", "choice")
+        if default_type not in ALLOWED_EXAM_TYPES:
+            raise PluginError(  # noqa: TRY003
+                f"Invalid default_type '{default_type}'. "
+                f"Must be one of: {', '.join(sorted(ALLOWED_EXAM_TYPES))}"
+            )
+
+        return config
 
     def _process_exam_data(self, exam_data: dict, exam_id: int, page_path: str) -> str:
         """Process a single exam data dictionary and return HTML.
@@ -157,10 +186,15 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         """
         # Validate exam data
         if not isinstance(exam_data, dict):
-            logger.warning(
+            error_msg = (
                 f"[{page_path}] Invalid exam data: expected dict, got {type(exam_data)}"
             )
-            return ""
+
+            if self._get_strict_validation():
+                raise PluginError(error_msg)
+            else:
+                logger.warning(error_msg)
+                return ""
 
         # Interpolate environment variables
         exam_data = interpolate_env_vars(exam_data)
@@ -170,14 +204,24 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         question = exam_data.get("question", "")
 
         if q_type not in ALLOWED_EXAM_TYPES:
-            logger.warning(
-                f"[{page_path}] Exam #{exam_id}: Invalid type '{q_type}'. Using 'choice'."
-            )
-            q_type = "choice"
+            error_msg = f"[{page_path}] Exam #{exam_id}: Invalid type '{q_type}'"
+
+            if self._get_strict_validation():
+                raise PluginError(  # noqa: TRY003
+                    f"{error_msg}. Must be one of: {', '.join(sorted(ALLOWED_EXAM_TYPES))}"
+                )
+            else:
+                logger.warning(f"{error_msg}. Using 'choice'.")
+                q_type = "choice"
 
         if not question:
-            logger.warning(f"[{page_path}] Exam #{exam_id}: Missing 'question' field")
-            return ""
+            error_msg = f"[{page_path}] Exam #{exam_id}: Missing 'question' field"
+
+            if self._get_strict_validation():
+                raise PluginError(error_msg)
+            else:
+                logger.warning(error_msg)
+                return ""
 
         # Extract optional fields
         hints = exam_data.get("hints", [])
@@ -348,6 +392,7 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
                     if exam_html:
                         exam_htmls.append(exam_html)
                         exam_id += 1
+                        self.total_exams_processed += 1
 
                 # Join all exams with newlines
                 combined_html = "\n".join(exam_htmls)
@@ -392,3 +437,12 @@ class MkDocsExamPlugin(BasePlugin):  # type: ignore[type-arg]
         # Log the error for debugging
         logger.debug(f"Build error encountered: {error}")
         # Allow error to propagate - we don't suppress it
+
+    def on_shutdown(self, **kwargs: Any) -> None:
+        """Clean up resources and log build summary when MkDocs shuts down.
+
+        Called once at the end of the build, useful for cleanup and statistics.
+        """
+        # Log summary statistics
+        if self.total_exams_processed > 0:
+            logger.info(f"Processed {self.total_exams_processed} exam(s) total")
