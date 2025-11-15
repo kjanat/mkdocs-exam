@@ -203,8 +203,13 @@ input[type="radio"].wrong {
   text-align: center;
 }
 
-/* Note: :contains() is not standard CSS, removed invalid selector
-   If needed, add .exam-score-correct class via JavaScript instead */
+/* Style exam score when correct (contains ✓ checkmark)
+   Using attribute selector since :contains() is not standard CSS */
+.exam-score[data-status="correct"],
+.exam-score.exam-score-correct {
+  background: var(--exam-correct-color);
+  color: white;
+}
 
 /* Answer Feedback */
 .answer-feedback {
